@@ -168,21 +168,21 @@
   }
   
   .connexion a {
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    border: 2px solid var(--primary-color);
-    font-weight: bold;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-  }
-  
-  .connexion a:hover {
-    background-color: transparent;
-    color: var(--accent-color);
-    border-color: var(--accent-color);
-  }
+  background-color: #90aeb0;  
+  color: white;               
+  border: 2px solid #90aeb0;  
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.connexion a:hover {
+  background-color: transparent;
+  color: #90aeb0;            
+  border-color: #90aeb0;      
+}
   
   .panier a {
     padding: 0.5rem 1rem;
