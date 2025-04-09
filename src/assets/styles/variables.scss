@@ -11,3 +11,13 @@
   --font-family-title: 'Bebas Neue', sans-serif;
   --font-family-text: 'Roboto', sans-serif;
 }
+/* Reset des débordements horizontaux */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden; /* Seulement pour l'axe X */
+}
+
+/* Permet le scroll vertical normal */
+body {
+  overflow-y: auto;
+}
