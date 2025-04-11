@@ -1,23 +1,28 @@
 :root {
-  --primary-color: #4A4A4A; /* Gris foncé pour les éléments principaux */
-  --secondary-color: #F9F9F9; /* Blanc cassé pour les arrière-plans */
-  --accent-color: #FF6F61; /* Accent color (un orange doux) */
-  --accent-color-light: #FFA07A; /* Accent color light */
-  --text-color: #333333; /* Gris pour le texte */
-  --highlight-color: #FFD700; /* Jaune doré pour les surlignages */
+  /* Vos variables existantes */
+  --primary-color: #4A4A4A;
+  --secondary-color: #F9F9F9;
+  --accent-color: #FF6F61;
+  --accent-color-light: #FFA07A;
+  --text-color: #333333;
+  --highlight-color: #FFD700;
   
-  
+  /* Ajoutez ces nouvelles variables pour le panier */
+  --cart-border-color: #e0e0e0;
+  --cart-text-light: #666666;
+  --cart-remove-color: #999999;
+  --cart-remove-hover: #ff6b6b;
+  --cart-btn-hover: #e05a4e;
   
   --font-family-title: 'Bebas Neue', sans-serif;
   --font-family-text: 'Roboto', sans-serif;
 }
-/* Reset des débordements horizontaux */
+
 html, body {
   max-width: 100%;
-  overflow-x: hidden; /* Seulement pour l'axe X */
+  overflow-x: hidden; 
 }
 
-/* Permet le scroll vertical normal */
 body {
   overflow-y: auto;
 }
