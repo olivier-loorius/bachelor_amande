@@ -4,7 +4,8 @@ import ActualiteView from '@/views/actualite/ActualiteView.vue'
 import MentionsLegales from '@/views/MentionsLegales.vue'
 import ContactView from '@/views/ContactView.vue'
 import CGVView from '@/views/CGVView.vue'
-import PanierView from '@/views/Panier.vue' // Correction du caractère ¨ en trop
+import PanierView from '@/views/Panier.vue' 
+import LoginView from '@/views/LoginView.vue' // Importation du composant ConnexionView
 
 const routes = [
   {
@@ -44,10 +45,18 @@ const routes = [
   {
     path: '/panier',
     name: 'panier',
-    component: PanierView, // Utilisation directe du composant importé
-    meta: { // Ajout des metas pour la cohérence
+    component: PanierView, 
+    meta: { 
       title: 'Panier - Amande Pâtisserie'
     }
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginView, 
+    meta: {
+      title: 'Connexion - Amande Pâtisserie',
+    },  
   }
 ]
 

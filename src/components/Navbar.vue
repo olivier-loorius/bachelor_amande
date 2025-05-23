@@ -9,10 +9,12 @@
       <div :class="{ 'menu-icon': true, open: isMenuOpen }"></div>
     </div>
     <ul :class="{ open: isMenuOpen }" @click="closeMenu">
-      <li class="actualite"><router-link to="/actualite">ACTUALITE</router-link></li>
       <li class="composer"><router-link to="/composer">COMPOSER</router-link></li>
+      <li class="actualite"><router-link to="/actualite">ACTUALITE</router-link></li>
       <li class="catalogue"><router-link to="/catalogue">CATALOGUE</router-link></li>
-      <li class="connexion"><router-link to="/login">CONNEXION</router-link></li>
+      <li class="connexion">
+        <a href="#" @click.prevent="openLogin">CONNEXION</a>
+      </li>
       <li class="panier">
         <a href="#" @click.prevent="openCart" class="cart-link">
           <i class="fas fa-shopping-cart"></i>
@@ -20,21 +22,26 @@
         </a>
       </li>
     </ul>
+    <LoginPanel :isOpen="isLoginOpen" @close="closeLogin" />
   </nav>
 </template>
 
 <script>
+import LoginPanel from '@/components/LoginPanel.vue'
+
 export default {
   name: 'Navbar',
+  components: { LoginPanel },
   data() {
     return {
-      isMenuOpen: false
+      isMenuOpen: false,
+      isLoginOpen: false,
     }
   },
   computed: {
     cartItemCount() {
       return this.$root.cartItems?.length || 0
-    }
+    },
   },
   methods: {
     toggleMenu() {
@@ -45,13 +52,19 @@ export default {
     },
     openCart() {
       this.$root.showCart = true
-    }
-  }
+    },
+    openLogin() {
+      this.isLoginOpen = true
+    },
+    closeLogin() {
+      this.isLoginOpen = false
+    },
+  },
 }
 </script>
 
 <style lang="scss">
-@use "@/assets/styles/variables" as *;
+@use '@/assets/styles/variables' as *;
 
 nav {
   display: flex;
