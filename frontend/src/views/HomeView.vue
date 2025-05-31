@@ -3,6 +3,7 @@
     <main class="content-container">
       <BannerSection />
       <ComposerSection />
+      <ActualiteBanner />
       <!-- Ajoutez ici d'autres sections factorisées si besoin -->
     </main>
   </div>
@@ -11,6 +12,7 @@
 <script setup lang="ts">
 import BannerSection from '@/components/BannerSection.vue'
 import ComposerSection from '@/components/ComposerSection.vue'
+import ActualiteBanner from '@/components/ActualiteBanner.vue'
 </script>
 
 <style scoped>
