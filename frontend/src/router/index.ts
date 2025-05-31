@@ -4,7 +4,7 @@ import ActualiteView from '@/views/ActualiteView.vue'
 import MentionsLegales from '@/views/MentionsLegales.vue'
 import ContactView from '@/views/ContactView.vue'
 import CGVView from '@/views/CGVView.vue'
-import PanierView from '@/views/Panier.vue' 
+import PanierView from '@/views/Panier.vue'
 import LoginView from '@/views/LoginView.vue' // Importation du composant ConnexionView
 
 const routes = [
@@ -45,19 +45,19 @@ const routes = [
   {
     path: '/panier',
     name: 'panier',
-    component: PanierView, 
-    meta: { 
-      title: 'Panier - Amande Pâtisserie'
-    }
+    component: PanierView,
+    meta: {
+      title: 'Panier - Amande Pâtisserie',
+    },
   },
   {
     path: '/login',
     name: 'Login',
-    component: LoginView, 
+    component: LoginView,
     meta: {
       title: 'Connexion - Amande Pâtisserie',
-    },  
-  }
+    },
+  },
 ]
 
 const router = createRouter({

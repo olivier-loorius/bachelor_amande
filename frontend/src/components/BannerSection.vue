@@ -4,9 +4,9 @@
     <div class="banner-text">
       <h2 class="banner-title">Bienvenue chez Amande Pâtisserie</h2>
       <p class="banner-description">
-        "Découvrez l'art de la pâtisserie française revisitée avec une touche de modernité.
-        Chaque création est réalisée avec passion et des ingrédients de qualité pour offrir une
-        expérience gustative unique"
+        "Découvrez l'art de la pâtisserie française revisitée avec une touche de modernité. Chaque
+        création est réalisée avec passion et des ingrédients de qualité pour offrir une expérience
+        gustative unique"
       </p>
     </div>
   </section>
