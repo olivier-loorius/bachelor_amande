@@ -1,19 +1,7 @@
 <template>
   <div class="page-container">
-    <Navbar />
     <main class="content-container">
-      <section class="banner-section">
-        <img src="@/assets/images/TarteletteBanner.png" alt="Tarte" class="banner-image" />
-        <div class="banner-text">
-          <h2 class="banner-title">Bienvenue chez Amande Pâtisserie</h2>
-          <p class="banner-description">
-            "Découvrez l'art de la pâtisserie française revisitée avec une touche de modernité.
-            Chaque création est réalisée avec passion et des ingrédients de qualité pour offrir une
-            expérience gustative unique"
-          </p>
-        </div>
-      </section>
-
+      <BannerSection />
       <section class="composer-section">
         <div class="composer-content">
           <div class="composer-text">
@@ -36,6 +24,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import BannerSection from '@/components/BannerSection.vue'
 
 const images = [
   './src/assets/images/ImgCompo1.png',
