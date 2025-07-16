@@ -6,6 +6,9 @@ import ContactView from '@/views/ContactView.vue'
 import CGVView from '@/views/CGVView.vue'
 import PanierView from '@/views/Panier.vue'
 import LoginView from '@/views/LoginView.vue' // Importation du composant ConnexionView
+import ActualiteDetailView from '@/views/ActualiteDetailView.vue'
+import ComposerView from '@/views/ComposerView.vue'
+import CatalogueView from '@/views/CatalogueView.vue'
 
 const routes = [
   {
@@ -17,6 +20,15 @@ const routes = [
     path: '/actualite',
     name: 'actualite',
     component: ActualiteView,
+  },
+  {
+    path: '/actualite/:id',
+    name: 'actualite-detail',
+    component: ActualiteDetailView,
+    props: true,
+    meta: {
+      title: 'Détail Actualité - Amande Pâtisserie',
+    },
   },
   {
     path: '/mentions-legales',
@@ -56,6 +68,22 @@ const routes = [
     component: LoginView,
     meta: {
       title: 'Connexion - Amande Pâtisserie',
+    },
+  },
+  {
+    path: '/composer',
+    name: 'composer',
+    component: ComposerView,
+    meta: {
+      title: 'Composer - Amande Pâtisserie',
+    },
+  },
+  {
+    path: '/catalogue',
+    name: 'catalogue',
+    component: CatalogueView,
+    meta: {
+      title: 'Catalogue - Amande Pâtisserie',
     },
   },
 ]

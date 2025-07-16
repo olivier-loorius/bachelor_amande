@@ -4,6 +4,12 @@
       <BannerSection />
       <ComposerSection />
       <ActualiteBanner />
+      <section class="cta-section">
+        <div class="cta-content">
+          <h2>Testez la page Catalogue</h2>
+          <router-link to="/catalogue" class="cta-btn">Voir le catalogue</router-link>
+        </div>
+      </section>
       <!-- Ajoutez ici d'autres sections factorisées si besoin -->
     </main>
   </div>
@@ -29,5 +35,46 @@ import ActualiteBanner from '@/components/ActualiteBanner.vue'
 
 .content-container {
   width: 100%;
+}
+
+.cta-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 2.5rem 0 0 0;
+}
+
+.cta-content {
+  background: #fff6f2;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(180, 138, 120, 0.07);
+  padding: 2rem 2.5rem;
+  text-align: center;
+}
+
+.cta-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #b48a78;
+  font-family: 'Roboto', sans-serif;
+}
+
+.cta-btn {
+  display: inline-block;
+  background: #b48a78;
+  color: #fff;
+  padding: 0.8rem 2rem;
+  border-radius: 2rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.cta-btn:hover {
+  background: #a06c54;
+  transform: scale(1.05);
 }
 </style>

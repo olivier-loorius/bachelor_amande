@@ -3,7 +3,8 @@
     <div class="actualite-header">
       <h1 class="actualite-title">Actualités</h1>
       <p class="actualite-intro">
-        Retrouvez ici toutes les actualités, recettes exclusives et événements gourmands de la pâtisserie Amande.
+        Retrouvez ici toutes les actualités, recettes exclusives et événements gourmands de la
+        pâtisserie Amande.
       </p>
     </div>
     <div class="actualite-list">
@@ -12,7 +13,11 @@
         <div class="actualite-content">
           <h2 class="article-title">{{ article.title }}</h2>
           <p class="article-date">{{ article.date }}</p>
-          <router-link :to="{ name: 'actualite', query: { highlight: article.title } }" class="actualite-link">En savoir plus</router-link>
+          <router-link
+            :to="{ name: 'actualite-detail', params: { id: getArticleId(article.title) } }"
+            class="actualite-link"
+            >En savoir plus</router-link
+          >
         </div>
       </div>
     </div>
@@ -64,6 +69,12 @@ const articles = ref([
     date: '10 févr. 2025',
   },
 ])
+
+function getArticleId(title: string) {
+  // Associer un ID unique à chaque article (exemple simple basé sur l'ordre)
+  const index = articles.value.findIndex((a) => a.title === title)
+  return index >= 0 ? index + 1 : 1
+}
 </script>
 
 <style scoped>
@@ -75,7 +86,7 @@ const articles = ref([
 .actualite-header {
   background: #fff;
   border-radius: 1.2rem;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
   padding: 2.5rem 2rem 2rem 2rem;
   margin-bottom: 2.5rem;
   text-align: center;
@@ -86,7 +97,7 @@ const articles = ref([
 .actualite-title {
   font-size: 2.2rem;
   font-family: 'Roboto', sans-serif;
-  color: var(--primary-color, #4A4A4A);
+  color: var(--primary-color, #4a4a4a);
   margin-bottom: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -105,14 +116,14 @@ const articles = ref([
 .actualite-item {
   background: #fff;
   border-radius: 0.7rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.2s;
 }
 .actualite-item:hover {
-  box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.13);
 }
 .actualite-img {
   width: 100%;
@@ -129,7 +140,7 @@ const articles = ref([
 .article-title {
   font-size: 1.15rem;
   font-family: 'Roboto', sans-serif;
-  color: var(--primary-color, #4A4A4A);
+  color: var(--primary-color, #4a4a4a);
   margin-bottom: 0.5rem;
   font-weight: bold;
 }
@@ -141,7 +152,7 @@ const articles = ref([
 .actualite-link {
   display: inline-block;
   margin: 0.5rem auto 0 auto;
-  background: var(--accent-color, #FF6F61);
+  background: var(--accent-color, #ff6f61);
   color: #fff;
   padding: 0.13rem 0.6rem;
   border-radius: 0.4rem;
@@ -156,7 +167,7 @@ const articles = ref([
   text-align: center;
 }
 .actualite-link:hover {
-  background: var(--accent-color-light, #FFA07A);
+  background: var(--accent-color-light, #ffa07a);
 }
 @media (max-width: 700px) {
   .actualite-header {

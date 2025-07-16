@@ -18,8 +18,8 @@
       <div class="footer-grid">
         <div class="footer-section">
           <h3>HORAIRES</h3>
-          <p>Lun - Ven: 9h - 19h</p>
-          <p>Sam: 9h - 18h</p>
+          <p>Lun - Ven: 10h - 19h</p>
+          <p>Sam: 9h - 17h</p>
           <p>Dim: Fermé</p>
         </div>
 

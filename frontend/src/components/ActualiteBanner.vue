@@ -6,16 +6,29 @@
         Découvrez nos dernières actualités, recettes exclusives et événements gourmands.<br />
         Restez informé(e) de toutes les nouveautés de la pâtisserie Amande !
       </p>
-      <router-link to="/actualite" class="actualite-banner-cta">Voir toutes les actualités</router-link>
+      <router-link to="/actualite" class="actualite-banner-cta"
+        >Voir toutes les actualités</router-link
+      >
       <div class="actualite-banner-slider">
         <button class="chevron chevron-left" @click="prevSlide" aria-label="Précédent">
           <span>&lt;</span>
         </button>
         <div class="actualite-banner-slide">
-          <img :src="slides[currentIndex].image" :alt="slides[currentIndex].title" class="actualite-banner-img" />
+          <img
+            :src="slides[currentIndex].image"
+            :alt="slides[currentIndex].title"
+            class="actualite-banner-img"
+          />
           <div class="actualite-banner-overlay">
             <h3 class="actualite-banner-article-title">{{ slides[currentIndex].title }}</h3>
-            <router-link :to="{ name: 'actualite', query: { highlight: slides[currentIndex].title } }" class="actualite-banner-link">En savoir plus</router-link>
+            <router-link
+              :to="{
+                name: 'actualite-detail',
+                params: { id: getSlideId(slides[currentIndex].title) },
+              }"
+              class="actualite-banner-link"
+              >En savoir plus</router-link
+            >
           </div>
         </div>
         <button class="chevron chevron-right" @click="nextSlide" aria-label="Suivant">
@@ -49,6 +62,11 @@ function nextSlide() {
 }
 function prevSlide() {
   currentIndex.value = (currentIndex.value - 1 + slides.length) % slides.length
+}
+function getSlideId(title: string) {
+  // Associer un ID unique à chaque slide (exemple simple basé sur l'ordre)
+  const index = slides.findIndex((s) => s.title === title)
+  return index >= 0 ? index + 1 : 1
 }
 </script>
 
@@ -129,7 +147,9 @@ function prevSlide() {
   object-fit: cover;
   filter: grayscale(0.25) brightness(1.08);
   opacity: 0.85;
-  transition: filter 0.2s, opacity 0.2s;
+  transition:
+    filter 0.2s,
+    opacity 0.2s;
 }
 .actualite-banner-overlay {
   position: absolute;
@@ -165,7 +185,9 @@ function prevSlide() {
   font-size: 0.85rem;
   font-weight: 500;
   opacity: 0.85;
-  transition: background 0.2s, opacity 0.2s;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
 }
 .actualite-banner-link:hover {
   background: var(--accent-color-light, #ffa07a);
