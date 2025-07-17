@@ -1,8 +1,8 @@
 <template>
-    <div class="mentions-page">
-      <div class="legal-container">
+  <div class="page-container">
+    <main class="content-container">
+      <div class="legal-card">
         <h1 class="legal-title">Mentions Légales</h1>
-  
         <!-- Section Définitions -->
         <section class="legal-section">
           <h2>Définitions</h2>
@@ -141,8 +141,9 @@
           <i class="fas fa-chevron-left"></i> Retour
         </button>
       </div>
-    </div>
-  </template>
+    </main>
+  </div>
+</template>
   
   <script>
   export default {
@@ -163,22 +164,27 @@
   <style lang="scss" scoped>
   @use "@/assets/styles/variables" as *;
   
-  .mentions-page {
-    padding: 2rem 1rem;
-    background-color: #f5f5f5;
-    min-height: calc(100vh - 80px);
-    font-family: var(--font-family-text);
+  .page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--secondary-color);
   }
-  
-  .legal-container {
+  .content-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .legal-card {
     max-width: 900px;
-    margin: 0 auto;
+    margin: 2rem 0;
     background: white;
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-radius: 1.2rem;
+    box-shadow: 0 2px 12px rgba(180, 138, 120, 0.07);
   }
-  
   .legal-title {
     color: var(--primary-color);
     text-align: center;

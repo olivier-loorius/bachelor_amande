@@ -1,26 +1,30 @@
 <template>
-  <div class="actualite-view">
-    <div class="actualite-header">
-      <h1 class="actualite-title">Actualités</h1>
-      <p class="actualite-intro">
-        Retrouvez ici toutes les actualités, recettes exclusives et événements gourmands de la
-        pâtisserie Amande.
-      </p>
-    </div>
-    <div class="actualite-list">
-      <div class="actualite-item" v-for="article in articles" :key="article.title">
-        <img :src="article.image" :alt="article.title" class="actualite-img" />
-        <div class="actualite-content">
-          <h2 class="article-title">{{ article.title }}</h2>
-          <p class="article-date">{{ article.date }}</p>
-          <router-link
-            :to="{ name: 'actualite-detail', params: { id: getArticleId(article.title) } }"
-            class="actualite-link"
-            >En savoir plus</router-link
-          >
+  <div class="page-container">
+    <main class="content-container actualite-content">
+      <div class="actualite-card">
+        <div class="actualite-header">
+          <h1 class="actualite-title">Actualités</h1>
+          <p class="actualite-intro">
+            Retrouvez ici toutes les actualités, recettes exclusives et événements gourmands de la
+            pâtisserie Amande.
+          </p>
+        </div>
+        <div class="actualite-list">
+          <div class="actualite-item" v-for="article in articles" :key="article.title">
+            <img :src="article.image" :alt="article.title" class="actualite-img" />
+            <div class="actualite-content">
+              <h2 class="article-title">{{ article.title }}</h2>
+              <p class="article-date">{{ article.date }}</p>
+              <router-link
+                :to="{ name: 'actualite-detail', params: { id: getArticleId(article.title) } }"
+                class="actualite-link"
+                >En savoir plus</router-link
+              >
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
@@ -78,10 +82,33 @@ function getArticleId(title: string) {
 </script>
 
 <style scoped>
-.actualite-view {
-  padding: 2rem;
-  max-width: 1100px;
-  margin: 0 auto;
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--secondary-color);
+}
+.content-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.actualite-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.actualite-card {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px rgba(180, 138, 120, 0.07);
+  padding: 2.5rem 2rem;
+  max-width: 800px;
+  width: 100%;
+  margin: 2rem 0;
 }
 .actualite-header {
   background: #fff;
@@ -168,6 +195,12 @@ function getArticleId(title: string) {
 }
 .actualite-link:hover {
   background: var(--accent-color-light, #ffa07a);
+}
+@media (max-width: 640px) {
+  .actualite-card {
+    padding: 1.2rem 0.5rem;
+    margin: 1rem 0;
+  }
 }
 @media (max-width: 700px) {
   .actualite-header {

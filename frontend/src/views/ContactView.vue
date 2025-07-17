@@ -1,8 +1,8 @@
 <template>
-    <div class="contact-page">
-      <div class="contact-container">
+  <div class="page-container">
+    <main class="content-container">
+      <div class="contact-card">
         <h1 class="contact-title">Contactez-nous</h1>
-        
         <form @submit.prevent="submitForm" class="contact-form">
           <div class="form-group">
             <label for="name">Nom complet</label>
@@ -14,7 +14,6 @@
               class="form-input"
             >
           </div>
-  
           <div class="form-group">
             <label for="email">Email</label>
             <input 
@@ -25,7 +24,6 @@
               class="form-input"
             >
           </div>
-  
           <div class="form-group">
             <label for="subject">Sujet</label>
             <select id="subject" v-model="form.subject" class="form-input">
@@ -35,7 +33,6 @@
               <option value="autre">Autre</option>
             </select>
           </div>
-  
           <div class="form-group">
             <label for="message">Message</label>
             <textarea 
@@ -46,77 +43,80 @@
               rows="5"
             ></textarea>
           </div>
-  
           <button type="submit" class="contact-button">
             Envoyer le message
           </button>
         </form>
       </div>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        form: {
-          name: '',
-          email: '',
-          subject: '',
-          message: ''
-        }
-      }
-    },
-    methods: {
-      submitForm() {
-        // Ici vous ajouterez la logique d'envoi du formulaire
-        console.log('Formulaire soumis:', this.form)
-        alert('Merci pour votre message! Nous vous contacterons bientôt.')
-        this.resetForm()
-      },
-      resetForm() {
-        this.form = {
-          name: '',
-          email: '',
-          subject: '',
-          message: ''
-        }
-      }
-    },
-    metaInfo() {
-      return {
-        title: 'Contact - Amande Pâtisserie'
+    </main>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      form: {
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
       }
     }
+  },
+  methods: {
+    submitForm() {
+      // Ici vous ajouterez la logique d'envoi du formulaire
+      console.log('Formulaire soumis:', this.form)
+      alert('Merci pour votre message! Nous vous contacterons bientôt.')
+      this.resetForm()
+    },
+    resetForm() {
+      this.form = {
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      }
+    }
+  },
+  metaInfo() {
+    return {
+      title: 'Contact - Amande Pâtisserie'
+    }
   }
-  </script>
-  
-  <style lang="scss" scoped>
-  @use "@/assets/styles/variables" as *;
-  
-  .contact-page {
-    padding: 2rem 1rem;
-    background-color: #f5f5f5;
-    min-height: calc(100vh - 80px);
-    font-family: var(--font-family-text);
-  }
-  
-  .contact-container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  }
-  
-  .contact-title {
-    color: var(--primary-color);
-    text-align: center;
-    margin-bottom: 2rem;
-    font-size: 1.8rem;
-    font-family: var(--font-family-title);
-  }
+}
+</script>
+
+<style scoped>
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--secondary-color);
+}
+.content-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.contact-card {
+  max-width: 900px;
+  margin: 2rem 0;
+  background: white;
+  padding: 2rem;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px rgba(180, 138, 120, 0.07);
+}
+.contact-title {
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  font-family: var(--font-family-title);
+}
   
   .contact-form {
     display: flex;
@@ -175,4 +175,4 @@
       font-size: 1.5rem;
     }
   }
-  </style>
+</style>
