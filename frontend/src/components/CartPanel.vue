@@ -56,7 +56,7 @@ export default {
   mounted() {
     window.addEventListener('resize', this.checkViewport)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('resize', this.checkViewport)
   },
   computed: {

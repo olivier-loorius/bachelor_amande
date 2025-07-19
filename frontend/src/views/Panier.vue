@@ -136,7 +136,7 @@ export default {
     this.checkViewport()
     window.addEventListener('resize', this.checkViewport)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('resize', this.checkViewport)
   }
 }
