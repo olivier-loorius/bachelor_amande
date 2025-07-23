@@ -10,12 +10,11 @@
           </div>
           
           <div class="catalogue-grid">
-            <div 
+            <article 
               v-for="produit in produits" 
               :key="produit.id"
               class="produit-card"
             >
-              <!-- Image (1/6) -->
               <div class="produit-image">
                 <img 
                   :src="produit.image" 
@@ -25,34 +24,32 @@
                 />
               </div>
 
-              <!-- Contenu principal (4/6) -->
               <div class="produit-content">
                 <h3 class="produit-nom">{{ produit.nom }}</h3>
                 
-                <div class="produit-composition">
+                <dl class="produit-composition">
                   <div class="composition-item">
-                    <span class="composition-label">Base:</span>
-                    <span class="composition-value">{{ produit.base }}</span>
+                    <dt class="composition-label">Base:</dt>
+                    <dd class="composition-value">{{ produit.base }}</dd>
                   </div>
                   <div class="composition-item">
-                    <span class="composition-label">Première douceur:</span>
-                    <span class="composition-value">{{ produit.premiereDouceur }}</span>
+                    <dt class="composition-label">Première douceur:</dt>
+                    <dd class="composition-value">{{ produit.premiereDouceur }}</dd>
                   </div>
                   <div class="composition-item">
-                    <span class="composition-label">Seconde douceur:</span>
-                    <span class="composition-value">{{ produit.secondeDouceur }}</span>
+                    <dt class="composition-label">Seconde douceur:</dt>
+                    <dd class="composition-value">{{ produit.secondeDouceur }}</dd>
                   </div>
                   <div class="composition-item">
-                    <span class="composition-label">Finition:</span>
-                    <span class="composition-value">{{ produit.finition }}</span>
+                    <dt class="composition-label">Finition:</dt>
+                    <dd class="composition-value">{{ produit.finition }}</dd>
                   </div>
-                </div>
+                </dl>
               </div>
 
-              <!-- Panier et quantité (1/6) -->
               <div class="produit-actions">
                 <div class="quantite-selector">
-                  <div class="quantite-label">Quantité</div>
+                  <label class="quantite-label">Quantité</label>
                   <div class="quantite-row">
                     <button 
                       @click="produit.quantite = Math.max(1, produit.quantite - 1)" 
@@ -70,6 +67,7 @@
                       min="1" 
                       max="10" 
                       class="quantite-input"
+                      aria-label="Quantité"
                     />
                     <button 
                       @click="produit.quantite = Math.min(10, produit.quantite + 1)" 
@@ -93,40 +91,160 @@
                     class="btn-panier"
                     :aria-label="`Ajouter ${produit.nom} au panier`"
                   >
-                    <i class="fas fa-shopping-cart"></i>
+                    <i class="fas fa-shopping-cart" aria-hidden="true"></i>
                     <span class="btn-text">Ajouter</span>
                   </button>
                   
                   <button 
                     @click="annulerAction"
                     class="btn-refresh"
-                    aria-label="Refresh avant ajout"
+                    aria-label="Réinitialiser la quantité"
                   >
-                    <i class="fas fa-redo"></i>
+                    <i class="fas fa-redo" aria-hidden="true"></i>
                   </button>
                 </div>
               </div>
-            </div>
+            </article>
+
+            <article 
+              v-for="produit in produits" 
+              :key="`mobile-${produit.id}`"
+              class="produit-mobile" 
+              @click="openProduitModal(produit)"
+            >
+              <div class="produit-mobile-image">
+                <img 
+                  :src="produit.image" 
+                  :alt="produit.nom" 
+                  class="produit-mobile-img"
+                />
+              </div>
+              <div class="produit-mobile-info">
+                <h3 class="produit-mobile-nom">{{ produit.nom }}</h3>
+                <div class="produit-mobile-arrow">
+                  <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </div>
+              </div>
+            </article>
           </div>
         </section>
       </div>
     </main>
   </div>
   
-  <!-- Modal de confirmation -->
   <AddToCartModal 
     :show="showAddModal"
     :message="`${produitAjoute?.nom} a bien été ajouté au panier !`"
     @close="closeAddModal"
   />
   
-  <!-- Modal de zoom d'image -->
   <div v-if="showImageZoom" class="image-zoom-overlay" @click="closeImageZoom">
     <div class="image-zoom-container" @click.stop>
       <button class="image-zoom-close" @click="closeImageZoom" aria-label="Fermer l'image">
-        <i class="fas fa-times"></i>
+        <i class="fas fa-times" aria-hidden="true"></i>
       </button>
       <img :src="zoomedImage" :alt="zoomedImageAlt" class="image-zoom-img" />
+    </div>
+  </div>
+
+  <div v-if="showProduitModal" class="produit-modal-overlay" @click="closeProduitModal">
+    <div class="produit-modal" @click.stop>
+      <div class="produit-modal-header">
+        <button class="produit-modal-close" @click="closeProduitModal" aria-label="Fermer">
+          <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+      
+      <div class="produit-modal-content" v-if="produitModal">
+        <div class="produit-modal-image">
+          <img 
+            :src="produitModal.image" 
+            :alt="produitModal.nom" 
+            class="produit-modal-img"
+          />
+        </div>
+        
+        <div class="produit-modal-details">
+          <h2 class="produit-modal-nom">{{ produitModal.nom }}</h2>
+          
+          <dl class="produit-modal-composition">
+            <div class="composition-item">
+              <dt class="composition-label">Base:</dt>
+              <dd class="composition-value">{{ produitModal.base }}</dd>
+            </div>
+            <div class="composition-item">
+              <dt class="composition-label">Première douceur:</dt>
+              <dd class="composition-value">{{ produitModal.premiereDouceur }}</dd>
+            </div>
+            <div class="composition-item">
+              <dt class="composition-label">Seconde douceur:</dt>
+              <dd class="composition-value">{{ produitModal.secondeDouceur }}</dd>
+            </div>
+            <div class="composition-item">
+              <dt class="composition-label">Finition:</dt>
+              <dd class="composition-value">{{ produitModal.finition }}</dd>
+            </div>
+          </dl>
+          
+          <div class="produit-modal-actions">
+            <div class="quantite-selector">
+              <label class="quantite-label">Quantité</label>
+              <div class="quantite-row">
+                <button 
+                  @click="produitModal.quantite = Math.max(1, produitModal.quantite - 1)" 
+                  aria-label="Diminuer la quantité" 
+                  class="quantite-btn" 
+                  :disabled="produitModal.quantite <= 1"
+                >
+                  <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 15L5 9L11 3" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <input 
+                  type="number" 
+                  v-model="produitModal.quantite" 
+                  min="1" 
+                  max="10" 
+                  class="quantite-input"
+                  aria-label="Quantité"
+                />
+                <button 
+                  @click="produitModal.quantite = Math.min(10, produitModal.quantite + 1)" 
+                  aria-label="Augmenter la quantité" 
+                  class="quantite-btn" 
+                  :disabled="produitModal.quantite >= 10"
+                >
+                  <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 15L13 9L7 3" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <span class="quantite-text">
+                  {{ produitModal.quantite > 1 ? 'tartelettes' : 'tartelette' }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="cta-group">
+              <button 
+                @click="ajouterAuPanier(produitModal); closeProduitModal()"
+                class="btn-panier"
+                :aria-label="`Ajouter ${produitModal.nom} au panier`"
+              >
+                <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                <span class="btn-text">Ajouter</span>
+              </button>
+              
+              <button 
+                @click="annulerAction"
+                class="btn-refresh"
+                aria-label="Réinitialiser la quantité"
+              >
+                <i class="fas fa-redo" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -135,8 +253,18 @@
 import { ref } from 'vue'
 import AddToCartModal from '@/components/AddToCartModal.vue'
 
-// Données fictives pour les produits
-const produits = ref([
+interface Produit {
+  id: number
+  nom: string
+  image: string
+  base: string
+  premiereDouceur: string
+  secondeDouceur: string
+  finition: string
+  quantite: number
+}
+
+const produits = ref<Produit[]>([
   {
     id: 1,
     nom: 'Tarte citron meringuée',
@@ -146,20 +274,49 @@ const produits = ref([
     secondeDouceur: 'Lemon curd citron jaune',
     finition: 'Meringue italienne',
     quantite: 1
+  },
+  {
+    id: 2,
+    nom: 'Tarte aux fraises',
+    image: new URL('@/assets/images/TFraise.jpg', import.meta.url).href,
+    base: 'Pâte sablée vanille',
+    premiereDouceur: 'Crème pâtissière vanille',
+    secondeDouceur: 'Fraise fraîche de saison',
+    finition: 'Glaçage miroir fraise',
+    quantite: 1
+  },
+  {
+    id: 3,
+    nom: 'Tarte au chocolat',
+    image: new URL('@/assets/images/TChocolat.jpg', import.meta.url).href,
+    base: 'Pâte sablée chocolat',
+    premiereDouceur: 'Ganache chocolat noir 70%',
+    secondeDouceur: 'Mousse chocolat au lait',
+    finition: 'Décors chocolat et feuilles d\'or',
+    quantite: 1
+  },
+  {
+    id: 4,
+    nom: 'Tarte aux poires',
+    image: new URL('@/assets/images/Tpoire.jpg', import.meta.url).href,
+    base: 'Pâte brisée amande',
+    premiereDouceur: 'Crème d\'amandes',
+    secondeDouceur: 'Poire Williams pochée',
+    finition: 'Amandes effilées et sucre glace',
+    quantite: 1
   }
 ])
 
 const showAddModal = ref(false)
-const produitAjoute = ref<any>(null)
+const produitAjoute = ref<Produit | null>(null)
 const showImageZoom = ref(false)
 const zoomedImage = ref('')
 const zoomedImageAlt = ref('')
+const showProduitModal = ref(false)
+const produitModal = ref<Produit | null>(null)
 
-const ajouterAuPanier = (produit: any) => {
+const ajouterAuPanier = (produit: Produit) => {
   console.log(`Ajout au panier: ${produit.nom} - Quantité: ${produit.quantite}`)
-  // Logique d'ajout au panier à implémenter
-  
-  // Afficher la modal de confirmation
   produitAjoute.value = produit
   showAddModal.value = true
 }
@@ -181,11 +338,17 @@ const closeImageZoom = () => {
   zoomedImageAlt.value = ''
 }
 
+const openProduitModal = (produit: Produit) => {
+  produitModal.value = produit
+  showProduitModal.value = true
+}
 
+const closeProduitModal = () => {
+  showProduitModal.value = false
+  produitModal.value = null
+}
 
 const annulerAction = () => {
-  console.log('Refresh avant ajout')
-  // Reset quantité à 1 avant ajout au panier
   produits.value.forEach(produit => {
     produit.quantite = 1
   })
@@ -199,8 +362,6 @@ const annulerAction = () => {
   width: 100%;
 }
 
-
-
 .catalogue-grid {
   display: flex;
   flex-direction: column;
@@ -208,9 +369,6 @@ const annulerAction = () => {
 }
 
 .produit-card {
-  display: grid;
-  grid-template-columns: 1.5fr 3.5fr 1fr;
-  gap: 1.5rem;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -219,6 +377,14 @@ const annulerAction = () => {
   transition: all 0.3s ease;
   max-width: 700px;
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 3.5fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.produit-mobile {
+  display: none;
 }
 
 .produit-card:hover {
@@ -446,72 +612,68 @@ const annulerAction = () => {
 
 @media (max-width: 768px) {
   .produit-card {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    padding: 1.5rem;
+    display: none;
   }
 
-  .produit-image img {
-    height: 100px;
-  }
-
-  .produit-nom {
-    font-size: 1rem;
-    text-align: center;
-  }
-
-  .composition-item {
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .composition-label {
-    min-width: auto;
-  }
-
-  .produit-actions {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0 0 0;
-  }
-
-  .cta-group {
-    flex-direction: row;
-    gap: 0.5rem;
-  }
-
-  .btn-panier {
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
-  }
-
-  .btn-refresh {
-    width: 35px;
-    height: 40px;
-  }
-
-  .quantite-selector {
-    flex-direction: row;
+  .produit-mobile {
+    display: flex;
     align-items: center;
     gap: 1rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 90%;
+    min-height: 80px;
+    margin: 0 auto 1rem auto;
   }
 
-  .quantite-row {
-    gap: 0.3rem;
+  .produit-mobile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   }
 
-  .quantite-input {
-    width: 35px;
+  .produit-mobile-image {
+    flex-shrink: 0;
   }
 
-  .quantite-text {
-    font-size: 0.7rem;
-    min-width: 50px;
+  .produit-mobile-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .produit-mobile-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  .produit-mobile-nom {
+    font-family: var(--font-family-title);
+    font-size: 1rem;
+    color: #90aeb0;
+    margin: 0;
+    font-weight: 600;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .produit-mobile-arrow {
+    color: #90aeb0;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
   }
 }
 
-/* Styles pour le zoom d'image */
 .image-zoom-overlay {
   position: fixed;
   top: 0;
@@ -601,8 +763,6 @@ const annulerAction = () => {
   }
 }
 
-
-
 @media (max-width: 480px) {
   .produit-card {
     padding: 1rem;
@@ -614,6 +774,141 @@ const annulerAction = () => {
 
   .composition-value {
     font-size: 0.7rem;
+  }
+}
+
+.produit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+.produit-modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 95vw;
+  max-height: 90vh;
+  width: 100%;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+.produit-modal-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+}
+
+.produit-modal-close {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.produit-modal-close:hover {
+  background: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.produit-modal-content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.produit-modal-image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.produit-modal-img {
+  width: 100%;
+  max-width: 400px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.produit-modal-details {
+  text-align: center;
+}
+
+.produit-modal-nom {
+  font-family: var(--font-family-title);
+  font-size: 1.5rem;
+  color: #90aeb0;
+  margin: 0 0 1.5rem 0;
+  font-weight: 700;
+}
+
+.produit-modal-composition {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.produit-modal-composition .composition-item {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+
+.produit-modal-composition .composition-label {
+  min-width: 120px;
+  font-weight: 600;
+  color: #666;
+}
+
+.produit-modal-composition .composition-value {
+  font-weight: 400;
+  color: #333;
+}
+
+.produit-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.produit-modal-actions .quantite-selector {
+  width: 100%;
+  max-width: 250px;
+}
+
+.produit-modal-actions .cta-group {
+  justify-content: center;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>
