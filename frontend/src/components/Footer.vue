@@ -43,9 +43,9 @@
 
     <!-- Liens légaux -->
     <div class="footer-legal">
-      <router-link to="/mentions-legales">Mentions légales</router-link>
-      <router-link to="/cgv">CGV</router-link>
-      <router-link to="/contact">Contact</router-link>
+      <router-link to="/mentions-legales" @click="scrollToTop">Mentions légales</router-link>
+      <router-link to="/cgv" @click="scrollToTop">CGV</router-link>
+      <router-link to="/contact" @click="scrollToTop">Contact</router-link>
     </div>
 
     <!-- Copyright + Bouton -->

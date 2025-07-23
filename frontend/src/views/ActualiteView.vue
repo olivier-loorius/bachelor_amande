@@ -1,28 +1,42 @@
 <template>
   <div class="page-container">
-    <main class="content-container actualite-content">
-      <div class="actualite-card">
-        <div class="actualite-header">
-          <h1 class="actualite-title">Actualités</h1>
-          <p class="actualite-intro">
-            Retrouvez ici toutes les actualités, recettes exclusives et événements gourmands de la
-            pâtisserie Amande.
-          </p>
-        </div>
-        <div class="actualite-list">
-          <div class="actualite-item" v-for="article in articles" :key="article.title">
-            <img :src="article.image" :alt="article.title" class="actualite-img" />
-            <div class="actualite-content">
-              <h2 class="article-title">{{ article.title }}</h2>
-              <p class="article-date">{{ article.date }}</p>
-              <router-link
-                :to="{ name: 'actualite-detail', params: { id: getArticleId(article.title) } }"
-                class="actualite-link"
-                >En savoir plus</router-link
-              >
-            </div>
+    <main class="content-container">
+      <div class="composer-card card">
+        <h1 class="composer-title section-title">Actualités</h1>
+        
+        <section class="composer-section">
+          <div class="composer-step-desc">
+            <p>Retrouvez ici toutes les actualités, recettes exclusives et événements gourmands de la pâtisserie Amande.</p>
           </div>
-        </div>
+          
+          <div class="actualite-grid">
+            <article 
+              v-for="article in articles" 
+              :key="article.title" 
+              class="actualite-card"
+            >
+              <div class="actualite-image-wrapper">
+                <img 
+                  :src="article.image" 
+                  :alt="article.title" 
+                  class="actualite-image" 
+                  loading="lazy"
+                />
+              </div>
+              <div class="actualite-content">
+                <h2 class="actualite-title">{{ article.title }}</h2>
+                <time class="actualite-date" :datetime="article.date">{{ article.date }}</time>
+                <router-link
+                  :to="{ name: 'not-found' }"
+                  class="actualite-link"
+                  aria-label="Lire l'article : {{ article.title }}"
+                >
+                  Lire l'article
+                </router-link>
+              </div>
+            </article>
+          </div>
+        </section>
       </div>
     </main>
   </div>
@@ -31,6 +45,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+// Articles d'actualité harmonisés avec le style de ComposerView
 const articles = ref([
   {
     title: 'Les secrets des éclairs parfaits',
@@ -82,6 +97,8 @@ function getArticleId(title: string) {
 </script>
 
 <style scoped>
+@import '@/assets/styles/vues.scss';
+
 .page-container {
   display: flex;
   flex-direction: column;
@@ -89,132 +106,171 @@ function getArticleId(title: string) {
   min-height: 100vh;
   background-color: var(--secondary-color);
 }
+
 .content-container {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-.actualite-content {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.actualite-card {
+
+.composer-card {
   background: #fff;
   border-radius: 1.2rem;
   box-shadow: 0 2px 12px rgba(180, 138, 120, 0.07);
-  padding: 2.5rem 2rem;
-  max-width: 800px;
+  padding: 2rem 1.5rem;
+  max-width: 900px;
   width: 100%;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
+  scroll-margin-top: 120px;
 }
-.actualite-header {
-  background: #fff;
-  border-radius: 1.2rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
-  padding: 2.5rem 2rem 2rem 2rem;
-  margin-bottom: 2.5rem;
+
+.composer-title {
+  font-family: var(--font-family-title);
+  font-size: 2rem;
+  color: #90aeb0;
   text-align: center;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
 }
-.actualite-title {
-  font-size: 2.2rem;
-  font-family: 'Roboto', sans-serif;
-  color: var(--primary-color, #4a4a4a);
-  margin-bottom: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
+
+.composer-section {
+  margin-bottom: 1.5rem;
 }
-.actualite-intro {
-  font-size: 1.1rem;
-  color: var(--text-color, #333);
-  margin-bottom: 0;
+
+.composer-step-desc {
+  font-family: var(--font-family-text);
+  color: var(--text-color);
+  font-size: 1rem;
+  margin-bottom: 2.5rem;
   line-height: 1.6;
+  text-align: center;
 }
-.actualite-list {
+
+.actualite-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
 }
-.actualite-item {
+
+.actualite-card {
   background: #fff;
-  border-radius: 0.7rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 8px rgba(180, 138, 120, 0.06);
   overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(180, 138, 120, 0.08);
   display: flex;
   flex-direction: column;
-  transition: box-shadow 0.2s;
 }
-.actualite-item:hover {
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.13);
+
+.actualite-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(180, 138, 120, 0.12);
+  border-color: var(--accent-color);
 }
-.actualite-img {
+
+.actualite-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16/10;
+}
+
+.actualite-image {
   width: 100%;
-  height: 220px;
+  height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
 }
+
+.actualite-card:hover .actualite-image {
+  transform: scale(1.03);
+}
+
 .actualite-content {
-  padding: 1rem;
+  padding: 1.2rem;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 0.8rem;
 }
-.article-title {
-  font-size: 1.15rem;
-  font-family: 'Roboto', sans-serif;
-  color: var(--primary-color, #4a4a4a);
-  margin-bottom: 0.5rem;
-  font-weight: bold;
+
+.actualite-title {
+  font-family: var(--font-family-title);
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 600;
 }
-.article-date {
-  font-size: 1rem;
+
+.actualite-date {
+  font-family: var(--font-family-text);
+  font-size: 0.85rem;
   color: #888;
-  margin-bottom: 1rem;
+  font-style: italic;
 }
+
 .actualite-link {
   display: inline-block;
-  margin: 0.5rem auto 0 auto;
-  background: var(--accent-color, #ff6f61);
-  color: #fff;
-  padding: 0.13rem 0.6rem;
-  border-radius: 0.4rem;
+  color: var(--accent-color);
   text-decoration: none;
-  font-family: 'Roboto', sans-serif;
-  font-size: 0.89rem;
+  font-family: var(--font-family-text);
+  font-size: 0.85rem;
   font-weight: 500;
-  letter-spacing: 0.01em;
-  transition: background 0.2s;
-  min-width: unset;
-  width: auto;
   text-align: center;
+  transition: all 0.3s ease;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid transparent;
+  margin-top: auto;
+  align-self: flex-start;
 }
+
 .actualite-link:hover {
-  background: var(--accent-color-light, #ffa07a);
+  border-bottom-color: var(--accent-color);
+  transform: translateX(4px);
 }
-@media (max-width: 640px) {
-  .actualite-card {
-    padding: 1.2rem 0.5rem;
-    margin: 1rem 0;
+
+@media (max-width: 768px) {
+  .composer-card {
+    padding: 1.2rem 1rem;
+    margin: 1rem;
   }
-}
-@media (max-width: 700px) {
-  .actualite-header {
-    padding: 1.2rem 0.7rem 1.2rem 0.7rem;
-    border-radius: 0.7rem;
+
+  .composer-title {
+    font-size: 1.6rem;
   }
-  .actualite-view {
+
+  .actualite-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .actualite-content {
     padding: 1rem;
   }
-  .actualite-list {
+
+  .actualite-title {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .actualite-grid {
     gap: 1rem;
   }
-  .actualite-img {
-    height: 170px;
+
+  .actualite-content {
+    padding: 0.8rem;
+  }
+
+  .actualite-title {
+    font-size: 0.95rem;
+  }
+
+  .actualite-link {
+    font-size: 0.8rem;
   }
 }
 </style>

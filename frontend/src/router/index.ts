@@ -6,7 +6,7 @@ import ContactView from '@/views/ContactView.vue'
 import CGVView from '@/views/CGVView.vue'
 import PanierView from '@/views/Panier.vue'
 import LoginView from '@/views/LoginView.vue' // Importation du composant ConnexionView
-import ActualiteDetailView from '@/views/ActualiteDetailView.vue'
+import ErrorView from '@/views/ErrorView.vue'
 import ComposerView from '@/views/ComposerView.vue'
 import CatalogueView from '@/views/CatalogueView.vue'
 
@@ -24,10 +24,10 @@ const routes = [
   {
     path: '/actualite/:id',
     name: 'actualite-detail',
-    component: ActualiteDetailView,
+    component: ErrorView,
     props: true,
     meta: {
-      title: 'Détail Actualité - Amande Pâtisserie',
+      title: 'Page non trouvée - Amande Pâtisserie',
     },
   },
   {
@@ -86,6 +86,18 @@ const routes = [
       title: 'Catalogue - Amande Pâtisserie',
     },
   },
+  {
+    path: '/not-found',
+    name: 'not-found',
+    component: ErrorView,
+    meta: {
+      title: 'Page non trouvée - Amande Pâtisserie',
+    },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/not-found',
+  },
 ]
 
 const router = createRouter({
@@ -97,6 +109,10 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const title = to.meta?.title || 'Amande Pâtisserie'
   document.title = typeof title === 'string' ? title : 'Amande Pâtisserie'
+  
+  // Scroll vers le haut de la page
+  window.scrollTo(0, 0)
+  
   next()
 })
 

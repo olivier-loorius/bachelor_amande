@@ -228,6 +228,7 @@ a:hover {
 @media (max-width: 768px) {
   .menu {
     display: block;
+    z-index: 1000;
   }
 
   ul {
@@ -237,12 +238,13 @@ a:hover {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background-color: var(--secondary-color);
     padding-top: 80px;
-    z-index: 1;
+    z-index: 999;
     text-align: center;
     gap: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   }
 
   ul.open {
@@ -255,6 +257,10 @@ a:hover {
 
   .logo img {
     height: 60px;
+  }
+
+  nav {
+    z-index: 1000;
   }
 }
 </style>

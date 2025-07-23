@@ -4,6 +4,7 @@
     <router-view />
     <Footer />
     <CartPanel :isOpen="showCart" @close="showCart = false" />
+    <ScrollToTop />
   </div>
 </template>
 
@@ -11,13 +12,15 @@
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import CartPanel from './components/CartPanel.vue'
+import ScrollToTop from './components/ScrollToTop.vue'
 
 export default {
   name: 'App',
   components: {
     Navbar,
     Footer,
-    CartPanel
+    CartPanel,
+    ScrollToTop
   },
   data() {
     return {
