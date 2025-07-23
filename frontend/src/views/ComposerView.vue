@@ -3,13 +3,13 @@
     <main class="content-container composer-content">
         <div class="composer-card card">
         <section v-if="currentStep === 1 || currentStep === 2">
-            <h1 class="composer-title section-title">Composer sa tartelette</h1>
+            <h1 class="section-title">Composer sa tartelette</h1>
           <div class="composer-price-ux">
             Chez Amande, chaque tartelette est à prix unique :
               <span class="composer-price-ux-value">6€ / tartelette</span>
               Laissez-vous tenter, composez sans compter !
           </div>
-            <p class="composer-intro section-desc">
+            <p class="composer-intro">
             Créez la tartelette de vos rêves en quelques clics !<br>
             Choisissez chaque ingrédient, visualisez le résultat, et laissez parler votre gourmandise.<br>
               Chaque produit est préparé artisanalement dans notre atelier par nos pâtissiers passionnés, toujours à la recherche de qualité et de saveurs d'exception.<br>
@@ -447,19 +447,16 @@
       </div>
     </main>
   </div>
-    <div v-if="showAddModal" class="add-modal-overlay" @click.self="closeAddModal">
-      <div class="add-modal">
-        <div class="add-modal-icon">
-          <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="add-modal-msg">Votre tartelette a bien été ajoutée au panier !</div>
-        <button class="composer-btn" @click="closeAddModal" style="margin-top: 1.2rem;">OK</button>
-      </div>
-  </div>
+    <AddToCartModal 
+      :show="showAddModal"
+      message="Votre tartelette a bien été ajoutée au panier !"
+      @close="closeAddModal"
+    />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import AddToCartModal from '@/components/AddToCartModal.vue'
 import fondNature from '@/assets/images/fondNature.jpg'
 import fondCacao from '@/assets/images/fondCacao.jpg'
 import fondNoisette from '@/assets/images/fondNoisette.jpg'
@@ -511,8 +508,6 @@ const quantite = ref(1)
   }
 const hoveredGarniture1 = ref<number|null>(null)
   const showAddModal = ref(false)
-  
-  let addModalTimeout: ReturnType<typeof setTimeout> | null = null
 
 const peutValider = computed(() => {
     return !!selectedFond.value && !!selectedGarniture1.value && !!selectedGarniture2.value && !!selectedGarniture3.value && !!selectedFinition.value && quantite.value > 0
@@ -545,16 +540,10 @@ function recommencer() {
 }
 function ajouterAuPanier() {
     showAddModal.value = true
-    if (addModalTimeout) clearTimeout(addModalTimeout)
-    addModalTimeout = setTimeout(() => {
-      closeAddModal()
-    }, 2500)
   }
   function closeAddModal() {
     showAddModal.value = false
-    if (addModalTimeout) clearTimeout(addModalTimeout)
-    addModalTimeout = null
-  recommencer()
+    recommencer()
     currentStep.value = 1
 }
 
@@ -1321,48 +1310,7 @@ function goToPrevStep() {
     pointer-events: none;
     transition: opacity 0.2s;
   }
-  .add-modal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.25);
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.2s;
-  }
-  .add-modal {
-    background: #fff;
-    border-radius: 1.2rem;
-    box-shadow: 0 4px 32px rgba(180, 138, 120, 0.18);
-    padding: 2.2rem 2.5rem 1.5rem 2.5rem;
-    min-width: 320px;
-    max-width: 90vw;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    animation: popIn 0.18s;
-  }
-  .add-modal-icon {
-    color: var(--accent-color);
-    font-size: 2.5rem;
-    margin-bottom: 1.1rem;
-  }
-  .add-modal-msg {
-    font-size: 1.15rem;
-    color: var(--text-color);
-    text-align: center;
-    margin-bottom: 0.5rem;
-    font-family: var(--font-family-text);
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes popIn {
-    0% { transform: scale(0.95); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
+
   .fond-carousel-mobile { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
   .fond-carousel-img-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; }
   .fond-card-mobile { width: 100%; max-width: 320px; }

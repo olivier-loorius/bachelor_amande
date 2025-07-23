@@ -1,197 +1,619 @@
 <template>
   <div class="page-container">
-    <main class="content-container catalogue-content">
-      <div class="catalogue-card">
-        <h1>Catalogue</h1>
-        <p class="mb-8 text-center">
-          Trouvez ici nos dernières créations du mois de {{ currentMonth }}
-        </p>
-
-        <!-- Slider des créations du mois -->
-        <h2 class="text-xl font-semibold mb-4 mt-2" style="color: #b48a78;">Créations du mois</h2>
-        <div class="slider-container mb-10">
-          <div class="slider-track">
-            <div
-              v-for="creation in creationsMois"
-              :key="creation.id"
-              class="creation-card"
+    <main class="content-container composer-content">
+      <div class="catalogue-card card">
+        <h1 class="section-title">Catalogue</h1>
+        
+        <section class="catalogue-section">
+          <div class="section-desc">
+            <p>Découvrez notre sélection de tartelettes et desserts artisanaux, créés avec passion et des ingrédients d'exception.</p>
+          </div>
+          
+          <div class="catalogue-grid">
+            <div 
+              v-for="produit in produits" 
+              :key="produit.id"
+              class="produit-card"
             >
-              <img :src="creation.image" :alt="creation.nom" class="creation-img" />
-              <div class="creation-nom">{{ creation.nom }}</div>
+              <!-- Image (1/6) -->
+              <div class="produit-image">
+                <img 
+                  :src="produit.image" 
+                  :alt="produit.nom" 
+                  @click="openImageZoom(produit.image, produit.nom)"
+                  class="produit-image-clickable"
+                />
+              </div>
+
+              <!-- Contenu principal (4/6) -->
+              <div class="produit-content">
+                <h3 class="produit-nom">{{ produit.nom }}</h3>
+                
+                <div class="produit-composition">
+                  <div class="composition-item">
+                    <span class="composition-label">Base:</span>
+                    <span class="composition-value">{{ produit.base }}</span>
+                  </div>
+                  <div class="composition-item">
+                    <span class="composition-label">Première douceur:</span>
+                    <span class="composition-value">{{ produit.premiereDouceur }}</span>
+                  </div>
+                  <div class="composition-item">
+                    <span class="composition-label">Seconde douceur:</span>
+                    <span class="composition-value">{{ produit.secondeDouceur }}</span>
+                  </div>
+                  <div class="composition-item">
+                    <span class="composition-label">Finition:</span>
+                    <span class="composition-value">{{ produit.finition }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Panier et quantité (1/6) -->
+              <div class="produit-actions">
+                <div class="quantite-selector">
+                  <div class="quantite-label">Quantité</div>
+                  <div class="quantite-row">
+                    <button 
+                      @click="produit.quantite = Math.max(1, produit.quantite - 1)" 
+                      aria-label="Diminuer la quantité" 
+                      class="quantite-btn" 
+                      :disabled="produit.quantite <= 1"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 15L5 9L11 3" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                    <input 
+                      type="number" 
+                      v-model="produit.quantite" 
+                      min="1" 
+                      max="10" 
+                      class="quantite-input"
+                    />
+                    <button 
+                      @click="produit.quantite = Math.min(10, produit.quantite + 1)" 
+                      aria-label="Augmenter la quantité" 
+                      class="quantite-btn" 
+                      :disabled="produit.quantite >= 10"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 15L13 9L7 3" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                    <span class="quantite-text">
+                      {{ produit.quantite > 1 ? 'tartelettes' : 'tartelette' }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="cta-group">
+                  <button 
+                    @click="ajouterAuPanier(produit)"
+                    class="btn-panier"
+                    :aria-label="`Ajouter ${produit.nom} au panier`"
+                  >
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="btn-text">Ajouter</span>
+                  </button>
+                  
+                  <button 
+                    @click="annulerAction"
+                    class="btn-refresh"
+                    aria-label="Refresh avant ajout"
+                  >
+                    <i class="fas fa-redo"></i>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <!-- Produits phares -->
-        <h2 class="text-xl font-semibold mb-4 mt-8" style="color: #b48a78;">Nos produits phares en commande</h2>
-        <div class="produits-phares-grid">
-          <div
-            v-for="produit in produitsPhares"
-            :key="produit.id"
-            class="produit-card"
-          >
-            <img :src="produit.image" :alt="produit.nom" class="produit-img" />
-            <div class="produit-nom">{{ produit.nom }}</div>
-            <button class="btn-commander">Commander</button>
-          </div>
-        </div>
+        </section>
       </div>
     </main>
+  </div>
+  
+  <!-- Modal de confirmation -->
+  <AddToCartModal 
+    :show="showAddModal"
+    :message="`${produitAjoute?.nom} a bien été ajouté au panier !`"
+    @close="closeAddModal"
+  />
+  
+  <!-- Modal de zoom d'image -->
+  <div v-if="showImageZoom" class="image-zoom-overlay" @click="closeImageZoom">
+    <div class="image-zoom-container" @click.stop>
+      <button class="image-zoom-close" @click="closeImageZoom" aria-label="Fermer l'image">
+        <i class="fas fa-times"></i>
+      </button>
+      <img :src="zoomedImage" :alt="zoomedImageAlt" class="image-zoom-img" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import AddToCartModal from '@/components/AddToCartModal.vue'
 
-// Mois dynamique
-const mois = [
-  'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-  'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
-]
-const currentMonth = mois[new Date().getMonth()]
-
-// Données fictives pour les créations du mois
-const creationsMois = ref([
-  { id: 1, nom: 'Tartelette Framboise', image: new URL('@/assets/images/TarteletteBanner.png', import.meta.url).href },
-  { id: 2, nom: 'Éclair Chocolat', image: new URL('@/assets/images/eclairs.jpg', import.meta.url).href },
-  { id: 3, nom: 'Macaron Pistache', image: new URL('@/assets/images/macaron.jpg', import.meta.url).href },
-  { id: 4, nom: 'Gâteau d’Anniversaire', image: new URL('@/assets/images/birthday.jpg', import.meta.url).href },
+// Données fictives pour les produits
+const produits = ref([
+  {
+    id: 1,
+    nom: 'Tarte citron meringuée',
+    image: new URL('@/assets/images/TCitron.png', import.meta.url).href,
+    base: 'Pâte sucrée vanille et citron',
+    premiereDouceur: 'Gel au 2 citrons',
+    secondeDouceur: 'Lemon curd citron jaune',
+    finition: 'Meringue italienne',
+    quantite: 1
+  }
 ])
 
-// Données fictives pour les produits phares
-const produitsPhares = ref([
-  { id: 1, nom: 'Wedding Cake', image: new URL('@/assets/images/wedding-cake.jpg', import.meta.url).href },
-  { id: 2, nom: 'Pâtisserie Chocolat', image: new URL('@/assets/images/chocolat.jpg', import.meta.url).href },
-  { id: 3, nom: 'Génoise Fruits', image: new URL('@/assets/images/genoise.jpg', import.meta.url).href },
-  { id: 4, nom: 'Pâte à Choux', image: new URL('@/assets/images/pâte.jpg', import.meta.url).href },
-])
+const showAddModal = ref(false)
+const produitAjoute = ref<any>(null)
+const showImageZoom = ref(false)
+const zoomedImage = ref('')
+const zoomedImageAlt = ref('')
+
+const ajouterAuPanier = (produit: any) => {
+  console.log(`Ajout au panier: ${produit.nom} - Quantité: ${produit.quantite}`)
+  // Logique d'ajout au panier à implémenter
+  
+  // Afficher la modal de confirmation
+  produitAjoute.value = produit
+  showAddModal.value = true
+}
+
+const closeAddModal = () => {
+  showAddModal.value = false
+  produitAjoute.value = null
+}
+
+const openImageZoom = (image: string, alt: string) => {
+  zoomedImage.value = image
+  zoomedImageAlt.value = alt
+  showImageZoom.value = true
+}
+
+const closeImageZoom = () => {
+  showImageZoom.value = false
+  zoomedImage.value = ''
+  zoomedImageAlt.value = ''
+}
+
+
+
+const annulerAction = () => {
+  console.log('Refresh avant ajout')
+  // Reset quantité à 1 avant ajout au panier
+  produits.value.forEach(produit => {
+    produit.quantite = 1
+  })
+}
 </script>
 
 <style scoped>
-.page-container {
+@import '@/assets/styles/vues.scss';
+
+.catalogue-section {
+  width: 100%;
+}
+
+
+
+.catalogue-grid {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  background-color: var(--secondary-color);
+  gap: 2rem;
 }
-.content-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.catalogue-content {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.catalogue-card {
-  background: #fff;
-  border-radius: 1.2rem;
-  box-shadow: 0 2px 12px rgba(180, 138, 120, 0.07);
-  padding: 2.5rem 2rem;
-  max-width: 900px;
-  width: 100%;
-  margin: 2rem 0;
-}
-@media (max-width: 640px) {
-  .catalogue-card {
-    padding: 1.2rem 0.5rem;
-    margin: 1rem 0;
-  }
-}
-.catalogue-view {
-  min-height: 60vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 2rem;
-}
-.catalogue-view h1 {
-  font-size: 2.2rem;
-  color: #b48a78;
-  margin-bottom: 1rem;
-  font-family: 'Roboto', sans-serif;
-}
-.catalogue-view p {
-  font-size: 1.1rem;
-  color: #444;
-}
-.slider-container {
-  width: 100%;
-  overflow-x: auto;
-  padding-bottom: 8px;
-}
-.slider-track {
-  display: flex;
-  gap: 1.5rem;
-}
-.creation-card {
-  min-width: 180px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem;
-}
-.creation-img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-}
-.creation-nom {
-  font-weight: 500;
-  color: #b48a78;
-  text-align: center;
-}
-.produits-phares-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  width: 100%;
-  max-width: 900px;
-  margin-bottom: 2rem;
-}
+
 .produit-card {
+  display: grid;
+  grid-template-columns: 1.5fr 3.5fr 1fr;
+  gap: 1.5rem;
   background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.produit-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.produit-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.produit-image img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.produit-image-clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.produit-image-clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.produit-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.3rem 0;
+}
+
+.produit-nom {
+  font-family: var(--font-family-title);
+  font-size: 1.2rem;
+  color: #90aeb0;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  opacity: 0.9;
+  margin-top: 0;
+}
+
+.produit-composition {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.composition-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.composition-label {
+  font-family: var(--font-family-text);
+  font-size: 0.75rem;
+  color: var(--text-color);
+  opacity: 0.6;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.composition-value {
+  font-family: var(--font-family-text);
+  font-size: 0.8rem;
+  color: var(--text-color);
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.produit-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.quantite-selector {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
+  gap: 0.5rem;
+  width: 100%;
 }
-.produit-img {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
+
+.quantite-label {
+  font-family: var(--font-family-text);
+  font-size: 0.9rem;
+  color: var(--text-color);
+  font-weight: 600;
 }
-.produit-nom {
-  font-weight: 500;
-  color: #b48a78;
+
+.quantite-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.quantite-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: var(--accent-color);
+}
+
+.quantite-btn:hover:not(:disabled) {
+  background: var(--accent-color);
+  color: #fff;
+  border-color: var(--accent-color);
+}
+
+.quantite-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quantite-input {
+  width: 40px;
+  height: 28px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
   text-align: center;
-  margin-bottom: 0.5rem;
+  font-family: var(--font-family-text);
+  font-size: 0.9rem;
+  background: #fff;
+  color: var(--text-color);
 }
-.btn-commander {
-  background: #b48a78;
+
+.quantite-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.1);
+}
+
+.quantite-text {
+  color: #888;
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: var(--font-family-text);
+  min-width: 60px;
+  text-align: left;
+}
+
+.btn-panier {
+  background: var(--accent-color);
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1.2rem;
-  font-size: 1rem;
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: var(--font-family-text);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
-.btn-commander:hover {
-  background: #a06c5a;
+
+.btn-panier:hover {
+  background: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-panier i {
+  font-size: 1rem;
+}
+
+.btn-panier .btn-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.cta-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.btn-refresh {
+  background: #90aeb0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-refresh:hover {
+  background: #7a9a9c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-refresh i {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .produit-card {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .produit-image img {
+    height: 100px;
+  }
+
+  .produit-nom {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .composition-item {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .composition-label {
+    min-width: auto;
+  }
+
+  .produit-actions {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0 0 0;
+  }
+
+  .cta-group {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .btn-panier {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .btn-refresh {
+    width: 35px;
+    height: 40px;
+  }
+
+  .quantite-selector {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .quantite-row {
+    gap: 0.3rem;
+  }
+
+  .quantite-input {
+    width: 35px;
+  }
+
+  .quantite-text {
+    font-size: 0.7rem;
+    min-width: 50px;
+  }
+}
+
+/* Styles pour le zoom d'image */
+.image-zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+.image-zoom-container {
+  position: relative;
+  max-width: 50vw;
+  max-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-zoom-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: zoomIn 0.3s ease;
+}
+
+.image-zoom-close {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333;
+  font-size: 1.2rem;
+  z-index: 1;
+}
+
+.image-zoom-close:hover {
+  background: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .image-zoom-container {
+    max-width: 75vw;
+    max-height: 60vh;
+  }
+  
+  .image-zoom-close {
+    top: -40px;
+    right: -40px;
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+}
+
+
+
+@media (max-width: 480px) {
+  .produit-card {
+    padding: 1rem;
+  }
+
+  .produit-nom {
+    font-size: 0.9rem;
+  }
+
+  .composition-value {
+    font-size: 0.7rem;
+  }
 }
 </style>

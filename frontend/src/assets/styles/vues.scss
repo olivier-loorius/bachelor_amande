@@ -6,6 +6,7 @@
   align-items: center;
   min-height: 100vh;
   background-color: var(--secondary-color);
+  padding-top: 2rem;
 }
 .content-container {
   width: 100%;
@@ -13,6 +14,13 @@
   flex-direction: column;
   align-items: center;
   margin: 0 1.2rem;
+}
+
+.composer-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .card {
   background: #fff;
@@ -25,15 +33,21 @@
 }
 .section-title {
   font-family: var(--font-family-title);
-  font-size: 2rem;
-  color: var(--accent-color);
+  font-size: 2.5rem;
+  color: #90aeb0;
   margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 700;
 }
 .section-desc {
   font-family: var(--font-family-text);
   color: var(--text-color);
   font-size: 1.1rem;
   margin-bottom: 2rem;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .btn, .composer-btn {
   background: var(--accent-color);

@@ -1,11 +1,11 @@
 <template>
   <div class="page-container">
-    <main class="content-container">
+    <main class="content-container composer-content">
       <div class="composer-card card">
-        <h1 class="composer-title section-title">Actualités</h1>
+        <h1 class="section-title">Actualités</h1>
         
         <section class="composer-section">
-          <div class="composer-step-desc">
+          <div class="section-desc">
             <p>Retrouvez ici toutes les actualités, recettes exclusives et événements gourmands de la pâtisserie Amande.</p>
           </div>
           
