@@ -10,6 +10,7 @@ import ErrorView from '@/views/ErrorView.vue'
 import ComposerView from '@/views/ComposerView.vue'
 import CatalogueView from '@/views/CatalogueView.vue'
 import ConstructionView from '@/views/ConstructionView.vue'
+import EnConstructionView from '@/views/EnConstructionView.vue'
 
 const routes = [
   {
@@ -99,6 +100,15 @@ const routes = [
     path: '/construction',
     name: 'construction',
     component: ConstructionView,
+    meta: {
+      title: 'Page en construction - Amande Pâtisserie',
+    },
+  },
+  {
+    path: '/reseau-en-construction/:reseau',
+    name: 'reseau-en-construction',
+    component: EnConstructionView,
+    props: true,
     meta: {
       title: 'Page en construction - Amande Pâtisserie',
     },

@@ -1,73 +1,93 @@
 <template>
-  <footer class="footer">
+  <footer class="footer" role="contentinfo" aria-label="Pied de page">
     <div class="footer-content">
-      <!-- Logo -->
-      <div class="footer-logo">
-        <router-link to="/">
-          <div class="logo-wrapper">
-            <img 
-              src="../assets/images/logo-footer.png" 
-              alt="Amande Pâtisserie" 
-              class="logo-rounded"
-            >
+      <div class="footer-main">
+        <div class="footer-logo">
+          <router-link to="/" aria-label="Retour à l'accueil">
+            <div class="logo-container">
+              <img 
+                src="@/assets/images/LogoAmande.png" 
+                alt="Amande Pâtisserie" 
+                class="footer-logo-img"
+              >
+            </div>
+          </router-link>
+        </div>
+
+        <div class="footer-grid">
+          <div class="footer-section">
+            <h3>HORAIRES</h3>
+            <p>Lun - Ven: 10h - 19h</p>
+            <p>Sam: 9h - 17h</p>
+            <p>Dim: Fermé</p>
           </div>
-        </router-link>
-      </div>
 
-      <!-- Sections -->
-      <div class="footer-grid">
-        <div class="footer-section">
-          <h3>HORAIRES</h3>
-          <p>Lun - Ven: 10h - 19h</p>
-          <p>Sam: 9h - 17h</p>
-          <p>Dim: Fermé</p>
-        </div>
+          <div class="footer-section">
+            <h3>CONTACT</h3>
+            <p>12 Rue des Délices</p>
+            <p>75000 Paris</p>
+            <p>01 23 45 67 89</p>
+          </div>
 
-        <div class="footer-section">
-          <h3>CONTACT</h3>
-          <p>12 Rue des Délices</p>
-          <p>75000 Paris</p>
-          <p>01 23 45 67 89</p>
-        </div>
-
-        <div class="footer-section">
-          <h3>RÉSEAUX SOCIAUX</h3>
-          <div class="social-icons">
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-facebook"></i></a>
-            <a href="#"><i class="fab fa-tiktok"></i></a>
+          <div class="footer-section">
+            <h3>RÉSEAUX<br>SOCIAUX</h3>
+            <div class="social-icons">
+              <router-link 
+                :to="{ name: 'reseau-en-construction', params: { reseau: 'instagram' } }" 
+                aria-label="Instagram"
+              >
+                <i class="fab fa-instagram"></i>
+              </router-link>
+              <router-link 
+                :to="{ name: 'reseau-en-construction', params: { reseau: 'facebook' } }" 
+                aria-label="Facebook"
+              >
+                <i class="fab fa-facebook"></i>
+              </router-link>
+              <router-link 
+                :to="{ name: 'reseau-en-construction', params: { reseau: 'tiktok' } }" 
+                aria-label="TikTok"
+              >
+                <i class="fab fa-tiktok"></i>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Liens légaux -->
     <div class="footer-legal">
       <router-link to="/mentions-legales" @click="scrollToTop">Mentions légales</router-link>
       <router-link to="/cgv" @click="scrollToTop">CGV</router-link>
       <router-link to="/contact" @click="scrollToTop">Contact</router-link>
     </div>
 
-    <!-- Copyright -->
     <div class="footer-bottom">
       <p>&copy; 2025 Amande Pâtisserie - Tous droits réservés</p>
     </div>
   </footer>
 </template>
 
-<script>
-export default {
-  name: 'Footer'
+<script setup lang="ts">
+const scrollToTop = (): void => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
 }
 </script>
 
 <style lang="scss" scoped>
 @use "@/assets/styles/variables" as *;
 
+$footer-padding-desktop: 2rem;
+$footer-padding-mobile: 1rem;
+$transition-duration: 0.3s;
+
 .footer {
   background: var(--primary-color);
   color: var(--secondary-color);
-  padding: 2rem 0 0;
+  padding: $footer-padding-desktop 0 0;
   font-family: var(--font-family-text);
   position: relative;
 }
@@ -75,39 +95,66 @@ export default {
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 $footer-padding-desktop;
+}
+
+.footer-main {
   display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 2rem;
+  justify-content: space-between;
+  margin-left: 12%;
+  margin-right: 12%;
 }
 
 .footer-logo {
-  flex: 0 0 200px;
-  margin-bottom: 1.5rem;
+  flex: 1;
+  text-align: left;
+  display: flex;
+  justify-content: flex-start;
 }
 
-.logo-wrapper {
-  display: inline-block;
+.logo-container {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: var(--secondary-color);
+  border: 2px solid #ff6f61;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-duration ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.logo-rounded {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
+.logo-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent-color);
+}
+
+.footer-logo-img {
+  height: 112px;
+  width: 112px;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: cover;
-  border: 2px solid var(--accent-color);
-  display: block;
+  transition: transform $transition-duration ease;
 }
 
 .footer-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
+  flex: 3;
+  display: flex;
+  justify-content: space-between;
+  gap: 0;
 }
 
 .footer-section {
+  flex: 1;
+  text-align: left;
+  
   h3 {
     color: var(--accent-color);
     font-family: var(--font-family-title);
@@ -115,12 +162,15 @@ export default {
     letter-spacing: 1px;
     margin-bottom: 1rem;
     text-transform: uppercase;
+    font-weight: 600;
+    text-align: left;
   }
 
   p {
     margin: 0.5rem 0;
     line-height: 1.5;
     font-size: 0.95rem;
+    text-align: left;
   }
 }
 
@@ -131,11 +181,12 @@ export default {
   
   a {
     color: var(--secondary-color);
-    font-size: 1.4rem;
-    transition: color 0.3s;
+    font-size: 1.1rem;
+    transition: all $transition-duration ease;
     
     &:hover {
       color: var(--accent-color);
+      transform: translateY(-2px);
     }
   }
 }
@@ -143,19 +194,21 @@ export default {
 .footer-legal {
   max-width: 1200px;
   margin: 2rem auto 0;
-  padding: 1.5rem 2rem;
+  padding: 1.5rem $footer-padding-desktop;
   display: flex;
   justify-content: center;
   gap: 2rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 
   a {
     color: var(--secondary-color);
     text-decoration: none;
     font-size: 0.9rem;
+    transition: all $transition-duration ease;
     
     &:hover {
       color: var(--accent-color);
+      transform: translateY(-1px);
     }
   }
 }
@@ -163,54 +216,110 @@ export default {
 .footer-bottom {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1.5rem 2rem;
+  padding: 1.5rem $footer-padding-desktop;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  p {
+    font-size: 0.9rem;
+    margin: 0;
+  }
 }
 
-
-
 @media (max-width: 768px) {
+  .footer {
+    padding: $footer-padding-mobile 0 0;
+  }
+
   .footer-content {
+    padding: 0 $footer-padding-mobile;
+  }
+
+  .footer-main {
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    padding: 0 1rem;
+    text-align: left;
+    gap: 1.5rem;
+    margin-left: 12%;
+    margin-right: 12%;
   }
 
   .footer-logo {
-    margin-bottom: 2rem;
+    flex: none;
+    margin-bottom: 0.5rem;
+    justify-content: center;
+  }
+
+  .logo-container {
+    width: 70px;
+    height: 70px;
+  }
+
+  .footer-logo-img {
+    height: 62px;
+    width: 62px;
   }
 
   .footer-grid {
-    width: 100%;
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
   }
 
   .footer-section {
     text-align: center;
+    padding-left: 0;
+    max-width: 260px;
+    width: 100%;
+    margin: 0 auto;
+    
+    h3 {
+      font-size: 0.9rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    p {
+      font-size: 0.8rem;
+      text-align: center;
+      margin: 0.3rem 0;
+    }
     
     .social-icons {
       justify-content: center;
+      margin-top: 0.5rem;
+      padding-left: 0;
+      
+      a {
+        font-size: 0.9rem;
+      }
     }
   }
 
   .footer-legal {
-    flex-direction: column;
+    flex-direction: row;
     gap: 1rem;
     align-items: center;
-    padding: 1.5rem 1rem;
+    padding: 1rem $footer-padding-mobile;
+    
+    a {
+      font-size: 0.75rem;
+    }
   }
 
   .footer-bottom {
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    gap: 0;
     text-align: center;
+    padding: 1rem $footer-padding-mobile;
+    
+    p {
+      font-size: 0.75rem;
+    }
   }
-
-
 }
 </style>
