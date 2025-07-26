@@ -5,7 +5,7 @@
       <router-view />
     </main>
     <Footer />
-    <Panier :isOpen="isPanierOpen" @close="fermerPanier" />
+    <Panier :isOpen="panierStore.isPanierOpen" @close="panierStore.fermerPanier" />
     <ScrollToTop />
   </div>
 </template>
@@ -15,9 +15,9 @@ import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import Panier from './views/Panier.vue'
 import ScrollToTop from './components/ScrollToTop.vue'
-import { usePanier } from './composables/usePanier'
+import { usePanierStore } from './stores/panier'
 
-const { isPanierOpen, fermerPanier } = usePanier()
+const panierStore = usePanierStore()
 </script>
 
 <style>

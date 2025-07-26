@@ -166,8 +166,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-
-const siteUrl = ref(window.location.hostname)
 </script>
 
 <style scoped>

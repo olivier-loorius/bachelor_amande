@@ -1,12 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { dataService } from '@/services/dataService'
+import { jwtService } from '@/services/jwtService'
 
 interface User {
-  id: number
+  id: string
   email: string
-  nom?: string
-  prenom?: string
+  nom: string
   dateCreation: string
+  role: 'user' | 'admin'
+  panierId: string
 }
 
 interface LoginCredentials {
@@ -14,67 +17,66 @@ interface LoginCredentials {
   password: string
 }
 
-interface LoginResult {
-  success: boolean
-  message: string
+interface RegisterCredentials {
+  nom: string
+  email: string
+  password: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  // State
   const user = ref<User | null>(null)
   const token = ref<string | null>(null)
   const isLoading = ref(false)
 
-  // Getters
   const isAuthenticated = computed(() => !!user.value && !!token.value)
   const currentUser = computed(() => user.value)
 
-  // Actions
-  const login = async (credentials: LoginCredentials): Promise<LoginResult> => {
+  const initialize = () => {
+    const storedToken = localStorage.getItem('auth_token')
+    if (storedToken && !jwtService.isTokenExpired(storedToken)) {
+      const userData = jwtService.getUserFromToken(storedToken)
+      if (userData) {
+        user.value = userData
+        token.value = storedToken
+      }
+    } else {
+      logout()
+    }
+  }
+
+  const login = async (credentials: LoginCredentials) => {
     isLoading.value = true
     
     try {
-      // Simulate API call - replace with actual API endpoint
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(credentials)
-      // })
+      const existingUser = dataService.getUserByEmail(credentials.email)
       
-      // For now, simulate successful login with mock data
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate network delay
-      
-      // Mock successful login
-      if (credentials.email && credentials.password) {
-        const mockUser: User = {
-          id: 1,
-          email: credentials.email,
-          nom: 'Doe',
-          prenom: 'John',
-          dateCreation: new Date().toISOString()
-        }
-        
-        const mockToken = 'mock-jwt-token-' + Date.now()
-        
-        user.value = mockUser
-        token.value = mockToken
-        
-        // Store in localStorage for persistence
-        localStorage.setItem('auth_user', JSON.stringify(mockUser))
-        localStorage.setItem('auth_token', mockToken)
-        
-        return {
-          success: true,
-          message: 'Connexion réussie !'
-        }
-      } else {
+      if (!existingUser) {
         return {
           success: false,
-          message: 'Email et mot de passe requis'
+          message: 'Email ou mot de passe incorrect'
         }
       }
+
+      const tokenData = {
+        id: existingUser.id,
+        email: existingUser.email,
+        nom: existingUser.nom,
+        role: existingUser.role,
+        panierId: existingUser.panierId
+      }
+      
+      const newToken = jwtService.generateToken(tokenData)
+      localStorage.setItem('auth_token', newToken)
+      
+      user.value = existingUser
+      token.value = newToken
+      
+      return {
+        success: true,
+        message: 'Connexion réussie'
+      }
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('Erreur lors de la connexion:', error)
       return {
         success: false,
         message: 'Erreur lors de la connexion'
@@ -84,47 +86,99 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const logout = () => {
-    user.value = null
-    token.value = null
+  const register = async (credentials: RegisterCredentials) => {
+    isLoading.value = true
     
-    // Clear localStorage
-    localStorage.removeItem('auth_user')
-    localStorage.removeItem('auth_token')
-  }
-
-  const initializeAuth = () => {
-    // Check for existing auth data in localStorage
-    const storedUser = localStorage.getItem('auth_user')
-    const storedToken = localStorage.getItem('auth_token')
-    
-    if (storedUser && storedToken) {
-      try {
-        user.value = JSON.parse(storedUser)
-        token.value = storedToken
-      } catch (error) {
-        console.error('Error parsing stored auth data:', error)
-        logout()
+    try {
+      const existingUser = dataService.getUserByEmail(credentials.email)
+      
+      if (existingUser) {
+        return {
+          success: false,
+          message: 'Un compte avec cet email existe déjà'
+        }
       }
+
+      const newUser = dataService.createUser({
+        email: credentials.email,
+        nom: credentials.nom,
+        role: 'user'
+      })
+
+      const tokenData = {
+        id: newUser.id,
+        email: newUser.email,
+        nom: newUser.nom,
+        role: newUser.role,
+        panierId: newUser.panierId
+      }
+      
+      const newToken = jwtService.generateToken(tokenData)
+      localStorage.setItem('auth_token', newToken)
+      
+      user.value = newUser
+      token.value = newToken
+      
+      return {
+        success: true,
+        message: 'Compte créé avec succès'
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'inscription:', error)
+      return {
+        success: false,
+        message: 'Erreur lors de la création du compte'
+      }
+    } finally {
+      isLoading.value = false
     }
   }
 
-  // Initialize auth state on store creation
-  initializeAuth()
+  const logout = () => {
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('panier')
+    
+    user.value = null
+    token.value = null
+  }
+
+  const refreshToken = () => {
+    if (!token.value) return false
+    
+    const newToken = jwtService.refreshToken(token.value)
+    if (newToken) {
+      localStorage.setItem('auth_token', newToken)
+      token.value = newToken
+      return true
+    }
+    
+    logout()
+    return false
+  }
+
+  const checkTokenStatus = () => {
+    if (!token.value) return false
+    
+    if (jwtService.isTokenExpired(token.value)) {
+      logout()
+      return false
+    }
+    
+    return true
+  }
+
+  initialize()
 
   return {
-    // State
     user,
     token,
     isLoading,
-    
-    // Getters
     isAuthenticated,
     currentUser,
-    
-    // Actions
     login,
+    register,
     logout,
-    initializeAuth
+    refreshToken,
+    checkTokenStatus
   }
 }) 

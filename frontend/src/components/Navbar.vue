@@ -58,6 +58,7 @@
       :isOpen="isLoginOpen" 
       :openCartAfterLogin="openCartAfterLogin"
       @close="closeLogin"
+      @loginSuccess="handleLoginSuccess"
       @openCart="openCart"
     />
   </nav>
@@ -65,8 +66,9 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import LoginPanel from '@/components/LoginPanel.vue'
-import { usePanier } from '@/composables/usePanier'
+import { usePanierStore } from '@/stores/panier'
 import { useAuthStore } from '@/stores/auth'
 
 // État local
@@ -79,17 +81,18 @@ const isNavHidden = ref(false)
 let lastScrollY = 0
 
 // Stores et composables
-const { ouvrirPanier, panier } = usePanier()
+const panierStore = usePanierStore()
 const authStore = useAuthStore()
+const router = useRouter()
 
 // Computed
 const nombreArticles = computed(() => {
-  return panier.value.reduce((sum, item) => sum + item.quantite, 0)
+  return panierStore.panier.reduce((sum, item) => sum + item.quantite, 0)
 })
 
 // Watchers
 watch(() => authStore.isAuthenticated, (newValue) => {
-  console.log('Navbar - État d\'authentification changé:', newValue)
+  // État d'authentification changé
 })
 
 // Méthodes de navigation
@@ -112,10 +115,21 @@ const closeLogin = () => {
   openCartAfterLogin.value = false
 }
 
+const handleLoginSuccess = () => {
+  // Connexion réussie - rester sur la page actuelle
+  
+  // Si l'utilisateur est sur la page /login, le rediriger vers l'accueil
+  if (router.currentRoute.value.path === '/login') {
+    router.push('/')
+  }
+  
+  // Aucune autre redirection, l'utilisateur reste sur la page où il était
+}
+
 // Méthodes de panier
 const openCart = () => {
   if (authStore.isAuthenticated) {
-    ouvrirPanier()
+    panierStore.ouvrirPanier()
   } else {
     openLoginForCart()
   }

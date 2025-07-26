@@ -77,8 +77,8 @@ const form = ref({
 })
 
 function submitForm() {
-  // Ici vous ajouterez la logique d'envoi du formulaire
-  console.log('Formulaire soumis:', form.value)
+  // Traitement du formulaire
+  // Ici vous pouvez ajouter la logique d'envoi du formulaire
   alert('Merci pour votre message! Nous vous contacterons bientôt.')
   resetForm()
 }

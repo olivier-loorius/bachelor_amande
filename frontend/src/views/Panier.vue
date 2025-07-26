@@ -25,7 +25,7 @@
           <div v-else class="user-info">
             <div class="user-status-display">
               <i class="fas fa-user-check status-icon"></i>
-              <p>Connecté en tant que <strong>{{ currentUser?.prenom }}</strong></p>
+              <p>Connecté en tant que <strong>{{ currentUser?.nom }}</strong></p>
             </div>
             <button @click="nextStep" class="btn-primary">
               Continuer <i class="fas fa-arrow-right"></i>
@@ -38,12 +38,12 @@
 
         <!-- Étape 2 - Contenu du panier -->
         <div v-if="currentStep === 2" class="step">
-          <div v-if="panier.length === 0" class="empty-cart">
+          <div v-if="panierStore.panier.length === 0" class="empty-cart">
             <div class="empty-cart-icon">
               <i class="fas fa-shopping-cart"></i>
             </div>
             <h3 class="empty-cart-title">
-              <span v-if="isAuthenticated">Bonjour {{ currentUser?.prenom }},</span>
+              <span v-if="isAuthenticated">Bonjour {{ currentUser?.nom }},</span>
               Votre panier est vide
             </h3>
             <p class="empty-cart-text">
@@ -62,10 +62,10 @@
 
           <div v-else>
             <div v-if="isAuthenticated" class="cart-welcome">
-              <h3 class="cart-welcome-title">Bonjour {{ currentUser?.prenom }}, prêt à finaliser votre commande ?</h3>
+              <h3 class="cart-welcome-title">Bonjour {{ currentUser?.nom }}, prêt à finaliser votre commande ?</h3>
             </div>
             <div class="cart-items">
-              <div v-for="item in panier" :key="item.id" class="cart-item">
+              <div v-for="item in panierStore.panier" :key="item.id" class="cart-item">
                 <img :src="item.image" :alt="item.nom" class="item-image">
                 <div class="item-details">
                   <h4>{{ item.nom }}</h4>
@@ -83,8 +83,15 @@
             </div>
 
             <div class="cart-total">
-              <p class="order-summary">Vous allez commander <strong>{{ nombreArticles }} tartelette{{ nombreArticles > 1 ? 's' : '' }}</strong></p>
-              <p class="total-text">Total: <strong>{{ total.toFixed(2) }} €</strong></p>
+              <div class="cart-summary">
+                <div class="summary-row">
+                  <span>{{ nombreArticlesPanier }} tartelettes commandées</span>
+                  <span class="total-price">{{ totalPanier.toFixed(2) }}€</span>
+                </div>
+                <div class="price-breakdown">
+                  <small>{{ nombreArticlesPanier }} × 6,00€ = {{ totalPanier.toFixed(2) }}€</small>
+                </div>
+              </div>
               <div class="checkout-container">
                 <button class="btn-checkout">
                   <i class="fas fa-check"></i> Valider la commande
@@ -97,7 +104,7 @@
     </div>
     <LogoutModal 
       :show="isLogoutModalOpen" 
-      :userName="currentUser?.prenom"
+      :userName="currentUser?.nom"
       @close="closeLogoutModal"
       @confirm="handleLogoutConfirm"
     />
@@ -105,8 +112,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { usePanier } from '@/composables/usePanier'
+import { ref, computed, watch, onMounted } from 'vue'
+import { usePanierStore } from '@/stores/panier'
 import { useAuthStore } from '@/stores/auth'
 import LogoutModal from '@/components/LogoutModal.vue'
 
@@ -123,17 +130,43 @@ const currentStep = ref(1)
 const isMobile = ref(false)
 const isLogoutModalOpen = ref(false)
 
-const { 
-  panier, 
-  total, 
+const panierStore = usePanierStore()
+
+const {
+  panier,
+  total,
   nombreArticles,
-  modifierQuantite, 
+  modifierQuantite,
   supprimerDuPanier, 
   fermerPanier 
-} = usePanier()
+} = panierStore
 
 const authStore = useAuthStore()
 const { currentUser, isAuthenticated } = authStore
+
+// Computed
+const totalPanier = computed(() => panierStore.total)
+const nombreArticlesPanier = computed(() => panierStore.nombreArticles)
+
+// Watcher pour détecter la connexion et passer à l'étape 2
+watch(currentUser, (newValue) => {
+  if (newValue && currentStep.value === 1) {
+    currentStep.value = 2
+  }
+})
+
+// Méthodes
+const modifierQuantitePanier = (id: number, nouvelleQuantite: number) => {
+  panierStore.modifierQuantite(id, nouvelleQuantite)
+}
+
+const supprimerDuPanierPanier = (id: number) => {
+  panierStore.supprimerDuPanier(id)
+}
+
+const fermerPanierPanier = () => {
+  panierStore.fermerPanier()
+}
 
 const closeCart = () => {
   emit('close')
@@ -143,7 +176,6 @@ const closeCart = () => {
 const login = () => {
   // Ouvrir le panel de connexion
   // Pour l'instant, on simule une connexion
-  console.log('Ouvrir panel de connexion')
 }
 
 const openLogoutModal = () => {
@@ -157,7 +189,6 @@ const closeLogoutModal = () => {
 const handleLogoutConfirm = () => {
   authStore.logout()
   currentStep.value = 1
-  console.log('Utilisateur déconnecté du panier')
 }
 
 const handleLogout = () => {
@@ -173,15 +204,15 @@ const prevStep = () => {
 }
 
 const updateQuantity = (id: number, change: number) => {
-  const produit = panier.value.find(item => item.id === id)
+  const produit = panierStore.panier.find(item => item.id === id)
   if (produit) {
     const nouvelleQuantite = produit.quantite + change
-    modifierQuantite(id, nouvelleQuantite)
+    modifierQuantitePanier(id, nouvelleQuantite)
   }
 }
 
 const removeItem = (id: number) => {
-  supprimerDuPanier(id)
+  supprimerDuPanierPanier(id)
 }
 
 const goToComposer = () => {
@@ -197,10 +228,11 @@ const checkViewport = () => {
 onMounted(() => {
   checkViewport()
   window.addEventListener('resize', checkViewport)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', checkViewport)
+  
+  // Si l'utilisateur est connecté, aller directement à l'étape 2
+  if (isAuthenticated) {
+    currentStep.value = 2
+  }
 })
 </script>
 

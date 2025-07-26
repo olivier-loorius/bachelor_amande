@@ -49,9 +49,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { usePanierStore } from '@/stores/panier'
 import { useAuthStore } from '@/stores/auth'
-import { usePanier } from '@/composables/usePanier'
 
 interface Props {
   isOpen: boolean
@@ -62,8 +62,10 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const panierStore = usePanierStore()
 const authStore = useAuthStore()
-const { panier } = usePanier()
+
+const panier = computed(() => panierStore.panier)
 const isMobile = ref(false)
 
 const userFirstName = computed(() => {
@@ -79,13 +81,19 @@ const closeCart = () => {
 }
 
 const updateQuantity = (index: number, change: number) => {
-  // Logique de mise à jour de quantité
-  console.log('Update quantity:', index, change)
+  const item = panier.value[index]
+  if (item) {
+    const newQuantity = item.quantite + change
+    if (newQuantity > 0) {
+      item.quantite = newQuantity
+    } else {
+      removeItem(index)
+    }
+  }
 }
 
 const removeItem = (index: number) => {
-  // Logique de suppression
-  console.log('Remove item:', index)
+  panier.value.splice(index, 1)
 }
 
 const validateOrder = () => {
@@ -106,7 +114,7 @@ onMounted(() => {
   window.addEventListener('resize', checkViewport)
 })
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
   window.removeEventListener('resize', checkViewport)
 })
 </script>

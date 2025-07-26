@@ -256,15 +256,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import AddToCartModal from '@/components/AddToCartModal.vue'
 import LoginPromptModal from '@/components/LoginPromptModal.vue'
-import { usePanier } from '@/composables/usePanier'
+import { usePanierStore } from '@/stores/panier'
 import { useAuthStore } from '@/stores/auth'
 import CartAnimation from '@/components/CartAnimation.vue'
 
+const panierStore = usePanierStore()
 const authStore = useAuthStore()
-const { ajouterAuPanier: ajouterAuPanierStore, ouvrirPanier } = usePanier()
 
 interface Produit {
   id: number
@@ -274,6 +274,7 @@ interface Produit {
   premiereDouceur: string
   secondeDouceur: string
   finition: string
+  prix: number
   quantite: number
 }
 
@@ -286,6 +287,7 @@ const produits = ref<Produit[]>([
     premiereDouceur: 'Gel au 2 citrons',
     secondeDouceur: 'Lemon curd citron jaune',
     finition: 'Meringue italienne',
+    prix: 6,
     quantite: 1
   },
   {
@@ -296,6 +298,7 @@ const produits = ref<Produit[]>([
     premiereDouceur: 'Crème pâtissière vanille',
     secondeDouceur: 'Fraise fraîche de saison',
     finition: 'Glaçage miroir fraise',
+    prix: 6,
     quantite: 1
   },
   {
@@ -306,6 +309,7 @@ const produits = ref<Produit[]>([
     premiereDouceur: 'Ganache chocolat noir 70%',
     secondeDouceur: 'Mousse chocolat au lait',
     finition: 'Décors chocolat et feuilles d\'or',
+    prix: 6,
     quantite: 1
   },
   {
@@ -316,6 +320,7 @@ const produits = ref<Produit[]>([
     premiereDouceur: 'Crème d\'amandes',
     secondeDouceur: 'Poire Williams pochée',
     finition: 'Amandes effilées et sucre glace',
+    prix: 6,
     quantite: 1
   }
 ])
@@ -335,7 +340,7 @@ const ajouterAuPanier = (produit: Produit) => {
     return
   }
   
-  const success = ajouterAuPanierStore(produit)
+  const success = panierStore.ajouterAuPanier(produit)
   if (success) {
     produitAjoute.value = produit
     showAddModal.value = true
@@ -409,7 +414,7 @@ const ajouterAuPanierMobile = (produit: Produit) => {
     return
   }
   
-  ajouterAuPanierStore(produit)
+  panierStore.ajouterAuPanier(produit)
   produitAjoute.value = produit
   showAddModal.value = true
   closeProduitModal()
@@ -417,6 +422,8 @@ const ajouterAuPanierMobile = (produit: Produit) => {
   // Réinitialiser la quantité à 1 après ajout
   produit.quantite = 1
 }
+
+const ouvrirPanier = () => panierStore.ouvrirPanier()
 </script>
 
 <style scoped>
@@ -628,8 +635,8 @@ const ajouterAuPanierMobile = (produit: Produit) => {
   min-width: 60px;
   text-align: left;
 }
-
-.btn-panier {
+  
+  .btn-panier {
   background: var(--accent-color);
   color: #fff;
   border: none;

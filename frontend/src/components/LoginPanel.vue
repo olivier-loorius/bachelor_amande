@@ -18,7 +18,7 @@
               <i class="fas fa-user-circle"></i>
             </div>
             <div class="user-details">
-              <h3>{{ authStore.currentUser?.prenom }} {{ authStore.currentUser?.nom }}</h3>
+              <h3>{{ authStore.currentUser?.nom || 'Utilisateur' }}</h3>
               <p class="user-email">{{ maskEmail(authStore.currentUser?.email) }}</p>
               <span class="member-since">Membre depuis {{ getMemberSince() }}</span>
             </div>
@@ -66,6 +66,7 @@
                 id="email"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 placeholder="Entrez votre email"
+                autocomplete="username"
                 required
               />
             </div>
@@ -77,6 +78,7 @@
                 id="password"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 placeholder="Entrez votre mot de passe"
+                autocomplete="current-password"
                 required
               />
             </div>
@@ -96,12 +98,21 @@
       </div>
     </div>
     <RegisterPanel :isOpen="isRegisterOpen" @close="closeRegister" />
+    
+    <!-- Modale de déconnexion -->
+    <LogoutModal 
+      :show="isLogoutModalOpen" 
+      :userName="authStore.currentUser?.nom"
+      @close="closeLogoutModal"
+      @confirm="handleLogoutConfirm"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import RegisterPanel from '@/components/RegisterPanel.vue'
+import LogoutModal from '@/components/LogoutModal.vue'
 import { useAuthStore } from '@/stores/auth'
 
 interface Props {
@@ -114,6 +125,7 @@ const emit = defineEmits<{
   close: []
   loginSuccess: []
   openCart: []
+  openRegister: []
 }>()
 
 const authStore = useAuthStore()
@@ -121,6 +133,7 @@ const authStore = useAuthStore()
 
 const isMobile = ref(false)
 const isRegisterOpen = ref(false)
+const isLogoutModalOpen = ref(false)
 const isLoading = ref(false)
 const message = ref('')
 const messageType = ref<'success' | 'error'>('error')
@@ -159,7 +172,7 @@ watch(() => props.isOpen, (newValue) => {
 
 // Surveiller les changements d'état d'authentification
 watch(() => authStore.isAuthenticated, (newValue) => {
-  console.log('État d\'authentification changé:', newValue)
+  // État d'authentification changé
 })
 
 const showMessage = (msg: string, type: 'success' | 'error') => {
@@ -171,28 +184,29 @@ const showMessage = (msg: string, type: 'success' | 'error') => {
 }
 
 const handleLogin = async () => {
+  
   isLoading.value = true
   
   try {
-    const result = authStore.login({
+    const result = await authStore.login({
       email: formData.email,
       password: formData.password
     })
 
     if (result.success) {
       showMessage(result.message, 'success')
-      setTimeout(() => {
-        closeLogin()
-        emit('loginSuccess')
-        // Si l'utilisateur était connecté pour le panier, l'ouvrir automatiquement
-        if (props.openCartAfterLogin) {
-          emit('openCart')
-        }
-      }, 1000)
+      // Fermer immédiatement le modal après connexion réussie
+      closeLogin()
+      emit('loginSuccess')
+      // Si l'utilisateur était connecté pour le panier, l'ouvrir automatiquement
+      if (props.openCartAfterLogin) {
+        emit('openCart')
+      }
     } else {
       showMessage(result.message, 'error')
     }
   } catch (error) {
+    console.error('Erreur lors de la connexion:', error)
     showMessage('Erreur lors de la connexion', 'error')
   } finally {
     isLoading.value = false
@@ -200,9 +214,18 @@ const handleLogin = async () => {
 }
 
 const handleLogout = () => {
+  isLogoutModalOpen.value = true
+}
+
+const closeLogoutModal = () => {
+  isLogoutModalOpen.value = false
+}
+
+const handleLogoutConfirm = () => {
   authStore.logout()
   showMessage('Vous avez été déconnecté avec succès.', 'success')
   closeLogin()
+  isLogoutModalOpen.value = false
 }
 
 const getMemberSince = () => {
@@ -253,9 +276,11 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(5px);
-  z-index: 1000;
+  z-index: 99999;
   display: flex;
   justify-content: flex-end;
   opacity: 0;
@@ -463,9 +488,7 @@ form button[type='button']:hover {
   align-items: center;
   gap: 2rem;
   padding: 1.5rem;
-  background: rgba(144, 174, 176, 0.1);
-  border-radius: 12px;
-  border: 1px solid #90aeb0;
+  /* Suppression du background et de la bordure */
 }
 
 .user-avatar {

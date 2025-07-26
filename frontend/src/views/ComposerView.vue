@@ -468,7 +468,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import AddToCartModal from '@/components/AddToCartModal.vue'
 import LoginPromptModal from '@/components/LoginPromptModal.vue'
 import { useAuthStore } from '@/stores/auth'
-import { usePanier } from '@/composables/usePanier'
+import { usePanierStore } from '@/stores/panier'
 import fondNature from '@/assets/images/fondNature.jpg'
 import fondCacao from '@/assets/images/fondCacao.jpg'
 import fondNoisette from '@/assets/images/fondNoisette.jpg'
@@ -522,7 +522,7 @@ const hoveredGarniture1 = ref<number|null>(null)
 const showAddModal = ref(false)
 const showLoginPrompt = ref(false)
 const authStore = useAuthStore()
-const { ajouterAuPanier: ajouterAuPanierStore } = usePanier()
+const panierStore = usePanierStore()
 
 const peutValider = computed(() => {
     return !!selectedFond.value && !!selectedGarniture1.value && !!selectedGarniture2.value && !!selectedGarniture3.value && !!selectedFinition.value && quantite.value > 0
@@ -564,7 +564,7 @@ function ajouterAuPanier() {
     id: Date.now(), // ID unique basé sur le timestamp
     nom: `Tartelette personnalisée`,
     image: getGarnitureImage(selectedFond.value, selectedGarniture1.value),
-    prix: 12.50, // Prix fixe pour les tartelettes personnalisées
+    prix: 6, // Prix fixe pour les tartelettes personnalisées
     quantite: quantite.value,
     base: selectedFond.value?.nom || '',
     premiereDouceur: selectedGarniture1.value?.nom || '',
@@ -573,7 +573,7 @@ function ajouterAuPanier() {
   }
   
   // Ajouter au panier
-  const success = ajouterAuPanierStore(produit)
+  const success = panierStore.ajouterAuPanier(produit)
   
   if (success) {
     showAddModal.value = true
@@ -611,7 +611,7 @@ function deselectFond() {
   selectedFond.value = null
   selectedGarniture1.value = null
   selectedGarniture2.value = null
-    selectedGarniture3.value = null
+  selectedGarniture3.value = null
   selectedFinition.value = null
 }
 

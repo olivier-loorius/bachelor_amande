@@ -4,7 +4,13 @@
       <div class="logout-modal-icon">
         <i class="fas fa-sign-out-alt"></i>
       </div>
-      <div class="logout-modal-msg">{{ message }}</div>
+      <div class="logout-modal-msg">
+        <p>{{ message }}</p>
+        <div v-if="hasItemsInCart" class="cart-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Attention : Votre panier contient {{ panierStore.nombreArticles }} article(s) qui seront perdus.</span>
+        </div>
+      </div>
       <div class="modal-actions">
         <button class="btn-secondary" @click="closeModal">
           Annuler
@@ -18,7 +24,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
+import { usePanierStore } from '@/stores/panier'
 
 interface Props {
   show: boolean
@@ -33,6 +40,10 @@ const emit = defineEmits<{
   close: []
   confirm: []
 }>()
+
+const panierStore = usePanierStore()
+
+const hasItemsInCart = computed(() => panierStore.nombreArticles > 0)
 
 const message = ref(`Êtes-vous sûr de vouloir vous déconnecter, ${props.userName} ?`)
 
@@ -54,9 +65,8 @@ watch(() => props.userName, (newName) => {
 .logout-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(4px);
-  z-index: 2000;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,9 +75,9 @@ watch(() => props.userName, (newName) => {
 }
 
 .logout-modal {
-  background: #fff;
+  background: var(--secondary-color);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
   padding: 2rem;
   max-width: 400px;
   width: 100%;
@@ -75,6 +85,9 @@ watch(() => props.userName, (newName) => {
   flex-direction: column;
   align-items: center;
   animation: slideUp 0.3s ease;
+  border: 1px solid var(--accent-color);
+  position: relative;
+  z-index: 10000;
 }
 
 .logout-modal-icon {
@@ -90,6 +103,30 @@ watch(() => props.userName, (newName) => {
   margin-bottom: 1.5rem;
   font-family: var(--font-family-text);
   line-height: 1.4;
+}
+
+.cart-warning {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  color: #856404;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.cart-warning i {
+  color: #f39c12;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.cart-warning span {
+  line-height: 1.3;
 }
 
 .modal-actions {

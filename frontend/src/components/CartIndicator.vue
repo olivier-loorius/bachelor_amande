@@ -6,9 +6,12 @@
 </template>
 
 <script setup lang="ts">
-import { usePanier } from '@/composables/usePanier'
+import { computed } from 'vue'
+import { usePanierStore } from '@/stores/panier'
 
-const { nombreArticles, ouvrirPanier } = usePanier()
+const panierStore = usePanierStore()
+const nombreArticles = computed(() => panierStore.nombreArticles)
+const ouvrirPanier = () => panierStore.ouvrirPanier()
 </script>
 
 <style scoped>
