@@ -452,11 +452,23 @@
       message="Votre tartelette a bien été ajoutée au panier !"
       @close="closeAddModal"
     />
-</template>
+
+    <!-- Modal d'incitation à la connexion -->
+    <LoginPromptModal 
+      :isOpen="showLoginPrompt" 
+      @close="closeLoginPrompt"
+      @loginSuccess="handleLoginSuccess"
+      @registerSuccess="handleRegisterSuccess"
+      @openCart="openCartAfterLogin"
+    />
+  </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import AddToCartModal from '@/components/AddToCartModal.vue'
+import LoginPromptModal from '@/components/LoginPromptModal.vue'
+import { useAuthStore } from '@/stores/auth'
+import { usePanier } from '@/composables/usePanier'
 import fondNature from '@/assets/images/fondNature.jpg'
 import fondCacao from '@/assets/images/fondCacao.jpg'
 import fondNoisette from '@/assets/images/fondNoisette.jpg'
@@ -507,7 +519,10 @@ const quantite = ref(1)
     animateQty.value = true;
   }
 const hoveredGarniture1 = ref<number|null>(null)
-  const showAddModal = ref(false)
+const showAddModal = ref(false)
+const showLoginPrompt = ref(false)
+const authStore = useAuthStore()
+const { ajouterAuPanier: ajouterAuPanierStore } = usePanier()
 
 const peutValider = computed(() => {
     return !!selectedFond.value && !!selectedGarniture1.value && !!selectedGarniture2.value && !!selectedGarniture3.value && !!selectedFinition.value && quantite.value > 0
@@ -539,13 +554,58 @@ function recommencer() {
   quantite.value = 1
 }
 function ajouterAuPanier() {
+  if (!authStore.isAuthenticated) {
+    showLoginPrompt.value = true
+    return
+  }
+  
+  // Créer le produit à partir des sélections
+  const produit = {
+    id: Date.now(), // ID unique basé sur le timestamp
+    nom: `Tartelette personnalisée`,
+    image: getGarnitureImage(selectedFond.value, selectedGarniture1.value),
+    prix: 12.50, // Prix fixe pour les tartelettes personnalisées
+    quantite: quantite.value,
+    base: selectedFond.value?.nom || '',
+    premiereDouceur: selectedGarniture1.value?.nom || '',
+    secondeDouceur: selectedGarniture2.value?.nom || '',
+    finition: selectedFinition.value?.nom || ''
+  }
+  
+  // Ajouter au panier
+  const success = ajouterAuPanierStore(produit)
+  
+  if (success) {
     showAddModal.value = true
   }
+}
   function closeAddModal() {
     showAddModal.value = false
     recommencer()
     currentStep.value = 1
-}
+  }
+
+  // Fonctions pour la modal d'incitation à la connexion
+  function closeLoginPrompt() {
+    showLoginPrompt.value = false
+  }
+
+  function handleLoginSuccess() {
+    // L'utilisateur s'est connecté avec succès
+    // On peut maintenant ajouter le produit au panier
+    ajouterAuPanier()
+  }
+
+  function handleRegisterSuccess() {
+    // L'utilisateur s'est inscrit avec succès
+    // On peut maintenant ajouter le produit au panier
+    ajouterAuPanier()
+  }
+
+  function openCartAfterLogin() {
+    // Ouvrir le panier après connexion
+    // Cette fonction sera appelée si l'utilisateur choisit d'ouvrir le panier
+  }
 
 function deselectFond() {
   selectedFond.value = null

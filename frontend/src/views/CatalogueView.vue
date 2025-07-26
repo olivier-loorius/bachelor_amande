@@ -29,20 +29,16 @@
                 
                 <dl class="produit-composition">
                   <div class="composition-item">
-                    <dt class="composition-label">Base:</dt>
-                    <dd class="composition-value">{{ produit.base }}</dd>
+                    <dt class="composition-label">Base:</dt><dd class="composition-value">{{ produit.base }}</dd>
                   </div>
                   <div class="composition-item">
-                    <dt class="composition-label">Première douceur:</dt>
-                    <dd class="composition-value">{{ produit.premiereDouceur }}</dd>
+                    <dt class="composition-label">Première douceur:</dt><dd class="composition-value">{{ produit.premiereDouceur }}</dd>
                   </div>
                   <div class="composition-item">
-                    <dt class="composition-label">Seconde douceur:</dt>
-                    <dd class="composition-value">{{ produit.secondeDouceur }}</dd>
+                    <dt class="composition-label">Seconde douceur:</dt><dd class="composition-value">{{ produit.secondeDouceur }}</dd>
                   </div>
                   <div class="composition-item">
-                    <dt class="composition-label">Finition:</dt>
-                    <dd class="composition-value">{{ produit.finition }}</dd>
+                    <dt class="composition-label">Finition:</dt><dd class="composition-value">{{ produit.finition }}</dd>
                   </div>
                 </dl>
               </div>
@@ -136,6 +132,16 @@
     :show="showAddModal"
     :message="`${produitAjoute?.nom} a bien été ajouté au panier !`"
     @close="closeAddModal"
+    @viewCart="ouvrirPanier"
+  />
+
+  <!-- Modal d'incitation à la connexion -->
+  <LoginPromptModal 
+    :isOpen="showLoginPrompt" 
+    @close="closeLoginPrompt"
+    @loginSuccess="handleLoginSuccess"
+    @registerSuccess="handleRegisterSuccess"
+    @openCart="openCartAfterLogin"
   />
   
   <div v-if="showImageZoom" class="image-zoom-overlay" @click="closeImageZoom">
@@ -252,6 +258,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AddToCartModal from '@/components/AddToCartModal.vue'
+import LoginPromptModal from '@/components/LoginPromptModal.vue'
+import { usePanier } from '@/composables/usePanier'
+import { useAuthStore } from '@/stores/auth'
+import CartAnimation from '@/components/CartAnimation.vue'
+
+const authStore = useAuthStore()
+const { ajouterAuPanier: ajouterAuPanierStore, ouvrirPanier } = usePanier()
 
 interface Produit {
   id: number
@@ -314,11 +327,22 @@ const zoomedImage = ref('')
 const zoomedImageAlt = ref('')
 const showProduitModal = ref(false)
 const produitModal = ref<Produit | null>(null)
+const showLoginPrompt = ref(false)
 
 const ajouterAuPanier = (produit: Produit) => {
-  console.log(`Ajout au panier: ${produit.nom} - Quantité: ${produit.quantite}`)
-  produitAjoute.value = produit
-  showAddModal.value = true
+  if (!authStore.isAuthenticated) {
+    showLoginPrompt.value = true
+    return
+  }
+  
+  const success = ajouterAuPanierStore(produit)
+  if (success) {
+    produitAjoute.value = produit
+    showAddModal.value = true
+    
+    // Réinitialiser la quantité à 1 après ajout
+    produit.quantite = 1
+  }
 }
 
 const closeAddModal = () => {
@@ -353,6 +377,46 @@ const annulerAction = () => {
     produit.quantite = 1
   })
 }
+
+// Fonctions pour la modale d'incitation à la connexion
+const closeLoginPrompt = () => {
+  showLoginPrompt.value = false
+}
+
+const handleLoginSuccess = () => {
+  // L'utilisateur s'est connecté avec succès
+  // On peut maintenant ajouter le produit au panier
+  if (produitModal.value) {
+    ajouterAuPanierMobile(produitModal.value)
+  }
+}
+
+const handleRegisterSuccess = () => {
+  // L'utilisateur s'est inscrit avec succès
+  // On peut maintenant ajouter le produit au panier
+  if (produitModal.value) {
+    ajouterAuPanierMobile(produitModal.value)
+  }
+}
+
+const openCartAfterLogin = () => {
+  ouvrirPanier()
+}
+
+const ajouterAuPanierMobile = (produit: Produit) => {
+  if (!authStore.isAuthenticated) {
+    showLoginPrompt.value = true
+    return
+  }
+  
+  ajouterAuPanierStore(produit)
+  produitAjoute.value = produit
+  showAddModal.value = true
+  closeProduitModal()
+  
+  // Réinitialiser la quantité à 1 après ajout
+  produit.quantite = 1
+}
 </script>
 
 <style scoped>
@@ -378,9 +442,10 @@ const annulerAction = () => {
   max-width: 700px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.5fr 3.5fr 1fr;
+  grid-template-columns: 1fr 2.5fr 1fr;
   gap: 1.5rem;
   width: 100%;
+  align-items: stretch;
 }
 
 .produit-mobile {
@@ -396,6 +461,7 @@ const annulerAction = () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
 }
 
 .produit-image img {
@@ -420,30 +486,35 @@ const annulerAction = () => {
 .produit-content {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 0.3rem 0;
+  justify-content: space-between;
+  padding: 0;
+  height: 120px;
 }
 
 .produit-nom {
   font-family: var(--font-family-title);
   font-size: 1.2rem;
   color: #90aeb0;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   font-weight: 600;
   opacity: 0.9;
   margin-top: 0;
+  padding-top: 0;
 }
 
 .produit-composition {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
+  flex: 1;
 }
 
 .composition-item {
   display: flex;
   align-items: baseline;
-  gap: 1rem;
+  gap: 0.2rem;
+  margin: 0;
+  padding: 0;
 }
 
 .composition-label {
@@ -452,7 +523,9 @@ const annulerAction = () => {
   color: var(--text-color);
   opacity: 0.6;
   font-weight: 500;
-  min-width: 120px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .composition-value {
@@ -461,22 +534,28 @@ const annulerAction = () => {
   color: var(--text-color);
   font-weight: 400;
   opacity: 0.8;
+  flex: 1;
+  margin: 0;
+  padding: 0;
 }
 
 .produit-actions {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 0;
+  height: 120px;
+  gap: 0;
 }
 
 .quantite-selector {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   width: 100%;
+  margin-top: 0;
 }
 
 .quantite-label {
@@ -484,6 +563,10 @@ const annulerAction = () => {
   font-size: 0.9rem;
   color: var(--text-color);
   font-weight: 600;
+  text-align: left;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .quantite-row {
@@ -491,6 +574,7 @@ const annulerAction = () => {
   align-items: center;
   gap: 0.5rem;
   justify-content: center;
+  margin-top: 0.5rem;
 }
 
 .quantite-btn {
@@ -583,6 +667,8 @@ const annulerAction = () => {
   align-items: center;
   gap: 0.8rem;
   width: 100%;
+  justify-content: center;
+  margin-top: auto;
 }
 
 .btn-refresh {
@@ -671,6 +757,43 @@ const annulerAction = () => {
     font-size: 1rem;
     flex-shrink: 0;
     margin-left: 0.5rem;
+  }
+
+  .produit-composition {
+    gap: 0.2rem;
+  }
+  
+  .composition-item {
+    gap: 0.15rem;
+  }
+  
+  .composition-label {
+    font-size: 0.7rem;
+  }
+  
+  .composition-value {
+    font-size: 0.75rem;
+  }
+  
+  .produit-nom {
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0.5rem;
+  }
+  
+  .produit-content {
+    padding-top: 0;
+    margin-top: 0;
+  }
+  
+  .produit-actions {
+    padding-top: 0;
+    margin-top: 0;
+  }
+  
+  .quantite-label {
+    margin-top: 0;
+    padding-top: 0;
   }
 }
 

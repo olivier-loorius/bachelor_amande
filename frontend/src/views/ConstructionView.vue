@@ -1,22 +1,19 @@
 <template>
   <div class="page-container">
     <main class="content-container">
-      <div class="error-card card">
-        <div class="error-content">
-          <div class="error-header">
-            <div class="error-icon">
-              <i class="fas fa-exclamation-triangle"></i>
+      <div class="construction-card card">
+        <div class="construction-content">
+          <div class="construction-header">
+            <div class="construction-icon">
+              <i class="fas fa-tools"></i>
             </div>
-            <h1 class="section-title">Page introuvable</h1>
-            <p class="error-description">
-              Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
+            <h1 class="section-title">Page en construction</h1>
+            <p class="construction-description">
+              Cette page est actuellement en cours de développement pour notre projet scolaire.
             </p>
-            <div class="error-code">
-              <span>Erreur 404</span>
-            </div>
           </div>
 
-          <div class="error-actions">
+          <div class="construction-actions">
             <router-link to="/" class="btn-primary">
               <i class="fas fa-home"></i>
               Retour à l'accueil
@@ -34,34 +31,34 @@
 </template>
 
 <script setup lang="ts">
-// Page d'erreur 404 harmonisée avec le style du projet
+// Page en construction pour le projet scolaire
 </script>
 
 <style scoped>
 @import '@/assets/styles/vues.scss';
 
-.error-card {
+.construction-card {
   max-width: 600px;
   margin: 0 auto;
   text-align: center;
   padding: 3rem 2rem;
 }
 
-.error-content {
+.construction-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2rem;
 }
 
-.error-header {
+.construction-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
 }
 
-.error-icon {
+.construction-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,7 +71,7 @@
   box-shadow: 0 4px 16px rgba(255, 111, 97, 0.3);
 }
 
-.error-description {
+.construction-description {
   font-family: var(--font-family-text);
   font-size: 1.1rem;
   color: var(--text-color);
@@ -84,16 +81,7 @@
   opacity: 0.8;
 }
 
-.error-code {
-  font-family: var(--font-family-title);
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--accent-color);
-  line-height: 1;
-  margin-top: 0.5rem;
-}
-
-.error-actions {
+.construction-actions {
   display: flex;
   gap: 1rem;
   justify-content: center;
@@ -148,28 +136,56 @@
 }
 
 @media (max-width: 768px) {
-  .error-card {
+  .construction-card {
     padding: 2rem 1rem;
+    margin: 1rem;
   }
 
-  .error-content h1 {
+  .construction-content {
+    gap: 1.5rem;
+  }
+
+  .construction-content h1 {
     font-size: 1.8rem;
   }
 
-  .error-code {
-    font-size: 2rem;
+  .construction-description {
+    font-size: 1rem;
+    padding: 0 0.5rem;
   }
 
-  .error-actions {
+  .construction-actions {
     flex-direction: column;
     align-items: center;
+    gap: 0.75rem;
   }
 
   .btn-primary, .btn-secondary {
-    width: 100%;
+    width: 80%;
     max-width: 280px;
     justify-content: center;
+    padding: 0.8rem 1.5rem;
   }
 }
-</style>
 
+@media (max-width: 480px) {
+  .construction-card {
+    padding: 1.5rem 1rem;
+    margin: 0.5rem;
+  }
+
+  .construction-content h1 {
+    font-size: 1.6rem;
+  }
+
+  .construction-description {
+    font-size: 0.95rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 75%;
+    max-width: 250px;
+    font-size: 0.9rem;
+  }
+}
+</style> 

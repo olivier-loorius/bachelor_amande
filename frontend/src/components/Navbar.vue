@@ -1,71 +1,168 @@
 <template>
-  <nav>
+  <nav :class="{ 'nav-hidden': isNavHidden }" role="navigation" aria-label="Navigation principale">
     <div class="logo">
-      <router-link to="/">
-        <img src="@/assets/images/logo-amande.png" alt="Amande Pâtisserie" />
+      <router-link to="/" aria-label="Accueil">
+        <img src="@/assets/images/LogoAmande.png" alt="Amande Pâtisserie" />
       </router-link>
     </div>
-    <div class="menu" @click="toggleMenu">
+    
+    <button 
+      class="menu" 
+      @click="toggleMenu" 
+      :aria-expanded="isMenuOpen"
+      aria-label="Menu de navigation"
+      aria-controls="navigation-menu"
+    >
       <div :class="{ 'menu-icon': true, open: isMenuOpen }"></div>
-    </div>
-    <ul :class="{ open: isMenuOpen }" @click="closeMenu">
-      <li class="composer"><router-link to="/composer">COMPOSER</router-link></li>
-      <li class="actualite"><router-link to="/actualite">ACTUALITE</router-link></li>
-      <li class="catalogue"><router-link to="/catalogue">CATALOGUE</router-link></li>
-      <li class="connexion">
-        <a href="#" @click.prevent="openLogin">CONNEXION</a>
-      </li>
-      <li class="panier">
-        <a href="#" @click.prevent="openCart" class="cart-link">
-          <i class="fas fa-shopping-cart"></i>
-          <span v-if="cartItemCount > 0" class="cart-count">{{ cartItemCount }}</span>
-        </a>
-      </li>
+    </button>
+    
+    <ul 
+      id="navigation-menu"
+      :class="{ open: isMenuOpen }" 
+      @click="closeMenu"
+      role="menu"
+    >
+      <li role="none"><router-link to="/composer" role="menuitem">COMPOSER</router-link></li>
+      <li role="none"><router-link to="/actualite" role="menuitem">ACTUALITE</router-link></li>
+      <li role="none"><router-link to="/catalogue" role="menuitem">CATALOGUE</router-link></li>
     </ul>
-    <LoginPanel :isOpen="isLoginOpen" @close="closeLogin" />
+    
+    <div class="cta-container">
+      <div class="cta-item connexion">
+        <button 
+          @click="openLogin" 
+          class="cta-button login-btn" 
+          :title="authStore.isAuthenticated ? 'Mon compte' : 'Se connecter'"
+          :aria-label="authStore.isAuthenticated ? 'Mon compte' : 'Se connecter'"
+        >
+          <i :class="authStore.isAuthenticated ? 'fas fa-user-check' : 'fas fa-user'"></i>
+          <div v-if="authStore.isAuthenticated" class="status-indicator" aria-label="Connecté"></div>
+        </button>
+      </div>
+      
+      <div class="cta-item panier">
+        <button 
+          @click="openCart" 
+          class="cta-button cart-btn" 
+          :class="{ 'disabled': !authStore.isAuthenticated }" 
+          :title="authStore.isAuthenticated ? 'Mon panier' : 'Connectez-vous pour accéder au panier'"
+          :aria-label="authStore.isAuthenticated ? 'Mon panier' : 'Connectez-vous pour accéder au panier'"
+        >
+          <i class="fas fa-shopping-cart"></i>
+          <span v-if="nombreArticles > 0" class="cart-count" aria-label="Nombre d'articles">{{ nombreArticles }}</span>
+        </button>
+      </div>
+    </div>
+    
+    <LoginPanel 
+      :isOpen="isLoginOpen" 
+      :openCartAfterLogin="openCartAfterLogin"
+      @close="closeLogin"
+      @openCart="openCart"
+    />
   </nav>
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import LoginPanel from '@/components/LoginPanel.vue'
+import { usePanier } from '@/composables/usePanier'
+import { useAuthStore } from '@/stores/auth'
 
-export default {
-  name: 'Navbar',
-  components: { LoginPanel },
-  data() {
-    return {
-      isMenuOpen: false,
-      isLoginOpen: false,
-    }
-  },
-  computed: {
-    cartItemCount() {
-      return this.$root.cartItems?.length || 0
-    },
-  },
-  methods: {
-    toggleMenu() {
-      this.isMenuOpen = !this.isMenuOpen
-    },
-    closeMenu() {
-      this.isMenuOpen = false
-    },
-    openCart() {
-      this.$root.showCart = true
-    },
-    openLogin() {
-      this.isLoginOpen = true
-    },
-    closeLogin() {
-      this.isLoginOpen = false
-    },
-  },
+// État local
+const isMenuOpen = ref(false)
+const isLoginOpen = ref(false)
+const openCartAfterLogin = ref(false)
+const isNavHidden = ref(false)
+
+// Scroll tracking
+let lastScrollY = 0
+
+// Stores et composables
+const { ouvrirPanier, panier } = usePanier()
+const authStore = useAuthStore()
+
+// Computed
+const nombreArticles = computed(() => {
+  return panier.value.reduce((sum, item) => sum + item.quantite, 0)
+})
+
+// Watchers
+watch(() => authStore.isAuthenticated, (newValue) => {
+  console.log('Navbar - État d\'authentification changé:', newValue)
+})
+
+// Méthodes de navigation
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value
 }
+
+const closeMenu = () => {
+  isMenuOpen.value = false
+}
+
+// Méthodes d'authentification
+const openLogin = () => {
+  openCartAfterLogin.value = false
+  isLoginOpen.value = true
+}
+
+const closeLogin = () => {
+  isLoginOpen.value = false
+  openCartAfterLogin.value = false
+}
+
+// Méthodes de panier
+const openCart = () => {
+  if (authStore.isAuthenticated) {
+    ouvrirPanier()
+  } else {
+    openLoginForCart()
+  }
+}
+
+const openLoginForCart = () => {
+  openCartAfterLogin.value = true
+  isLoginOpen.value = true
+}
+
+// Gestion du scroll
+const handleScroll = () => {
+  const currentScrollY = window.scrollY
+  const scrollThreshold = 5
+  const hideThreshold = 80
+  
+  if (Math.abs(currentScrollY - lastScrollY) < scrollThreshold) return
+  
+  if (currentScrollY > lastScrollY && currentScrollY > hideThreshold) {
+    isNavHidden.value = true
+  } else if (currentScrollY < lastScrollY) {
+    isNavHidden.value = false
+  }
+  
+  lastScrollY = currentScrollY
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style lang="scss">
 @use '@/assets/styles/variables' as *;
 
+// Variables locales
+$navbar-height-desktop: 80px;
+$navbar-height-mobile: 65px;
+$transition-duration: 0.4s;
+$transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+
+// Navbar principale
 nav {
   display: flex;
   justify-content: space-between;
@@ -74,26 +171,52 @@ nav {
   background-color: var(--secondary-color);
   color: var(--text-color);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  height: 80px;
+  height: $navbar-height-desktop;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: transform $transition-duration $transition-timing;
+  will-change: transform;
 }
 
+.nav-hidden {
+  transform: translateY(-100%);
+}
+
+// Logo
 .logo {
   margin-left: 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .logo img {
-  height: 70px;
+  height: 120px;
+  width: auto;
+  object-fit: contain;
   transition: transform 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  margin-bottom: -15px;
 }
 
 .logo img:hover {
   transform: scale(1.05);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 
+// Menu burger (mobile)
 .menu {
   display: none;
   cursor: pointer;
   position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 30px;
+  height: 30px;
 }
 
 .menu-icon {
@@ -101,6 +224,7 @@ nav {
   height: 3px;
   background-color: var(--accent-color);
   transition: all 0.3s ease-in-out;
+  position: relative;
 }
 
 .menu-icon::before,
@@ -115,10 +239,12 @@ nav {
 
 .menu-icon::before {
   top: -10px;
+  left: 0;
 }
 
 .menu-icon::after {
   top: 10px;
+  left: 0;
 }
 
 .menu-icon.open {
@@ -135,32 +261,35 @@ nav {
   top: 0;
 }
 
+// Navigation principale
 ul {
   list-style: none;
   display: flex;
-  gap: 1.5rem;
+  gap: 1.8rem;
   padding: 0;
   margin: 0;
   align-items: center;
 }
 
 li {
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-family-text);
   text-transform: uppercase;
   font-size: 0.9rem;
   letter-spacing: 1px;
+  font-weight: 600;
 }
 
 a {
   display: inline-block;
-  padding: 0.5rem 0;
+  padding: 0.6rem 0;
   color: var(--text-color);
   text-decoration: none;
   transition: all 0.3s ease;
-  font-weight: bold;
+  font-weight: 600;
   position: relative;
 }
 
+// Effet de soulignement au hover
 .actualite a::after,
 .composer a::after,
 .catalogue a::after {
@@ -169,10 +298,10 @@ a {
   width: 0;
   height: 2px;
   background: var(--accent-color);
-  transition: width 0.3s;
+  transition: width 0.3s ease;
   position: absolute;
   left: 0;
-  bottom: -2px;
+  bottom: 0;
 }
 
 .actualite a:hover::after,
@@ -183,84 +312,282 @@ a {
 
 a:hover {
   color: var(--accent-color);
-  transform: scale(1.05);
+  transform: translateY(-1px);
 }
 
-.connexion a {
-  background-color: #90aeb0;
-  color: white;
-  border: 2px solid #90aeb0;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+// CTA Container
+.cta-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.connexion a:hover {
-  background-color: transparent;
-  color: #90aeb0;
-}
-
-.panier .cart-link {
-  padding: 0.5rem 1rem;
-  background-color: var(--accent-color);
-  color: var(--secondary-color);
-  border-radius: 20px;
-  border: 2px solid var(--accent-color);
+// CTA Items
+.cta-item {
   position: relative;
 }
 
-.panier .cart-link:hover {
-  background-color: transparent;
-  color: var(--accent-color);
+.cta-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 35px;
+  border-radius: 8px;
+  border: 2px solid;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-sizing: border-box;
+  position: relative;
+  background: none;
 }
 
+// Bouton de connexion
+.login-btn {
+  background-color: #90aeb0;
+  color: white;
+  border-color: #90aeb0;
+}
+
+.login-btn:hover {
+  background-color: transparent;
+  color: #90aeb0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(144, 174, 176, 0.3);
+}
+
+// Bouton de panier
+.cart-btn {
+  background-color: var(--accent-color);
+  color: var(--secondary-color);
+  border-color: var(--accent-color);
+}
+
+.cart-btn:hover {
+  background-color: transparent;
+  color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+}
+
+.cart-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cart-btn.disabled:hover {
+  opacity: 0.7;
+  background-color: var(--accent-color) !important;
+  color: var(--secondary-color) !important;
+  transform: none;
+  box-shadow: none;
+}
+
+// Icônes des CTA
+.cta-button i {
+  font-size: 1rem;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// Compteur d'articles
 .cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
   background-color: var(--secondary-color);
   color: var(--accent-color);
   border-radius: 50%;
-  padding: 0.2rem 0.5rem;
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  font-size: 0.7rem;
+  padding: 0;
+  font-size: 0.65rem;
+  font-weight: bold;
   border: 1px solid var(--accent-color);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
+// Indicateur de statut connecté
+.status-indicator {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #4CAF50;
+  border: 1px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+// Styles responsives
 @media (max-width: 768px) {
+  // Menu burger visible
   .menu {
-    display: block;
+    display: flex;
     z-index: 1000;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 1.5rem;
+    flex: 0 0 auto;
+    order: 4;
   }
 
+  // Navbar mobile
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.5rem;
+    height: $navbar-height-mobile;
+  }
+
+  // Logo mobile
+  .logo {
+    margin-left: 6px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  
+  .logo img {
+    height: 75px;
+    width: auto;
+    margin-bottom: -10px;
+  }
+
+  // CTA mobile
+  .cta-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-left: auto;
+    margin-right: 1.5rem;
+    flex: 0 0 auto;
+    order: 3;
+  }
+  
+  .cta-button {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin: 0;
+    padding: 0;
+    font-size: 1.2rem;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    position: relative;
+    text-align: center;
+  }
+  
+  .cart-count {
+    font-size: 0.7rem;
+    width: 15px;
+    height: 15px;
+    top: -6px;
+    right: -6px;
+  }
+  
+  .status-indicator {
+    width: 8px;
+    height: 8px;
+    top: -1px;
+    right: -1px;
+  }
+
+  // Menu dropdown mobile
   ul {
     display: none;
     flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
+    position: absolute;
+    top: 100%;
+    right: -100%;
+    width: 100vw;
+    left: 50%;
+    transform: translateX(-50%);
     background-color: var(--secondary-color);
-    padding-top: 80px;
+    padding: 1rem;
     z-index: 999;
     text-align: center;
-    gap: 2rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    gap: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: right 0.3s ease-in-out;
+    margin: 0;
+    margin-top: -1px;
+    color: var(--text-color);
   }
-
+  
   ul.open {
     display: flex;
+    right: 0;
   }
 
+  // Liens du menu mobile
   ul li {
-    font-size: 1.2rem;
+    font-family: var(--font-family-text);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    padding: 0;
+    margin: 0;
   }
-
-  .logo img {
-    height: 60px;
+  
+  ul li a {
+    display: block;
+    padding: 0.8rem 1rem;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    position: relative;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
   }
-
-  nav {
-    z-index: 1000;
+  
+  .actualite a::after,
+  .composer a::after,
+  .catalogue a::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 2px;
+    background: var(--accent-color);
+    transition: width 0.3s ease;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+  }
+  
+  .actualite a:hover::after,
+  .composer a:hover::after,
+  .catalogue a:hover::after {
+    width: 100%;
+  }
+  
+  ul li a:hover {
+    color: var(--accent-color);
+    transform: translateY(-1px);
   }
 }
 </style>

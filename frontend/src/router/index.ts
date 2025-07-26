@@ -9,6 +9,7 @@ import LoginView from '@/views/LoginView.vue' // Importation du composant Connex
 import ErrorView from '@/views/ErrorView.vue'
 import ComposerView from '@/views/ComposerView.vue'
 import CatalogueView from '@/views/CatalogueView.vue'
+import ConstructionView from '@/views/ConstructionView.vue'
 
 const routes = [
   {
@@ -95,6 +96,14 @@ const routes = [
     },
   },
   {
+    path: '/construction',
+    name: 'construction',
+    component: ConstructionView,
+    meta: {
+      title: 'Page en construction - Amande Pâtisserie',
+    },
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/not-found',
   },
@@ -105,12 +114,9 @@ const router = createRouter({
   routes,
 })
 
-// Gestion des titres de page
 router.beforeEach((to, from, next) => {
   const title = to.meta?.title || 'Amande Pâtisserie'
   document.title = typeof title === 'string' ? title : 'Amande Pâtisserie'
-  
-  // Scroll vers le haut de la page
   window.scrollTo(0, 0)
   
   next()

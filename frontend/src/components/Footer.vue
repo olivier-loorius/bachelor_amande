@@ -48,27 +48,16 @@
       <router-link to="/contact" @click="scrollToTop">Contact</router-link>
     </div>
 
-    <!-- Copyright + Bouton -->
+    <!-- Copyright -->
     <div class="footer-bottom">
       <p>&copy; 2025 Amande Pâtisserie - Tous droits réservés</p>
-      <button @click="scrollToTop" class="back-to-top" aria-label="Retour en haut">
-        <i class="fas fa-arrow-up"></i>
-      </button>
     </div>
   </footer>
 </template>
 
 <script>
 export default {
-  name: 'Footer',
-  methods: {
-    scrollToTop() {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  }
+  name: 'Footer'
 }
 </script>
 
@@ -181,27 +170,7 @@ export default {
   border-top: 1px solid rgba(255,255,255,0.1);
 }
 
-.back-to-top {
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: filter 0.3s ease;
-  
-  &:hover {
-    filter: brightness(0.9);
-  }
-  
-  i {
-    font-size: 1.2rem;
-  }
-}
+
 
 @media (max-width: 768px) {
   .footer-content {
@@ -242,8 +211,6 @@ export default {
     text-align: center;
   }
 
-  .back-to-top {
-    margin-top: 1rem;
-  }
+
 }
 </style>

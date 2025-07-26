@@ -3,7 +3,7 @@
     <div class="login-panel" :class="{ 'mobile-view': isMobile }">
       <!-- En-tête -->
       <div class="login-header">
-        <h2>Connexion</h2>
+        <h2>{{ authStore.isAuthenticated ? 'Mon Compte' : 'Connexion' }}</h2>
         <button @click="closeLogin" class="close-btn">
           <i class="fas fa-times"></i>
         </button>
@@ -11,82 +11,239 @@
 
       <!-- Contenu -->
       <div class="login-content">
-        <p>Entrez votre email et mot de passe pour vous connecter à votre compte.</p>
-        <form class="space-y-4">
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              id="email"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              placeholder="Entrez votre email"
-            />
+        <!-- Si connecté : afficher les informations du compte -->
+        <div v-if="authStore.isAuthenticated" class="account-section">
+          <div class="account-header">
+            <div class="user-avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+              <h3>{{ authStore.currentUser?.prenom }} {{ authStore.currentUser?.nom }}</h3>
+              <p class="user-email">{{ maskEmail(authStore.currentUser?.email) }}</p>
+              <span class="member-since">Membre depuis {{ getMemberSince() }}</span>
+            </div>
           </div>
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-            <input
-              type="password"
-              id="password"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              placeholder="Entrez votre mot de passe"
-            />
+
+          <div class="account-actions">
+            <button class="account-btn">
+              <i class="fas fa-user-edit"></i>
+              Modifier mon profil
+            </button>
+            <button class="account-btn">
+              <i class="fas fa-shopping-bag"></i>
+              Mes commandes
+            </button>
+            <button class="account-btn">
+              <i class="fas fa-heart"></i>
+              Mes favoris
+            </button>
+            <button class="account-btn">
+              <i class="fas fa-cog"></i>
+              Paramètres
+            </button>
+            <button @click="handleLogout" class="logout-btn">
+              <i class="fas fa-sign-out-alt"></i>
+              Se déconnecter
+            </button>
           </div>
-          <a href="#" class="text-sm text-indigo-600 hover:underline">Mot de passe oublié ?</a>
-          <button
-            type="submit"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Connexion
-          </button>
-        </form>
-        <p class="text-sm text-center mt-4">
-          Vous n'avez pas de compte ?
-          <a href="#" class="text-indigo-600 hover:underline" @click.prevent="openRegister">Créez-en un</a>
-        </p>
+        </div>
+
+        <!-- Si non connecté : afficher le formulaire de connexion -->
+        <div v-else>
+          <p>Entrez votre email et mot de passe pour vous connecter à votre compte.</p>
+          
+          <!-- Message d'erreur/succès -->
+          <div v-if="message" :class="['message', messageType]">
+            {{ message }}
+          </div>
+
+          <form @submit.prevent="handleLogin" class="space-y-4">
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                v-model="formData.email"
+                type="email"
+                id="email"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="Entrez votre email"
+                required
+              />
+            </div>
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+              <input
+                v-model="formData.password"
+                type="password"
+                id="password"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="Entrez votre mot de passe"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              :disabled="isLoading"
+            >
+              {{ isLoading ? 'Connexion...' : 'Connexion' }}
+            </button>
+          </form>
+          <p class="text-sm text-center mt-4">
+            Vous n'avez pas de compte ?
+            <a href="#" class="text-indigo-600 hover:underline" @click.prevent="openRegister">Créez-en un</a>
+          </p>
+        </div>
       </div>
     </div>
     <RegisterPanel :isOpen="isRegisterOpen" @close="closeRegister" />
   </div>
 </template>
 
-<script>
-import RegisterPanel from '@/components/RegisterPanel.vue';
+<script setup lang="ts">
+import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
+import RegisterPanel from '@/components/RegisterPanel.vue'
+import { useAuthStore } from '@/stores/auth'
 
-export default {
-  props: {
-    isOpen: Boolean,
-  },
-  data() {
-    return {
-      isMobile: false,
-      isRegisterOpen: false,
+interface Props {
+  isOpen: boolean
+  openCartAfterLogin?: boolean
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<{
+  close: []
+  loginSuccess: []
+  openCart: []
+}>()
+
+const authStore = useAuthStore()
+
+
+const isMobile = ref(false)
+const isRegisterOpen = ref(false)
+const isLoading = ref(false)
+const message = ref('')
+const messageType = ref<'success' | 'error'>('error')
+
+const formData = reactive({
+  email: '',
+  password: ''
+})
+
+const closeLogin = () => {
+  emit('close')
+  resetForm()
+}
+
+const openRegister = () => {
+  isRegisterOpen.value = true
+}
+
+const closeRegister = () => {
+  isRegisterOpen.value = false
+}
+
+const resetForm = () => {
+  formData.email = ''
+  formData.password = ''
+  message.value = ''
+  isLoading.value = false
+}
+
+// Reset le formulaire quand le modal s'ouvre
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
+    resetForm()
+  }
+})
+
+// Surveiller les changements d'état d'authentification
+watch(() => authStore.isAuthenticated, (newValue) => {
+  console.log('État d\'authentification changé:', newValue)
+})
+
+const showMessage = (msg: string, type: 'success' | 'error') => {
+  message.value = msg
+  messageType.value = type
+  setTimeout(() => {
+    message.value = ''
+  }, 3000)
+}
+
+const handleLogin = async () => {
+  isLoading.value = true
+  
+  try {
+    const result = authStore.login({
+      email: formData.email,
+      password: formData.password
+    })
+
+    if (result.success) {
+      showMessage(result.message, 'success')
+      setTimeout(() => {
+        closeLogin()
+        emit('loginSuccess')
+        // Si l'utilisateur était connecté pour le panier, l'ouvrir automatiquement
+        if (props.openCartAfterLogin) {
+          emit('openCart')
+        }
+      }, 1000)
+    } else {
+      showMessage(result.message, 'error')
     }
-  },
-  methods: {
-    closeLogin() {
-      this.$emit('close')
-    },
-    openRegister() {
-      this.isRegisterOpen = true
-    },
-    closeRegister() {
-      this.isRegisterOpen = false
-    },
-    checkViewport() {
-      this.isMobile = window.innerWidth < 768
-    },
-  },
-  mounted() {
-    this.checkViewport()
-    window.addEventListener('resize', this.checkViewport)
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.checkViewport)
-  },
-  components: {
-    RegisterPanel
+  } catch (error) {
+    showMessage('Erreur lors de la connexion', 'error')
+  } finally {
+    isLoading.value = false
   }
 }
+
+const handleLogout = () => {
+  authStore.logout()
+  showMessage('Vous avez été déconnecté avec succès.', 'success')
+  closeLogin()
+}
+
+const getMemberSince = () => {
+  if (!authStore.currentUser?.dateCreation) return 'récemment'
+  const date = new Date(authStore.currentUser.dateCreation)
+  const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+  return `${months[date.getMonth()]} ${date.getFullYear()}`
+}
+
+const maskEmail = (email: string | undefined) => {
+  if (!email) return ''
+  
+  const [localPart, domain] = email.split('@')
+  if (!domain) return email
+  
+  // Masquer la partie locale (avant @)
+  const maskedLocal = localPart.length > 2 
+    ? localPart.charAt(0) + '*'.repeat(localPart.length - 2) + localPart.charAt(localPart.length - 1)
+    : localPart
+  
+  // Masquer partiellement le domaine
+  const domainParts = domain.split('.')
+  const maskedDomain = domainParts.length > 1
+    ? domainParts[0].charAt(0) + '*'.repeat(domainParts[0].length - 1) + '.' + domainParts.slice(1).join('.')
+    : domain
+  
+  return `${maskedLocal}@${maskedDomain}`
+}
+
+const checkViewport = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+onMounted(() => {
+  checkViewport()
+  window.addEventListener('resize', checkViewport)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkViewport)
+})
 </script>
 
 <style scoped>
@@ -145,13 +302,12 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid var(--accent-color);
   background: var(--secondary-color);
 }
 
 .login-header h2 {
   margin: 0;
-  color: var(--accent-color);
+  color: #90aeb0;
   font-family: var(--font-family-title);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -201,8 +357,8 @@ form label {
 
 form input {
   padding: 0.75rem;
-  border: 1px solid var(--accent-color);
-  border-radius: 0.5rem;
+  border: 1px solid #90aeb0;
+  border-radius: 8px;
   font-size: 1rem;
   color: var(--text-color);
   background: var(--secondary-color);
@@ -238,12 +394,16 @@ form button {
 }
 
 form button[type='submit'] {
-  background: var(--accent-color);
-  color: var(--secondary-color);
+  background: #ff6f61;
+  color: white;
+  border: 2px solid #ff6f61;
 }
 
 form button[type='submit']:hover {
-  background: var(--text-color);
+  background: transparent;
+  color: #ff6f61;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
 }
 
 form button[type='button'] {
@@ -270,5 +430,113 @@ form button[type='button']:hover {
 
 .login-content .text-center a:hover {
   text-decoration: underline;
+}
+
+.message {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.account-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: rgba(144, 174, 176, 0.1);
+  border-radius: 12px;
+  border: 1px solid #90aeb0;
+}
+
+.user-avatar {
+  font-size: 3rem;
+  color: #ff6f61;
+}
+
+.user-details h3 {
+  margin: 0 0 0.25rem 0;
+  color: var(--text-color);
+  font-family: var(--font-family-title);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.user-email {
+  margin: 0 0 0.5rem 0;
+  color: var(--cart-text-light);
+  font-size: 0.9rem;
+}
+
+.member-since {
+  color: #ff6f61;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.account-btn {
+  background: none;
+  color: var(--text-color);
+  padding: 0.75rem 0;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.account-btn:hover {
+  color: #ff6f61;
+}
+
+.logout-btn {
+  background: #ff6f61;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #ff6f61;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.logout-btn:hover {
+  background: transparent;
+  color: #ff6f61;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
 }
 </style>

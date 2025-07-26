@@ -2,77 +2,113 @@
   <div class="cart-overlay" :class="{ 'active': isOpen }" @click.self="closeCart">
     <div class="cart-panel" :class="{ 'mobile-view': isMobile }">
       <div class="cart-header">
-        <h2>Mon Panier</h2>
+        <div class="cart-header-content">
+          <div class="user-greeting">
+            <span>Bonjour {{ userFirstName }}</span>
+          </div>
+          <h2>Mon Panier</h2>
+        </div>
         <button @click="closeCart" class="close-btn">
           <i class="fas fa-times"></i>
         </button>
       </div>
 
       <div class="cart-content">
-        <div v-if="currentStep === 1" class="step">
-          <!-- Étape connexion -->
-        </div>
-
-        <div v-if="currentStep === 2" class="step">
-          <div class="cart-items">
-            <div v-for="(item, index) in items" :key="item.id" class="cart-item">
-              <img :src="item.image" :alt="item.name" class="item-image">
-              <div class="item-details">
-                <h4>{{ item.name }}</h4>
-                <p>{{ item.price.toFixed(2) }} €</p>
-                <div class="quantity-controls">
-                  <button @click.stop="updateQuantity(index, -1)">-</button>
-                  <span>{{ item.quantity }}</span>
-                  <button @click.stop="updateQuantity(index, 1)">+</button>
-                </div>
-              </div>
-              <button @click.stop="removeItem(index)" class="remove-btn">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
+        <div class="cart-items">
+          <div v-if="items.length === 0" class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <p>Votre panier est vide</p>
+            <small>Ajoutez des produits depuis notre catalogue</small>
           </div>
-
-          <div class="cart-total">
-            <p>Total: <strong>{{ total.toFixed(2) }} €</strong></p>
-            <button @click="validateOrder" class="btn-checkout">
-              Valider la commande
+          <div v-else v-for="(item, index) in items" :key="item.id" class="cart-item">
+            <img :src="item.image" :alt="item.nom" class="item-image">
+            <div class="item-details">
+              <h4>{{ item.nom }}</h4>
+              <p>{{ item.prix.toFixed(2) }} €</p>
+              <div class="quantity-controls">
+                <button @click.stop="updateQuantity(index, -1)">-</button>
+                <span>{{ item.quantite }}</span>
+                <button @click.stop="updateQuantity(index, 1)">+</button>
+              </div>
+            </div>
+            <button @click.stop="removeItem(index)" class="remove-btn">
+              <i class="fas fa-trash"></i>
             </button>
           </div>
+        </div>
+
+        <div class="cart-total">
+          <p>Total: <strong>{{ total.toFixed(2) }} €</strong></p>
+          <button @click="validateOrder" class="btn-checkout">
+            Valider la commande
+          </button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  props: { isOpen: Boolean },
-  data() {
-    return {
-      currentStep: 1,
-      isMobile: window.innerWidth < 768
-    }
-  },
-  mounted() {
-    window.addEventListener('resize', this.checkViewport)
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.checkViewport)
-  },
-  computed: {
-    items() { return this.$root.cartItems || [] },
-    total() { return this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0) }
-  },
-  methods: {
-    checkViewport() {
-      this.isMobile = window.innerWidth < 768
-    },
-    closeCart() { this.$emit('close') },
-    updateQuantity(index, change) { this.$root.updateCartItemQuantity(index, change) },
-    removeItem(index) { this.$root.removeFromCart(index) },
-    validateOrder() { alert(`Commande validée ! Total: ${this.total.toFixed(2)} €`) }
-  }
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { usePanier } from '@/composables/usePanier'
+
+interface Props {
+  isOpen: boolean
 }
+
+const props = defineProps<Props>()
+const emit = defineEmits<{
+  close: []
+}>()
+
+const authStore = useAuthStore()
+const { panier } = usePanier()
+const isMobile = ref(false)
+
+const userFirstName = computed(() => {
+  return authStore.currentUser?.prenom || 'Utilisateur'
+})
+
+const checkViewport = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+const closeCart = () => {
+  emit('close')
+}
+
+const updateQuantity = (index: number, change: number) => {
+  // Logique de mise à jour de quantité
+  console.log('Update quantity:', index, change)
+}
+
+const removeItem = (index: number) => {
+  // Logique de suppression
+  console.log('Remove item:', index)
+}
+
+const validateOrder = () => {
+  alert(`Commande validée ! Total: ${total.value.toFixed(2)} €`)
+}
+
+// Utiliser les données du panier
+const items = computed(() => {
+  return panier.value
+})
+
+const total = computed(() => {
+  return items.value.reduce((sum, item) => sum + (item.prix * item.quantite), 0)
+})
+
+onMounted(() => {
+  checkViewport()
+  window.addEventListener('resize', checkViewport)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkViewport)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -134,22 +170,64 @@ export default {
 .cart-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 1.5rem;
   border-bottom: 1px solid var(--cart-border-color);
   position: sticky;
   top: 0;
   background: var(--secondary-color);
   z-index: 10;
+}
 
-  h2 {
-    margin: 0;
-    color: var(--accent-color);
-    font-family: var(--font-family-title);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 1.5rem;
-  }
+.cart-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user-greeting {
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.cart-header h2 {
+  margin: 0;
+  color: var(--accent-color);
+  font-family: var(--font-family-title);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 1.5rem;
+}
+
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.empty-cart i {
+  font-size: 3rem;
+  color: #90aeb0;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-cart p {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.empty-cart small {
+  color: #90aeb0;
+  font-size: 0.9rem;
 }
 
 .close-btn {

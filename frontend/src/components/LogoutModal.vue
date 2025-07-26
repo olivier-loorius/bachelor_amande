@@ -1,16 +1,16 @@
 <template>
-  <div v-if="show" class="add-modal-overlay" @click.self="closeModal">
-    <div class="add-modal">
-      <div class="add-modal-icon">
-        <i class="fas fa-check-circle"></i>
+  <div v-if="show" class="logout-modal-overlay" @click.self="closeModal">
+    <div class="logout-modal">
+      <div class="logout-modal-icon">
+        <i class="fas fa-sign-out-alt"></i>
       </div>
-      <div class="add-modal-msg">{{ message }}</div>
+      <div class="logout-modal-msg">{{ message }}</div>
       <div class="modal-actions">
         <button class="btn-secondary" @click="closeModal">
-          Continuer mes achats
+          Annuler
         </button>
-        <button class="btn-primary" @click="viewCart">
-          <i class="fas fa-shopping-cart"></i> Voir mon panier
+        <button class="btn-primary" @click="confirmLogout">
+          Se déconnecter
         </button>
       </div>
     </div>
@@ -22,53 +22,36 @@ import { ref, watch } from 'vue'
 
 interface Props {
   show: boolean
-  message?: string
-  autoCloseDelay?: number
+  userName?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  message: 'Votre produit a bien été ajouté au panier !',
-  autoCloseDelay: 5000
+  userName: 'Utilisateur'
 })
 
 const emit = defineEmits<{
   close: []
-  viewCart: []
+  confirm: []
 }>()
 
-const viewCart = () => {
-  emit('viewCart')
-  closeModal()
-}
-
-let autoCloseTimeout: ReturnType<typeof setTimeout> | null = null
+const message = ref(`Êtes-vous sûr de vouloir vous déconnecter, ${props.userName} ?`)
 
 const closeModal = () => {
-  if (autoCloseTimeout) {
-    clearTimeout(autoCloseTimeout)
-    autoCloseTimeout = null
-  }
   emit('close')
 }
 
-watch(() => props.show, (newShow) => {
-  if (newShow) {
-    // Auto-fermeture après le délai spécifié
-    autoCloseTimeout = setTimeout(() => {
-      closeModal()
-    }, props.autoCloseDelay)
-  } else {
-    // Nettoyer le timeout si la modal est fermée manuellement
-    if (autoCloseTimeout) {
-      clearTimeout(autoCloseTimeout)
-      autoCloseTimeout = null
-    }
-  }
+const confirmLogout = () => {
+  emit('confirm')
+  closeModal()
+}
+
+watch(() => props.userName, (newName) => {
+  message.value = `Êtes-vous sûr de vouloir vous déconnecter, ${newName} ?`
 })
 </script>
 
 <style scoped>
-.add-modal-overlay {
+.logout-modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.4);
@@ -81,7 +64,7 @@ watch(() => props.show, (newShow) => {
   animation: fadeIn 0.2s ease;
 }
 
-.add-modal {
+.logout-modal {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -94,13 +77,13 @@ watch(() => props.show, (newShow) => {
   animation: slideUp 0.3s ease;
 }
 
-.add-modal-icon {
+.logout-modal-icon {
   color: var(--accent-color);
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
 
-.add-modal-msg {
+.logout-modal-msg {
   font-size: 1.1rem;
   color: var(--text-color);
   text-align: center;
@@ -164,21 +147,21 @@ watch(() => props.show, (newShow) => {
 }
 
 @media (max-width: 768px) {
-  .add-modal-overlay {
+  .logout-modal-overlay {
     padding: 0.5rem;
   }
   
-  .add-modal {
+  .logout-modal {
     padding: 1.5rem;
     max-width: 90vw;
   }
   
-  .add-modal-icon {
+  .logout-modal-icon {
     font-size: 2rem;
     margin-bottom: 0.75rem;
   }
   
-  .add-modal-msg {
+  .logout-modal-msg {
     font-size: 1rem;
     margin-bottom: 1.25rem;
   }
