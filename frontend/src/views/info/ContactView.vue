@@ -94,7 +94,7 @@ function resetForm() {
 </script>
 
 <style scoped>
-@import '@/assets/styles/vues.scss';
+
 
 .page-container {
   display: flex;

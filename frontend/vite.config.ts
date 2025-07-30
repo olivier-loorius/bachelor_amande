@@ -11,11 +11,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'), // Ce chemin doit être correct pour "src"
     },
   },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@use "@/assets/styles/variables" as *;`, // Assure-toi du bon chemin ici
-      },
-    },
-  },
 })

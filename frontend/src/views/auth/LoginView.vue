@@ -13,7 +13,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import LoginPanel from '@/components/LoginPanel.vue'
+import LoginPanel from '@/components/auth/LoginPanel.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()

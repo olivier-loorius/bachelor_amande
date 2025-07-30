@@ -1,15 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
-import ActualiteView from '@/views/ActualiteView.vue'
-import MentionsLegales from '@/views/MentionsLegales.vue'
-import ContactView from '@/views/ContactView.vue'
-import CGVView from '@/views/CGVView.vue'
-import PanierView from '@/views/Panier.vue'
-import LoginView from '@/views/LoginView.vue' // Importation du composant ConnexionView
-import ErrorView from '@/views/ErrorView.vue'
-import ComposerView from '@/views/ComposerView.vue'
-import CatalogueView from '@/views/CatalogueView.vue'
-import ConstructionView from '@/views/ConstructionView.vue'
+import HomeView from '@/views/catalogue/HomeView.vue'
+import ActualiteView from '@/views/info/ActualiteView.vue'
+import MentionsLegales from '@/views/info/MentionsLegales.vue'
+import ContactView from '@/views/info/ContactView.vue'
+import CGVView from '@/views/info/CGVView.vue'
+import PanierView from '@/views/panier/Panier.vue'
+import LoginView from '@/views/auth/LoginView.vue' // Importation du composant ConnexionView
+import ErrorView from '@/views/utils/ErrorView.vue'
+import ComposerView from '@/views/composer/ComposerView.vue'
+import CatalogueView from '@/views/catalogue/CatalogueView.vue'
+import ConstructionView from '@/views/utils/ConstructionView.vue'
 import EnConstructionView from '@/views/EnConstructionView.vue'
 
 const routes = [

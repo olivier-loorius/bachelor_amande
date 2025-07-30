@@ -1,0 +1,36 @@
+{
+  "name": "amande-project",
+  "version": "1.0.0",
+  "description": "Projet full-stack Amande - L'art de la tartelette",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node scripts/dev-all.js",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "build": "cd frontend && npm run build",
+    "test": "cd frontend && npm run test && cd ../backend && npm run test",
+    "lint": "cd frontend && npm run lint && cd ../backend && npm run lint",
+    "clean": "rm -rf frontend/node_modules backend/node_modules frontend/dist",
+    "setup": "npm run install:all && npm run dev"
+  },
+  "keywords": [
+    "amande",
+    "tartelette",
+    "vue",
+    "express",
+    "supabase",
+    "fullstack"
+  ],
+  "author": "Amande Team",
+  "license": "MIT",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+} 

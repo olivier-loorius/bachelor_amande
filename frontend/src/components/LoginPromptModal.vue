@@ -49,8 +49,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import LoginPanel from '@/components/LoginPanel.vue'
-import RegisterPanel from '@/components/RegisterPanel.vue'
+import LoginPanel from '@/components/auth/LoginPanel.vue'
+import RegisterPanel from '@/components/auth/RegisterPanel.vue'
 
 interface Props {
   isOpen: boolean

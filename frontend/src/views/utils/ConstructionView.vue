@@ -35,7 +35,7 @@
 </script>
 
 <style scoped>
-@import '@/assets/styles/vues.scss';
+
 
 .construction-card {
   max-width: 600px;

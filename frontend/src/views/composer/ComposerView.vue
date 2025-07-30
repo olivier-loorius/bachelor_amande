@@ -719,26 +719,7 @@ function goToPrevStep() {
 </script>
 
 <style scoped>
-  @import '@/assets/styles/vues.scss';
-.page-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  background-color: var(--secondary-color);
-}
-.content-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.composer-content {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  
 .composer-card {
   background: #fff;
   border-radius: 1.2rem;

@@ -427,7 +427,7 @@ const ouvrirPanier = () => panierStore.ouvrirPanier()
 </script>
 
 <style scoped>
-@import '@/assets/styles/vues.scss';
+
 
 .catalogue-section {
   width: 100%;

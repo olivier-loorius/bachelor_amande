@@ -67,7 +67,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import LoginPanel from '@/components/LoginPanel.vue'
+import LoginPanel from '@/components/auth/LoginPanel.vue'
 import { usePanierStore } from '@/stores/panier'
 import { useAuthStore } from '@/stores/auth'
 
@@ -168,7 +168,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss">
-@use '@/assets/styles/variables' as *;
+
 
 // Variables locales
 $navbar-height-desktop: 80px;

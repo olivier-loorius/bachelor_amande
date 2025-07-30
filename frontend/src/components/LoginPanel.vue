@@ -111,7 +111,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
-import RegisterPanel from '@/components/RegisterPanel.vue'
+import RegisterPanel from '@/components/auth/RegisterPanel.vue'
 import LogoutModal from '@/components/LogoutModal.vue'
 import { useAuthStore } from '@/stores/auth'
 

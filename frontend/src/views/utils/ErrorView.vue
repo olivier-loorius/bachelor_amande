@@ -38,7 +38,7 @@
 </script>
 
 <style scoped>
-@import '@/assets/styles/vues.scss';
+
 
 .error-card {
   max-width: 600px;

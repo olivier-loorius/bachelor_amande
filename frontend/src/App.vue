@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
-import Panier from './views/Panier.vue'
+import Panier from './views/panier/Panier.vue'
 import ScrollToTop from './components/ScrollToTop.vue'
 import { usePanierStore } from './stores/panier'
 

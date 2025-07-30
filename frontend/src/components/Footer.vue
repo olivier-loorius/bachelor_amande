@@ -78,7 +78,7 @@ const scrollToTop = (): void => {
 </script>
 
 <style lang="scss" scoped>
-@use "@/assets/styles/variables" as *;
+
 
 $footer-padding-desktop: 2rem;
 $footer-padding-mobile: 1rem;
