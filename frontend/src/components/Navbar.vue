@@ -28,10 +28,18 @@
     </ul>
     
     <div class="cta-container">
+      <!-- CTA Admin (visible seulement pour les admins) -->
+      <div v-if="authStore.isAuthenticated && authStore.currentUser?.role === 'admin'" class="cta-item admin">
+        <router-link to="/admin" class="cta-button admin-btn" title="Administration">
+          <i class="fas fa-cog"></i>
+        </router-link>
+      </div>
+      
       <div class="cta-item connexion">
         <button 
           @click="openLogin" 
           class="cta-button login-btn" 
+          :class="{ 'connected': authStore.isAuthenticated }"
           :title="authStore.isAuthenticated ? 'Mon compte' : 'Se connecter'"
           :aria-label="authStore.isAuthenticated ? 'Mon compte' : 'Se connecter'"
         >
@@ -373,6 +381,20 @@ a:hover {
   box-shadow: 0 4px 12px rgba(144, 174, 176, 0.3);
 }
 
+// État connecté
+.login-btn.connected {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border-color: #28a745;
+}
+
+.login-btn.connected:hover {
+  background: transparent;
+  color: #28a745;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
 // Bouton de panier
 .cart-btn {
   background-color: var(--accent-color);
@@ -398,6 +420,18 @@ a:hover {
   color: var(--secondary-color) !important;
   transform: none;
   box-shadow: none;
+}
+
+// Bouton admin (desktop)
+.admin-btn {
+  background: #383961;
+  color: white;
+  border-color: #383961;
+}
+
+.admin-btn:hover {
+  background: transparent;
+  color: #383961;
 }
 
 // Icônes des CTA
@@ -526,6 +560,30 @@ a:hover {
     height: 8px;
     top: -1px;
     right: -1px;
+  }
+  
+  /* Styles pour le CTA Admin */
+  .admin-btn {
+    background: #383961;
+    color: white;
+  }
+  
+  .admin-btn:hover {
+    background: transparent;
+    color: #383961;
+  }
+  
+  /* Styles pour le CTA Admin mobile */
+  .login-btn.connected {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+  }
+  
+  .login-btn.connected:hover {
+    background: transparent;
+    color: #28a745;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
   }
 
   // Menu dropdown mobile

@@ -28,7 +28,7 @@
             <div v-else class="user-menu">
               <button @click="toggleUserMenu" class="user-btn">
                 <i class="fas fa-user-circle"></i>
-                <span class="user-name">{{ user?.nom || 'Utilisateur' }}</span>
+                <span class="user-name">{{ user?.name || 'Utilisateur' }}</span>
                 <i class="fas fa-chevron-down"></i>
               </button>
               <div v-if="isUserMenuOpen" class="user-dropdown">

@@ -1,184 +1,127 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { dataService } from '@/services/dataService'
-import { jwtService } from '@/services/jwtService'
+import { supabase } from '@/services/supabaseService'
+import { registerUser, loginUser, getUserInfos, logoutUser } from '@/services/authService'
 
 interface User {
   id: string
   email: string
-  nom: string
-  dateCreation: string
+  name: string
   role: 'user' | 'admin'
-  panierId: string
-}
-
-interface LoginCredentials {
-  email: string
-  password: string
-}
-
-interface RegisterCredentials {
-  nom: string
-  email: string
-  password: string
+  created_at: string
 }
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const token = ref<string | null>(null)
   const isLoading = ref(false)
 
-  const isAuthenticated = computed(() => !!user.value && !!token.value)
+  const isLoggedIn = computed(() => !!user.value)
+  const isAuthenticated = computed(() => !!user.value)
   const currentUser = computed(() => user.value)
+  const isAdmin = computed(() => user.value?.role === 'admin')
 
-  const initialize = () => {
-    const storedToken = localStorage.getItem('auth_token')
-    if (storedToken && !jwtService.isTokenExpired(storedToken)) {
-      const userData = jwtService.getUserFromToken(storedToken)
-      if (userData) {
-        user.value = userData
-        token.value = storedToken
-      }
-    } else {
-      logout()
-    }
-  }
-
-  const login = async (credentials: LoginCredentials) => {
+  // Inscription
+  const register = async (nom: string, email: string, password: string) => {
     isLoading.value = true
     
     try {
-      const existingUser = dataService.getUserByEmail(credentials.email)
+      const authData = await registerUser({ email, password, name: nom })
       
-      if (!existingUser) {
-        return {
-          success: false,
-          message: 'Email ou mot de passe incorrect'
-        }
-      }
-
-      const tokenData = {
-        id: existingUser.id,
-        email: existingUser.email,
-        nom: existingUser.nom,
-        role: existingUser.role,
-        panierId: existingUser.panierId
+      // Le trigger créera automatiquement l'utilisateur dans public.users
+      // On récupère les infos utilisateur
+      const userInfos = await getUserInfos(authData.user.id)
+      
+      user.value = {
+        id: userInfos.id,
+        email: userInfos.email,
+        name: userInfos.name,
+        role: userInfos.role,
+        created_at: userInfos.created_at
       }
       
-      const newToken = jwtService.generateToken(tokenData)
-      localStorage.setItem('auth_token', newToken)
-      
-      user.value = existingUser
-      token.value = newToken
-      
-      return {
-        success: true,
-        message: 'Connexion réussie'
+      return { 
+        success: true, 
+        message: userInfos.role === 'admin' ? 'Compte admin créé avec succès' : 'Compte créé avec succès' 
       }
     } catch (error) {
-      console.error('Erreur lors de la connexion:', error)
-      return {
-        success: false,
-        message: 'Erreur lors de la connexion'
-      }
+      console.error('Erreur register:', error)
+      return { success: false, message: error.message }
     } finally {
       isLoading.value = false
     }
   }
 
-  const register = async (credentials: RegisterCredentials) => {
+  // Connexion
+  const login = async (credentials: { email: string; password: string }) => {
     isLoading.value = true
     
     try {
-      const existingUser = dataService.getUserByEmail(credentials.email)
+      const authData = await loginUser(credentials)
+      const userInfos = await getUserInfos(authData.user.id)
       
-      if (existingUser) {
-        return {
-          success: false,
-          message: 'Un compte avec cet email existe déjà'
-        }
-      }
-
-      const newUser = dataService.createUser({
-        email: credentials.email,
-        nom: credentials.nom,
-        role: 'user'
-      })
-
-      const tokenData = {
-        id: newUser.id,
-        email: newUser.email,
-        nom: newUser.nom,
-        role: newUser.role,
-        panierId: newUser.panierId
+      user.value = {
+        id: userInfos.id,
+        email: userInfos.email,
+        name: userInfos.name,
+        role: userInfos.role,
+        created_at: userInfos.created_at
       }
       
-      const newToken = jwtService.generateToken(tokenData)
-      localStorage.setItem('auth_token', newToken)
-      
-      user.value = newUser
-      token.value = newToken
-      
-      return {
-        success: true,
-        message: 'Compte créé avec succès'
+      return { 
+        success: true, 
+        message: userInfos.role === 'admin' ? 'Connexion admin réussie' : 'Connexion réussie' 
       }
     } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error)
-      return {
-        success: false,
-        message: 'Erreur lors de la création du compte'
-      }
+      return { success: false, message: error.message }
     } finally {
       isLoading.value = false
     }
   }
 
-  const logout = () => {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('panier')
-    
-    user.value = null
-    token.value = null
-  }
-
-  const refreshToken = () => {
-    if (!token.value) return false
-    
-    const newToken = jwtService.refreshToken(token.value)
-    if (newToken) {
-      localStorage.setItem('auth_token', newToken)
-      token.value = newToken
-      return true
+  // Déconnexion
+  const logout = async (router?: any) => {
+    try {
+      await logoutUser()
+      user.value = null
+      if (router) {
+        router.push('/')
+      }
+    } catch (error) {
+      console.error('Erreur logout:', error)
     }
-    
-    logout()
-    return false
   }
 
-  const checkTokenStatus = () => {
-    if (!token.value) return false
-    
-    if (jwtService.isTokenExpired(token.value)) {
-      logout()
-      return false
+  // Initialiser la session
+  const initialize = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        const userInfos = await getUserInfos(session.user.id)
+        user.value = {
+          id: userInfos.id,
+          email: userInfos.email,
+          name: userInfos.name,
+          role: userInfos.role,
+          created_at: userInfos.created_at
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'initialisation:', error)
     }
-    
-    return true
   }
 
+  // Initialiser au démarrage
   initialize()
 
   return {
     user,
-    token,
     isLoading,
+    isLoggedIn,
     isAuthenticated,
     currentUser,
+    isAdmin,
     login,
     register,
-    logout,
-    refreshToken,
-    checkTokenStatus
+    logout
   }
 }) 

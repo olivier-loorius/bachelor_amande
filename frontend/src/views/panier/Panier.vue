@@ -149,11 +149,11 @@ const totalPanier = computed(() => panierStore.total)
 const nombreArticlesPanier = computed(() => panierStore.nombreArticles)
 
 // Watcher pour détecter la connexion et passer à l'étape 2
-watch(currentUser, (newValue) => {
+watch(() => currentUser, (newValue) => {
   if (newValue && currentStep.value === 1) {
     currentStep.value = 2
   }
-})
+}, { immediate: true })
 
 // Méthodes
 const modifierQuantitePanier = (id: number, nouvelleQuantite: number) => {

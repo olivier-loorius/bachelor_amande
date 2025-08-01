@@ -442,6 +442,58 @@
                   <span class="btn-text">Panier</span>
               </button>
             </div>
+            
+            <!-- CRUD Section -->
+            <div class="crud-section" v-if="authStore.isAuthenticated">
+              <div class="save-composition-section">
+                <input 
+                  v-model="compositionName" 
+                  placeholder="Nom de votre création" 
+                  class="composition-name-input"
+                  :disabled="!peutValider"
+                />
+                <button 
+                  @click="saveComposition" 
+                  class="save-composition-btn"
+                  :disabled="!peutValider || isLoading"
+                >
+                  <i class="fas fa-save"></i>
+                  <span v-if="!isLoading">Sauvegarder</span>
+                  <span v-else>Sauvegarde...</span>
+                </button>
+              </div>
+              
+              <div class="compositions-list-section">
+                <button @click="toggleCompositionsList" class="toggle-compositions-btn">
+                  <i class="fas fa-list"></i>
+                  <span>Mes créations ({{ userCompositions.length }})</span>
+                </button>
+                
+                <div v-if="showCompositionsList" class="compositions-list">
+                  <div v-for="comp in userCompositions" :key="comp.id" class="composition-item">
+                    <div class="composition-info">
+                      <h4>{{ comp.nom }}</h4>
+                      <p class="composition-date">{{ new Date(comp.created_at!).toLocaleDateString() }}</p>
+                    </div>
+                    <div class="composition-actions">
+                      <button @click="loadComposition(comp)" class="load-btn">
+                        <i class="fas fa-upload"></i>
+                        Charger
+                      </button>
+                      <button @click="deleteComposition(comp.id!)" class="delete-btn">
+                        <i class="fas fa-trash"></i>
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Save Message -->
+              <div v-if="saveMessage" class="save-message" :class="saveMessageType">
+                {{ saveMessage }}
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -469,6 +521,7 @@ import AddToCartModal from '@/components/AddToCartModal.vue'
 import LoginPromptModal from '@/components/LoginPromptModal.vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePanierStore } from '@/stores/panier'
+import { compositionsService, type Composition } from '@/services/supabaseService'
 import fondNature from '@/assets/images/fondNature.jpg'
 import fondCacao from '@/assets/images/fondCacao.jpg'
 import fondNoisette from '@/assets/images/fondNoisette.jpg'
@@ -523,6 +576,15 @@ const showAddModal = ref(false)
 const showLoginPrompt = ref(false)
 const authStore = useAuthStore()
 const panierStore = usePanierStore()
+
+// CRUD Variables
+const compositionName = ref('')
+const userCompositions = ref<Composition[]>([])
+const showSaveModal = ref(false)
+const showCompositionsList = ref(false)
+const isLoading = ref(false)
+const saveMessage = ref('')
+const saveMessageType = ref<'success' | 'error'>('success')
 
 const peutValider = computed(() => {
     return !!selectedFond.value && !!selectedGarniture1.value && !!selectedGarniture2.value && !!selectedGarniture3.value && !!selectedFinition.value && quantite.value > 0
@@ -603,9 +665,113 @@ function ajouterAuPanier() {
   }
 
   function openCartAfterLogin() {
-    // Ouvrir le panier après connexion
-    // Cette fonction sera appelée si l'utilisateur choisit d'ouvrir le panier
+  // Ouvrir le panier après connexion
+  // Cette fonction sera appelée si l'utilisateur choisit d'ouvrir le panier
+}
+
+// CRUD Functions
+async function saveComposition() {
+  if (!authStore.isAuthenticated) {
+    showLoginPrompt.value = true
+    return
   }
+  
+  if (!compositionName.value.trim()) {
+    saveMessage.value = 'Veuillez donner un nom à votre création'
+    saveMessageType.value = 'error'
+    return
+  }
+  
+  if (!peutValider.value) {
+    saveMessage.value = 'Veuillez compléter votre composition'
+    saveMessageType.value = 'error'
+    return
+  }
+  
+  isLoading.value = true
+  
+  try {
+    const composition: Omit<Composition, 'id' | 'created_at' | 'updated_at'> = {
+      user_id: authStore.currentUser?.id,
+      nom: compositionName.value.trim(),
+      ingredients: {
+        fond: selectedFond.value,
+        garnitures: [selectedGarniture1.value, selectedGarniture2.value, selectedGarniture3.value],
+        finition: selectedFinition.value
+      }
+    }
+    
+    const { data, error } = await compositionsService.saveComposition(composition)
+    
+    if (error) {
+      saveMessage.value = 'Erreur lors de la sauvegarde'
+      saveMessageType.value = 'error'
+    } else {
+      saveMessage.value = 'Composition sauvegardée avec succès !'
+      saveMessageType.value = 'success'
+      compositionName.value = ''
+      await loadUserCompositions()
+    }
+  } catch (error) {
+    saveMessage.value = 'Erreur lors de la sauvegarde'
+    saveMessageType.value = 'error'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function loadUserCompositions() {
+  if (!authStore.isAuthenticated) return
+  
+  try {
+    const { data, error } = await compositionsService.getUserCompositions(authStore.currentUser!.id)
+    if (!error && data) {
+      userCompositions.value = data
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement des compositions:', error)
+  }
+}
+
+async function loadComposition(composition: Composition) {
+  if (composition.ingredients) {
+    selectedFond.value = composition.ingredients.fond
+    selectedGarniture1.value = composition.ingredients.garnitures[0] || null
+    selectedGarniture2.value = composition.ingredients.garnitures[1] || null
+    selectedGarniture3.value = composition.ingredients.garnitures[2] || null
+    selectedFinition.value = composition.ingredients.finition
+    compositionName.value = composition.nom
+  }
+}
+
+async function deleteComposition(id: string) {
+  if (!authStore.isAuthenticated) return
+  
+  try {
+    const { error } = await compositionsService.deleteComposition(id, authStore.currentUser!.id)
+    if (!error) {
+      await loadUserCompositions()
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error)
+  }
+}
+
+function showSaveCompositionModal() {
+  showSaveModal.value = true
+}
+
+function closeSaveModal() {
+  showSaveModal.value = false
+  saveMessage.value = ''
+}
+
+function toggleCompositionsList() {
+  showCompositionsList.value = !showCompositionsList.value
+  if (showCompositionsList.value) {
+    loadUserCompositions()
+  }
+}
 
 function deselectFond() {
   selectedFond.value = null
@@ -1522,5 +1688,195 @@ function goToPrevStep() {
   }
   .composer-btn-icon .btn-text {
     display: none;
+}
+
+/* CRUD Styles */
+.crud-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.save-composition-section {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.composition-name-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.composition-name-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.composition-name-input:disabled {
+  background: #f5f5f5;
+  color: #999;
+}
+
+.save-composition-btn {
+  padding: 12px 24px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.save-composition-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.save-composition-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.compositions-list-section {
+  margin-top: 1rem;
+}
+
+.toggle-compositions-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toggle-compositions-btn:hover {
+  border-color: var(--accent-color);
+  background: #f8f9fa;
+}
+
+.compositions-list {
+  margin-top: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+}
+
+.composition-item {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.composition-item:last-child {
+  border-bottom: none;
+}
+
+.composition-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+.composition-date {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.composition-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.load-btn, .delete-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.load-btn {
+  background: var(--accent-color);
+  color: white;
+}
+
+.load-btn:hover {
+  background: var(--accent-hover);
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+.save-message {
+  margin-top: 1rem;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.save-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.save-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .save-composition-section {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .composition-item {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .composition-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 </style>

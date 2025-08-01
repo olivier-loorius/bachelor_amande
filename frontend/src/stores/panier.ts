@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { useAuthStore } from './auth'
-import { dataService } from '@/services/dataService'
 
 interface ProduitPanier {
   id: number
@@ -29,45 +28,28 @@ export const usePanierStore = defineStore('panier', () => {
     return panier.value.reduce((sum, item) => sum + item.quantite, 0)
   })
 
-  // Charger le panier depuis le service de données
-  const chargerPanier = () => {
-    if (authStore.isAuthenticated && authStore.currentUser) {
-      // Charger le panier de l'utilisateur connecté
-      const userPanier = dataService.getPanierByUserId(authStore.currentUser.id)
-      if (userPanier) {
-        panier.value = userPanier.items
-      } else {
+  // Charger le panier depuis le localStorage
+  const chargerPanier = async () => {
+    const panierLocal = localStorage.getItem('panier')
+    if (panierLocal) {
+      try {
+        panier.value = JSON.parse(panierLocal)
+      } catch (error) {
+        console.error('Erreur lors du chargement du panier local:', error)
         panier.value = []
       }
     } else {
-      // Charger le panier local pour les utilisateurs non connectés
-      const panierLocal = localStorage.getItem('panier')
-      if (panierLocal) {
-        try {
-          panier.value = JSON.parse(panierLocal)
-        } catch (error) {
-          console.error('Erreur lors du chargement du panier local:', error)
-          panier.value = []
-        }
-      } else {
-        panier.value = []
-      }
+      panier.value = []
     }
   }
 
   // Sauvegarder le panier
-  const sauvegarderPanier = () => {
-    if (authStore.isAuthenticated && authStore.currentUser) {
-      // Sauvegarder dans le service de données pour l'utilisateur connecté
-      dataService.updatePanier(authStore.currentUser.id, panier.value)
-    } else {
-      // Sauvegarder localement pour les utilisateurs non connectés
-      localStorage.setItem('panier', JSON.stringify(panier.value))
-    }
+  const sauvegarderPanier = async () => {
+    localStorage.setItem('panier', JSON.stringify(panier.value))
   }
 
   // Ajouter au panier
-  const ajouterAuPanier = (produit: any) => {
+  const ajouterAuPanier = async (produit: any) => {
     const quantiteMax = 10
     const quantiteDemandee = produit.quantite || 1
 
@@ -99,36 +81,36 @@ export const usePanierStore = defineStore('panier', () => {
       })
     }
 
-    sauvegarderPanier()
+    await sauvegarderPanier()
     return true
   }
 
   // Supprimer du panier
-  const supprimerDuPanier = (id: number) => {
+  const supprimerDuPanier = async (id: number) => {
     const index = panier.value.findIndex(item => item.id === id)
     if (index !== -1) {
       panier.value.splice(index, 1)
-      sauvegarderPanier()
+      await sauvegarderPanier()
     }
   }
 
   // Modifier la quantité
-  const modifierQuantite = (id: number, nouvelleQuantite: number) => {
+  const modifierQuantite = async (id: number, nouvelleQuantite: number) => {
     const item = panier.value.find(item => item.id === id)
     if (item) {
       if (nouvelleQuantite > 0 && nouvelleQuantite <= 10) {
         item.quantite = nouvelleQuantite
-        sauvegarderPanier()
+        await sauvegarderPanier()
       } else if (nouvelleQuantite <= 0) {
-        supprimerDuPanier(id)
+        await supprimerDuPanier(id)
       }
     }
   }
 
   // Vider le panier
-  const viderPanier = () => {
+  const viderPanier = async () => {
     panier.value = []
-    sauvegarderPanier()
+    await sauvegarderPanier()
   }
 
   // Ouvrir/fermer le panier
@@ -151,24 +133,15 @@ export const usePanierStore = defineStore('panier', () => {
     return item ? item.quantite : 0
   }
 
-  // Synchroniser le panier (appelé lors des changements d'authentification)
-  const synchroniserPanier = () => {
-    chargerPanier()
+  // Synchroniser le panier
+  const synchroniserPanier = async () => {
+    await chargerPanier()
   }
 
-  // Écouter les changements d'authentification
-  watch(() => authStore.isAuthenticated, (isAuthenticated) => {
-    if (isAuthenticated) {
-      // Utilisateur connecté, charger son panier
-      chargerPanier()
-    } else {
-      // Utilisateur déconnecté, charger le panier local
-      chargerPanier()
-    }
-  })
-
   // Écouter les changements du panier pour sauvegarder
-  watch(panier, sauvegarderPanier, { deep: true })
+  watch(panier, async () => {
+    await sauvegarderPanier()
+  }, { deep: true })
 
   // Charger le panier au démarrage
   chargerPanier()

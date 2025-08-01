@@ -11,4 +11,5 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'), // Ce chemin doit être correct pour "src"
     },
   },
+  envDir: '../', // Lire les variables d'environnement depuis la racine du projet
 })

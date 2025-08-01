@@ -1,9 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
-// Charger les variables d'environnement
-dotenv.config();
+// Charger les variables d'environnement depuis la racine du projet
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,7 +19,17 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'API Amande Backend', 
     version: '1.0.0',
-    status: 'running'
+    status: 'running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Route pour forcer le rafraîchissement
+app.get('/refresh', (req, res) => {
+  res.json({ 
+    message: 'Page rafraîchie',
+    timestamp: new Date().toISOString(),
+    refresh: true
   });
 });
 
@@ -27,10 +38,10 @@ app.get('/test', (req, res) => {
   res.json({ message: 'Test route working!' });
 });
 
-// Routes API - temporairement commentées pour debug
-// app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/products', require('./routes/products'));
-// app.use('/api/cart', require('./routes/cart'));
+// Routes API
+app.use('/api/products', require('./routes/products'));
+app.use('/api/cart', require('./routes/cart'));
+app.use('/api/users', require('./routes/users'));
 
 // Middleware de gestion d'erreurs
 app.use((err, req, res, next) => {

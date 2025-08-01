@@ -11,6 +11,7 @@ import ComposerView from '@/views/composer/ComposerView.vue'
 import CatalogueView from '@/views/catalogue/CatalogueView.vue'
 import ConstructionView from '@/views/utils/ConstructionView.vue'
 import EnConstructionView from '@/views/EnConstructionView.vue'
+import AdminView from '@/views/admin/AdminView.vue'
 
 const routes = [
   {
@@ -111,6 +112,16 @@ const routes = [
     props: true,
     meta: {
       title: 'Page en construction - Amande Pâtisserie',
+    },
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: AdminView,
+    meta: {
+      title: 'Dashboard Admin - Amande Pâtisserie',
+      requiresAuth: true,
+      requiresAdmin: true
     },
   },
   {

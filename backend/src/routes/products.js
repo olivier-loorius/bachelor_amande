@@ -1,6 +1,5 @@
 const express = require('express');
 const { supabase } = require('../config/supabase');
-const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -13,14 +12,37 @@ router.get('/', async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) {
+      console.error('Erreur Supabase:', error);
       return res.status(400).json({ error: error.message });
     }
 
-    res.json({ products: data });
+    console.log(`📦 ${data?.length || 0} produits récupérés`);
+    res.json({ products: data || [] });
 
   } catch (error) {
     console.error('Erreur de récupération des produits:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des produits' });
+  }
+});
+
+// Ajouter un produit (pour test)
+router.post('/', async (req, res) => {
+  try {
+    const { name, description, price, category } = req.body;
+    
+    const { data, error } = await supabase
+      .from('products')
+      .insert([{ name, description, price, category }])
+      .select()
+      .single();
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(201).json({ product: data });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur lors de la création du produit' });
   }
 });
 
@@ -67,107 +89,6 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error('Erreur de récupération du produit:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération du produit' });
-  }
-});
-
-// Créer un nouveau produit (admin seulement)
-router.post('/', authenticateToken, async (req, res) => {
-  try {
-    const { name, description, price, category, image_url, ingredients } = req.body;
-
-    // Validation des données
-    if (!name || !description || !price || !category) {
-      return res.status(400).json({ 
-        error: 'Nom, description, prix et catégorie sont requis' 
-      });
-    }
-
-    const { data, error } = await supabase
-      .from('products')
-      .insert([
-        {
-          name,
-          description,
-          price,
-          category,
-          image_url,
-          ingredients,
-          created_by: req.user.id
-        }
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    res.status(201).json({ 
-      message: 'Produit créé avec succès',
-      product: data 
-    });
-
-  } catch (error) {
-    console.error('Erreur de création du produit:', error);
-    res.status(500).json({ error: 'Erreur lors de la création du produit' });
-  }
-});
-
-// Mettre à jour un produit (admin seulement)
-router.put('/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description, price, category, image_url, ingredients } = req.body;
-
-    const { data, error } = await supabase
-      .from('products')
-      .update({
-        name,
-        description,
-        price,
-        category,
-        image_url,
-        ingredients,
-        updated_at: new Date()
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    res.json({ 
-      message: 'Produit mis à jour avec succès',
-      product: data 
-    });
-
-  } catch (error) {
-    console.error('Erreur de mise à jour du produit:', error);
-    res.status(500).json({ error: 'Erreur lors de la mise à jour du produit' });
-  }
-});
-
-// Supprimer un produit (admin seulement)
-router.delete('/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const { error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    res.json({ message: 'Produit supprimé avec succès' });
-
-  } catch (error) {
-    console.error('Erreur de suppression du produit:', error);
-    res.status(500).json({ error: 'Erreur lors de la suppression du produit' });
   }
 });
 

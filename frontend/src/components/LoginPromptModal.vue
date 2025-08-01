@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <!-- Composants de connexion/inscription -->
+    <!-- Composant de connexion/inscription -->
     <LoginPanel 
       :isOpen="isLoginOpen" 
       @close="closeLogin"
@@ -39,18 +39,12 @@
       :openCartAfterLogin="true"
       @openCart="handleOpenCart"
     />
-    <RegisterPanel 
-      :isOpen="isRegisterOpen" 
-      @close="closeRegister"
-      @registerSuccess="handleRegisterSuccess"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import LoginPanel from '@/components/auth/LoginPanel.vue'
-import RegisterPanel from '@/components/auth/RegisterPanel.vue'
 
 interface Props {
   isOpen: boolean
@@ -65,7 +59,6 @@ const emit = defineEmits<{
 }>()
 
 const isLoginOpen = ref(false)
-const isRegisterOpen = ref(false)
 
 const closeModal = () => {
   emit('close')
@@ -80,11 +73,9 @@ const closeLogin = () => {
 }
 
 const openRegister = () => {
-  isRegisterOpen.value = true
-}
-
-const closeRegister = () => {
-  isRegisterOpen.value = false
+  // Ouvrir le mode inscription dans LoginPanel
+  isLoginOpen.value = true
+  // Le LoginPanel gère maintenant l'inscription en interne
 }
 
 const handleLoginSuccess = () => {

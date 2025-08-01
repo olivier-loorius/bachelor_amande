@@ -1,5 +1,6 @@
 <template>
   <div class="home-page">
+    <!-- Section Hero -->
     <section class="hero-section">
       <div class="hero-background">
         <div class="hero-image"></div>
@@ -32,6 +33,7 @@
       </div>
     </section>
 
+    <!-- Section Actualités -->
     <section class="news-section">
       <div class="container">
         <div class="section-header">
@@ -95,6 +97,7 @@
       </div>
     </section>
 
+    <!-- Section Catalogue -->
     <section class="catalogue-section">
       <div class="container">
         <div class="section-header">
@@ -213,31 +216,26 @@
       </div>
     </section>
 
-      <section class="cta-section">
-      <div class="cta-background">
-        <div class="cta-pattern"></div>
-        <div class="cta-overlay"></div>
-      </div>
+    <!-- Section CTA -->
+    <section class="cta-section">
       <div class="container">
-        <div class="cta-inner">
         <div class="cta-content">
-            <h2 class="cta-title">
-              <span class="cta-title-line">Prêt à créer</span>
-              <span class="cta-title-line">vos tartelettes ?</span>
-            </h2>
-            <p class="cta-subtitle">Découvrez notre catalogue complet et commencez votre composition</p>
-            <div class="cta-actions">
-              <router-link to="/catalogue" class="btn btn-primary btn-cta">
-                Explorer le catalogue
-              </router-link>
-              <router-link to="/composer" class="btn btn-secondary btn-cta">
-                Commencer à composer
-              </router-link>
-            </div>
+          <h2 class="cta-title">
+            <span>Prêt à créer</span>
+            <span>vos tartelettes ?</span>
+          </h2>
+          <p class="cta-subtitle">Découvrez notre catalogue complet et commencez votre composition</p>
+          <div class="cta-actions">
+            <router-link to="/catalogue" class="btn btn-primary btn-cta">
+              Explorer le catalogue
+            </router-link>
+            <router-link to="/composer" class="btn btn-secondary btn-cta">
+              Commencer à composer
+            </router-link>
           </div>
         </div>
-        </div>
-      </section>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -334,17 +332,6 @@ onUnmounted(() => {
   background-repeat: no-repeat;
   animation: imageZoom 20s ease-in-out infinite;
   filter: brightness(0.7) contrast(1.1);
-}
-
-.hero-pattern {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  animation: patternFloat 20s ease-in-out infinite;
 }
 
 .hero-overlay {
@@ -456,39 +443,6 @@ onUnmounted(() => {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
-.cta-section {
-  position: relative;
-  padding: 6rem 0;
-  color: #fff;
-  overflow: hidden;
-  background: #fff;
-}
-
-.cta-background {
-  display: none;
-}
-
-.cta-pattern {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  animation: patternFloat 25s ease-in-out infinite reverse;
-}
-
-.cta-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.1);
-}
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -496,165 +450,6 @@ onUnmounted(() => {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
-}
-
-.cta-inner {
-  background: #90aeb0;
-  padding: 4rem 1.5rem;
-  border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 3;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.cta-content {
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.cta-title {
-  font-family: var(--font-family-title);
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  line-height: 1.2;
-}
-
-.cta-title-line {
-  display: block;
-  animation: fadeInUp 1s ease-out;
-}
-
-.cta-title-line:nth-child(2) {
-  animation-delay: 0.2s;
-  animation-fill-mode: both;
-}
-
-.cta-subtitle {
-  font-family: var(--font-family-text);
-  font-size: 1.3rem;
-  margin-bottom: 3rem;
-  opacity: 0.95;
-  animation: fadeInUp 1s ease-out 0.4s both;
-}
-
-.cta-actions {
-  display: flex;
-  gap: 1.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  animation: fadeInUp 1s ease-out 0.6s both;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.btn-cta {
-  padding: 1.2rem 2.5rem;
-  font-size: 1.1rem;
-  font-weight: 700;
-  border-radius: 12px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  min-width: fit-content;
-  box-sizing: border-box;
-}
-
-.btn-cta:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 2rem;
-  border-radius: 8px;
-  font-family: var(--font-family-text);
-  font-size: 1rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-primary {
-  background: var(--accent-color);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-primary:hover {
-  background: var(--primary-color);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.btn-secondary {
-  background: transparent;
-  color: #fff;
-  border: 2px solid #fff;
-}
-
-.btn-secondary:hover {
-  background: #fff;
-  color: var(--primary-color);
-  transform: translateY(-2px);
-}
-
-.btn svg {
-  width: 20px;
-  height: 20px;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes imageZoom {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-@keyframes patternFloat {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(1deg); }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-  40% { transform: translateX(-50%) translateY(-10px); }
-  60% { transform: translateX(-50%) translateY(-5px); }
-}
-
-.values-section,
-.composer-section,
-.news-section {
-  padding: 3rem 0;
-  background: #fff;
 }
 
 .section-header {
@@ -680,53 +475,6 @@ onUnmounted(() => {
   opacity: 0.9;
   line-height: 1.7;
   text-align: center;
-}
-
-.values-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.value-card {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.value-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-}
-
-.value-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-  color: #fff;
-  margin-bottom: 1.5rem;
-}
-
-.value-card h3 {
-  font-family: var(--font-family-title);
-  font-size: 1.5rem;
-  color: var(--text-color);
-  margin-bottom: 1rem;
-}
-
-.value-card p {
-  font-family: var(--font-family-text);
-  color: var(--text-color);
-  opacity: 0.8;
-  line-height: 1.6;
 }
 
 .news-section {
@@ -1118,8 +866,6 @@ onUnmounted(() => {
   display: none;
 }
 
-
-
 .catalogue-slider {
   display: none;
 }
@@ -1136,6 +882,191 @@ onUnmounted(() => {
   padding: 0 1rem;
   position: relative;
   z-index: 10;
+}
+
+.cta-section {
+  position: relative;
+  padding: 6rem 0;
+  color: #fff;
+  overflow: hidden;
+  background: #fff;
+}
+
+.cta-background {
+  display: none;
+}
+
+.cta-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  animation: patternFloat 25s ease-in-out infinite reverse;
+}
+
+.cta-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.cta-inner {
+  background: #90aeb0;
+  padding: 4rem 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 3;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.cta-content {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.cta-title {
+  font-family: var(--font-family-title);
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.cta-title-line {
+  display: block;
+  animation: fadeInUp 1s ease-out;
+}
+
+.cta-title-line:nth-child(2) {
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+}
+
+.cta-subtitle {
+  font-family: var(--font-family-text);
+  font-size: 1.3rem;
+  margin-bottom: 3rem;
+  opacity: 0.95;
+  animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeInUp 1s ease-out 0.6s both;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.btn-cta {
+  padding: 1.2rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  min-width: fit-content;
+  box-sizing: border-box;
+}
+
+.btn-cta:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-family: var(--font-family-text);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:hover {
+  background: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.btn-secondary:hover {
+  background: #fff;
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes imageZoom {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes patternFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(1deg); }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+  40% { transform: translateX(-50%) translateY(-10px); }
+  60% { transform: translateX(-50%) translateY(-5px); }
 }
 
 @media (max-width: 768px) {
