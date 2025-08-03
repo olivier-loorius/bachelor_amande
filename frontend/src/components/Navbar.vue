@@ -216,7 +216,7 @@ nav {
 }
 
 .logo img {
-  height: 120px;
+  height: 80px; /* Réduit de 120px à 80px */
   width: auto;
   object-fit: contain;
   transition: transform 0.3s ease;

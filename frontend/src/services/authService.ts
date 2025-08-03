@@ -6,6 +6,21 @@ export async function registerUser({ email, password, name }: { email: string; p
     throw new Error("Tous les champs sont requis.");
   }
 
+  // Vérifier si un compte avec cet email existe déjà (même supprimé)
+  const { data: existingUser } = await supabase
+    .from('users')
+    .select('id, deleted')
+    .eq('email', email)
+    .single();
+
+  if (existingUser) {
+    if (existingUser.deleted) {
+      throw new Error("Un compte avec cet email a été supprimé. Veuillez utiliser un autre email.");
+    } else {
+      throw new Error("Un compte avec cet email existe déjà.");
+    }
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -60,6 +75,15 @@ export async function getUserInfos(userId: string) {
   }
   
   console.log('✅ getUserInfos - data:', data);
+  
+  // Vérifier si le compte est marqué comme supprimé
+  if (data.deleted) {
+    console.log('❌ Compte supprimé détecté:', data.email);
+    // Déconnecter l'utilisateur car son compte est supprimé
+    await supabase.auth.signOut();
+    throw new Error('Ce compte a été supprimé. Veuillez contacter l\'administrateur.');
+  }
+  
   return data;
 }
 

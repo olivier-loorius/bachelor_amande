@@ -91,6 +91,46 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Suppression de compte
+  const deleteAccount = async () => {
+    try {
+      console.log('🗑️ Début de la suppression du compte...')
+      
+      if (!user.value) {
+        throw new Error('Aucun utilisateur connecté')
+      }
+
+      console.log('👤 Utilisateur à supprimer:', user.value.email)
+
+                    // Désactiver le compte directement avec Supabase
+      const { error } = await supabase
+        .from('users')
+        .update({ deleted: true })
+        .eq('id', user.value.id)
+
+      if (error) {
+        throw new Error('Erreur lors de la désactivation: ' + error.message)
+      }
+
+      console.log('✅ Compte désactivé avec succès')
+
+      // Déconnexion après soft delete réussi
+      await logoutUser()
+      user.value = null
+
+      return { 
+        success: true, 
+        message: 'Compte désactivé avec succès' 
+      }
+    } catch (error) {
+      console.error('❌ Erreur deleteAccount:', error)
+      return { 
+        success: false, 
+        message: error.message || 'Erreur lors de la suppression du compte' 
+      }
+    }
+  }
+
   // Initialiser la session
   const initialize = async () => {
     try {
@@ -111,7 +151,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Initialiser au démarrage
-  initialize()
+  // initialize() // Commenté pour éviter la connexion automatique
 
   return {
     user,
@@ -122,6 +162,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     login,
     register,
-    logout
+    logout,
+    deleteAccount
   }
 }) 

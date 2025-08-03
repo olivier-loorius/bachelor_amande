@@ -22,6 +22,10 @@ const panierStore = usePanierStore()
 </script>
 
 <style>
+html, body, #app {
+  height: 100%;
+}
+
 .main-content {
   padding-top: 80px; /* Hauteur de la navbar */
 }

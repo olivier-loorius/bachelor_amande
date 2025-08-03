@@ -1,5 +1,8 @@
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+const path = require('path');
+
+// Charger le fichier .env depuis la racine du projet
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
 
 // Configuration Supabase
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -25,6 +28,7 @@ const supabaseAdmin = supabaseServiceKey
   : supabase; // Fallback sur le client public si pas de service key
 
 console.log('✅ Configuration Supabase chargée');
+console.log('🔑 Service Role Key:', supabaseServiceKey ? 'Présent' : 'Manquant');
 
 module.exports = {
   supabase,

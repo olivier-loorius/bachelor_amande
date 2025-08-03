@@ -135,10 +135,23 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const title = to.meta?.title || 'Amande Pâtisserie'
   document.title = typeof title === 'string' ? title : 'Amande Pâtisserie'
   window.scrollTo(0, 0)
+  
+  // Protection des routes admin
+  if (to.meta?.requiresAdmin) {
+    // Importer le store auth
+    const { useAuthStore } = await import('@/stores/auth')
+    const authStore = useAuthStore()
+    
+    if (!authStore.user || !authStore.isAdmin) {
+      console.log('❌ Accès admin refusé, redirection vers /')
+      next('/')
+      return
+    }
+  }
   
   next()
 })
