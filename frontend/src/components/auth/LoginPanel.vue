@@ -56,7 +56,11 @@
                    <i class="fas fa-sign-out-alt"></i>
                    Se déconnecter
                  </button>
-                 <button @click="startDeleteProcess" class="discrete-btn delete-discrete">
+                 <button 
+                   v-if="authStore.currentUser?.role !== 'admin'"
+                   @click="startDeleteProcess" 
+                   class="discrete-btn delete-discrete"
+                 >
                    <i class="fas fa-trash-alt"></i>
                    Supprimer mon compte
                  </button>
@@ -236,6 +240,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 interface Props {
@@ -251,6 +256,7 @@ const emit = defineEmits<{
 }>()
 
 const authStore = useAuthStore()
+const router = useRouter()
 const isLoading = ref(false)
 const isMobile = ref(false)
 const currentMode = ref<'login' | 'register' | 'account'>('login')
@@ -392,7 +398,8 @@ const handleLogout = () => {
   // Vider les champs immédiatement avant la déconnexion
   clearForms()
   
-  authStore.logout()
+  // Déconnexion avec redirection
+  authStore.logout(router)
   
   // Vider encore après la déconnexion
   setTimeout(() => {
@@ -400,6 +407,11 @@ const handleLogout = () => {
   }, 100)
   
   closeLogin()
+  
+  // Forcer un refresh pour s'assurer que la vue se met à jour
+  setTimeout(() => {
+    window.location.reload()
+  }, 500)
 }
 
 const startDeleteProcess = () => {

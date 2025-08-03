@@ -365,6 +365,32 @@ a:hover {
   box-sizing: border-box;
   position: relative;
   background: none;
+  outline: none; /* Supprime la bordure de focus par défaut */
+}
+
+/* Styles de focus personnalisés pour chaque CTA */
+.cta-button:focus {
+  outline: none; /* Supprime la bordure de focus par défaut */
+}
+
+.login-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(144, 174, 176, 0.3); /* Bordure de focus pour le bouton login */
+}
+
+.login-btn.connected:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3); /* Bordure de focus pour le bouton connecté */
+}
+
+.cart-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.3); /* Bordure de focus pour le bouton panier */
+}
+
+.admin-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(56, 57, 97, 0.3); /* Bordure de focus pour le bouton admin */
 }
 
 // Bouton de connexion
@@ -545,6 +571,32 @@ a:hover {
     display: flex;
     position: relative;
     text-align: center;
+    outline: none; /* Supprime la bordure de focus par défaut */
+  }
+  
+  /* Styles de focus pour mobile */
+  .cta-button:focus {
+    outline: none;
+  }
+  
+  .login-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(144, 174, 176, 0.3);
+  }
+  
+  .login-btn.connected:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+  }
+  
+  .cart-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.3);
+  }
+  
+  .admin-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(56, 57, 97, 0.3);
   }
   
   .cart-count {
