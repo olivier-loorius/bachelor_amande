@@ -527,6 +527,16 @@ import fondCacao from '@/assets/images/fondCacao.jpg'
 import fondNoisette from '@/assets/images/fondNoisette.jpg'
 import fondNatureCremeDamande from '@/assets/images/fondNatureCrèmeDamande.jpg'
 import fondNatureCajou from '@/assets/images/fondNatureCajou.jpg'
+import fondNaturePraline from '@/assets/images/fondNaturePraliné.png'
+import fondNaturePeche from '@/assets/images/fontNaturePeche.png'
+import fondCacaoCremeDamande from '@/assets/images/fondCacaoCrèmeDamande.png'
+import fondCacaoCajou from '@/assets/images/fondCacaoCajou (2).png'
+import fondCacaoPraline from '@/assets/images/fondCacaoPraliné.png'
+import fondCacaoPeche from '@/assets/images/fondCacaoPeche.png'
+import fondNoisetteCremeDamande from '@/assets/images/fondNoisettCremDamande.png'
+import fondNoisetteCajou from '@/assets/images/fondNoisetteCajou.png'
+import fondNoisettePraline from '@/assets/images/fondNoisettePraliné.png'
+import fondNoisettePeche from '@/assets/images/fondNoisettePeche.png'
 
 const fonds = [
   { id: 1, nom: 'Pâte sucrée amande', image: fondNature },
@@ -536,9 +546,9 @@ const fonds = [
 const garnitures1 = [
     { id: 1, nom: 'Crème d\'amande', image: '' },
   { id: 2, nom: 'Caramel cajou', image: '' },
-    { id: 3, nom: 'Crème d\'amande', image: '' },
-  { id: 4, nom: 'Crème citron', image: '' },
-  { id: 5, nom: 'Crème pralinée', image: '' },
+    { id: 3, nom: 'Croustillant praliné', image: '' },
+  { id: 4, nom: 'Compotée de pêche', image: '' },
+  { id: 5, nom: 'Crème citron', image: '' },
 ]
 const garnitures2 = [
   { id: 1, nom: 'Fraises' },
@@ -793,6 +803,36 @@ function deselectGarniture1() {
   }
     if (fond.image === fondNature && garniture.nom === "Caramel cajou") {
     return fondNatureCajou;
+  }
+    if (fond.image === fondNature && garniture.nom === "Croustillant praliné") {
+    return fondNaturePraline;
+  }
+    if (fond.image === fondNature && garniture.nom === "Compotée de pêche") {
+    return fondNaturePeche;
+  }
+    if (fond.image === fondCacao && garniture.nom === "Crème d'amande") {
+    return fondCacaoCremeDamande;
+  }
+    if (fond.image === fondCacao && garniture.nom === "Caramel cajou") {
+    return fondCacaoCajou;
+  }
+    if (fond.image === fondCacao && garniture.nom === "Croustillant praliné") {
+    return fondCacaoPraline;
+  }
+    if (fond.image === fondCacao && garniture.nom === "Compotée de pêche") {
+    return fondCacaoPeche;
+  }
+    if (fond.image === fondNoisette && garniture.nom === "Crème d'amande") {
+    return fondNoisetteCremeDamande;
+  }
+    if (fond.image === fondNoisette && garniture.nom === "Caramel cajou") {
+    return fondNoisetteCajou;
+  }
+    if (fond.image === fondNoisette && garniture.nom === "Croustillant praliné") {
+    return fondNoisettePraline;
+  }
+    if (fond.image === fondNoisette && garniture.nom === "Compotée de pêche") {
+    return fondNoisettePeche;
   }
   return fond.image;
 }
@@ -1291,26 +1331,24 @@ function goToPrevStep() {
   color: #888;
 }
 .composer-footer {
-  position: sticky;
-  bottom: 0;
   width: 100%;
   background: #fff;
-  z-index: 10;
-  padding-top: 1.2rem;
-  padding-bottom: 1.2rem;
+  padding-top: 2rem;
+  padding-bottom: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 2rem;
 }
 .composer-card {
-  padding-bottom: 8rem;
+  padding-bottom: 2rem;
 }
 .composer-progress-bar {
   display: flex;
   align-items: center;
   justify-content: center;
-    margin-bottom: 2.2rem;
-  margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+  margin-top: 1rem;
   gap: 0.5rem;
   min-width: 340px;
 }

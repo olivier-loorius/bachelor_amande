@@ -114,14 +114,17 @@
                     { 'deleted': user.deleted }
                   ]"
                 >
-                  <td class="user-name" data-label="Nom">
-                    <span :class="{ 'deleted-text': user.deleted }">
-                      {{ user.name }}
-                    </span>
-                    <span v-if="user.deleted" class="deleted-badge">
-                      🗑️ Supprimé
-                    </span>
-                  </td>
+                                   <td class="user-name" data-label="Nom">
+                   <span :class="{ 'deleted-text': user.deleted }">
+                     {{ user.name }}
+                   </span>
+                   <span v-if="user.deleted" class="deleted-badge">
+                     🗑️ Supprimé
+                   </span>
+                   <span v-else-if="user.updated_at && user.updated_at !== user.created_at" class="modified-badge">
+                     ✏️ Modifié
+                   </span>
+                 </td>
                   
                   <td class="user-email" data-label="Email">
                     <span :class="{ 'deleted-text': user.deleted }" :title="user.email">
@@ -150,15 +153,19 @@
                   
                   <td class="user-actions" data-label="Actions">
                     <button 
-                      v-if="!user.deleted"
+                      v-if="!user.deleted && user.role !== 'admin'"
                       @click="deleteUser(user.id)"
                       class="action-btn delete-btn"
                       title="Désactiver cet utilisateur"
                     >
                       <i class="fas fa-trash-alt"></i>
                     </button>
-                    <span v-else class="deleted-status">
+                    <span v-else-if="user.deleted" class="deleted-status">
                       Désactivé
+                    </span>
+                    <span v-else-if="user.role === 'admin'" class="admin-protected">
+                      <i class="fas fa-shield-alt"></i>
+                      Protégé
                     </span>
                   </td>
                 </tr>
@@ -201,6 +208,7 @@ interface User {
   email: string
   role: string
   created_at: string
+  updated_at?: string
   deleted?: boolean
   deleted_at?: string
 }
@@ -238,10 +246,23 @@ onMounted(async () => {
   console.log('✅ Accès admin autorisé')
   await loadUsers()
   
-  // Auto-refresh toutes les 30 secondes
-  setInterval(async () => {
-    await loadUsers()
-  }, 30000)
+      // Auto-refresh toutes les 30 secondes
+    setInterval(async () => {
+      await loadUsers()
+    }, 30000)
+    
+    // Écouter les modifications de profil pour rafraîchir le dashboard
+    const handleProfileUpdate = () => {
+      loadUsers()
+    }
+    
+    // Ajouter un listener pour les modifications de profil
+    window.addEventListener('profile-updated', handleProfileUpdate)
+    
+    // Cleanup
+    onUnmounted(() => {
+      window.removeEventListener('profile-updated', handleProfileUpdate)
+    })
 })
 
 const loadUsers = async () => {
@@ -634,6 +655,15 @@ const toggleUsersSection = () => {
   font-weight: 600;
 }
 
+.modified-badge {
+  background: #383961;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
 .user-email {
   color: var(--text-color);
   opacity: 0.8;
@@ -703,6 +733,15 @@ const toggleUsersSection = () => {
   color: #999;
   font-size: 0.8rem;
   font-style: italic;
+}
+
+.admin-protected {
+  color: #ff6f61;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 /* État vide */

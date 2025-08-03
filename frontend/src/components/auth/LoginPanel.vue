@@ -31,7 +31,11 @@
             </div>
 
                          <div class="account-actions">
-               <button class="account-btn">
+               <button 
+                 v-if="authStore.currentUser?.role !== 'admin'"
+                 @click="openEditProfile" 
+                 class="account-btn"
+               >
                  <i class="fas fa-user-edit"></i>
                  Modifier mon profil
                </button>
@@ -148,6 +152,51 @@
           </p>
         </div>
 
+        <!-- Mode Vérification du mot de passe -->
+        <div v-else-if="currentMode === 'password-verification'">
+          
+          <!-- Message d'erreur/succès -->
+          <div v-if="message" :class="['message', messageType]">
+            {{ message }}
+          </div>
+
+          <form @submit.prevent="verifyPassword" class="verification-form">
+            <div class="form-group">
+              <label for="current-password">Mot de passe actuel</label>
+              <div class="input-wrapper">
+                <input
+                  v-model="passwordVerification"
+                  :type="showPasswordVerification ? 'text' : 'password'"
+                  id="current-password"
+                  placeholder="Entrez votre mot de passe actuel"
+                  autocomplete="current-password"
+                  required
+                  class="form-input"
+                  style="padding-right: 2.5rem;"
+                />
+                <i 
+                  :class="showPasswordVerification ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                  @click="showPasswordVerification = !showPasswordVerification"
+                  style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-color); font-size: 14px;"
+                  :title="showPasswordVerification ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                ></i>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="submit" :disabled="isLoading" class="btn-primary">
+                <i class="fas fa-check"></i>
+                {{ isLoading ? 'Vérification...' : 'Confirmer' }}
+              </button>
+              
+              <button type="button" @click="handleBackFromVerification" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Retour
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- Mode Inscription -->
         <div v-else>
           <p>Remplissez les informations ci-dessous pour créer votre compte.</p>
@@ -186,9 +235,9 @@
                  v-model="registerForm.password"
                  :type="showPassword ? 'text' : 'password'"
                  id="registerPassword"
-                 placeholder="Entrez votre mot de passe"
+                 :placeholder="authStore.isAuthenticated ? 'Laissez vide pour ne pas changer' : 'Entrez votre mot de passe'"
                  autocomplete="new-password"
-                 required
+                 :required="!authStore.isAuthenticated"
                  style="padding-right: 2.5rem;"
                />
                <i 
@@ -205,9 +254,9 @@
                  v-model="registerForm.confirmPassword"
                  :type="showConfirmPassword ? 'text' : 'password'"
                  id="confirmPassword"
-                 placeholder="Confirmez votre mot de passe"
+                 :placeholder="authStore.isAuthenticated ? 'Confirmez si vous changez le mot de passe' : 'Confirmez votre mot de passe'"
                  autocomplete="new-password"
-                 required
+                 :required="!authStore.isAuthenticated"
                  style="padding-right: 2.5rem;"
                />
                <i 
@@ -218,10 +267,18 @@
                ></i>
              </div>
             
-            <button type="submit" :disabled="isLoading">
-              <span v-if="!isLoading">Créer un compte</span>
-              <span v-else>Création...</span>
-            </button>
+            <div class="form-actions">
+              <button type="submit" :disabled="isLoading" class="btn-primary">
+                <i :class="authStore.isAuthenticated ? 'fas fa-edit' : 'fas fa-user-plus'"></i>
+                <span v-if="!isLoading">{{ authStore.isAuthenticated ? 'Mettre à jour' : 'Créer un compte' }}</span>
+                <span v-else>{{ authStore.isAuthenticated ? 'Mise à jour...' : 'Création...' }}</span>
+              </button>
+              
+              <button v-if="authStore.isAuthenticated" type="button" @click="currentMode = 'account'" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Annuler
+              </button>
+            </div>
           </form>
 
           <!-- Lien de connexion -->
@@ -234,6 +291,8 @@
      </div>
    </div>
    
+
+   
    
    
  </template>
@@ -242,6 +301,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { supabase } from '@/services/supabaseService'
 
 interface Props {
   isOpen: boolean
@@ -259,13 +319,16 @@ const authStore = useAuthStore()
 const router = useRouter()
 const isLoading = ref(false)
 const isMobile = ref(false)
-const currentMode = ref<'login' | 'register' | 'account'>('login')
+const currentMode = ref<'login' | 'register' | 'account' | 'password-verification'>('login')
 const message = ref('')
-const messageType = ref<'success' | 'error'>('success')
+const messageType = ref<'success' | 'error' | 'info'>('success')
+const passwordVerification = ref('')
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+const showPasswordVerification = ref(false)
 const showDeleteConfirmation = ref(false)
 const deleteStep = ref(0) // 0: normal, 1: confirmation, 2: loading, 3: success
+const showEditProfile = ref(false)
 
 const loginForm = reactive({
   email: '',
@@ -286,6 +349,8 @@ const registerForm = reactive({
   password: '',
   confirmPassword: ''
 })
+
+
 
 const clearForms = () => {
   // Vider les données réactives
@@ -503,6 +568,91 @@ const handleDeleteAccount = async () => {
   }
 }
 
+const openEditProfile = () => {
+  // Vérification de sécurité : s'assurer que l'utilisateur est connecté
+  if (!authStore.isAuthenticated || !authStore.currentUser) {
+    message.value = 'Vous devez être connecté pour modifier votre profil'
+    messageType.value = 'error'
+    return
+  }
+  
+  // Vérification de sécurité : empêcher les admins de modifier leur profil
+  if (authStore.currentUser.role === 'admin') {
+    message.value = 'Les administrateurs ne peuvent pas modifier leur profil depuis l\'interface pour des raisons de sécurité. Contactez le support technique.'
+    messageType.value = 'error'
+    return
+  }
+  
+  // Vider le formulaire de vérification
+  passwordVerification.value = ''
+  showPasswordVerification.value = false
+  
+  // Demander d'abord le mot de passe actuel
+  currentMode.value = 'password-verification'
+  message.value = 'Veuillez entrer votre mot de passe actuel pour modifier votre profil'
+  messageType.value = 'info'
+}
+
+const handleBackFromVerification = () => {
+  // Vider le formulaire de vérification
+  passwordVerification.value = ''
+  showPasswordVerification.value = false
+  message.value = ''
+  
+  // Retourner au mode compte
+  currentMode.value = 'account'
+}
+
+const verifyPassword = async () => {
+  if (!passwordVerification.value.trim()) {
+    message.value = 'Veuillez entrer votre mot de passe'
+    messageType.value = 'error'
+    return
+  }
+
+  try {
+    isLoading.value = true
+    message.value = 'Vérification en cours...'
+    
+    // Vérification de sécurité supplémentaire
+    if (!authStore.currentUser?.email) {
+      message.value = 'Erreur : Impossible de récupérer vos informations'
+      messageType.value = 'error'
+      return
+    }
+    
+    // Vérifier le mot de passe avec Supabase
+    const { error } = await supabase.auth.signInWithPassword({
+      email: authStore.currentUser.email,
+      password: passwordVerification.value
+    })
+    
+    if (error) {
+      message.value = 'Mot de passe incorrect'
+      messageType.value = 'error'
+      passwordVerification.value = ''
+    } else {
+      // Mot de passe correct, ouvrir la modification
+      currentMode.value = 'register'
+      
+      // Pré-remplir le formulaire avec les données actuelles
+      registerForm.name = authStore.currentUser?.name || ''
+      registerForm.email = authStore.currentUser?.email || ''
+      registerForm.password = '' // Laisser vide pour indiquer qu'il est optionnel
+      registerForm.confirmPassword = '' // Laisser vide pour indiquer qu'il est optionnel
+      
+      // Message informatif
+      message.value = 'Modifiez vos informations. Le mot de passe est optionnel - laissez vide pour ne pas le changer.'
+      messageType.value = 'info'
+    }
+  } catch (error) {
+    message.value = 'Erreur lors de la vérification'
+    messageType.value = 'error'
+  } finally {
+    isLoading.value = false
+  }
+}
+
 const maskEmail = (email: string | undefined) => {
   if (!email) return ''
   const [local, domain] = email.split('@')
@@ -583,34 +733,133 @@ const handleLogin = async () => {
 }
 
 const handleRegister = async () => {
-  if (!registerForm.name || !registerForm.email || !registerForm.password || !registerForm.confirmPassword) {
-    message.value = 'Veuillez remplir tous les champs'
+  // Vérification de sécurité : s'assurer que l'utilisateur est connecté pour les modifications
+  if (authStore.isAuthenticated && (!authStore.currentUser || !authStore.currentUser.id)) {
+    message.value = 'Erreur de sécurité : Impossible de récupérer vos informations'
     messageType.value = 'error'
     return
   }
+  
+  // Si l'utilisateur est connecté, c'est une mise à jour
+  if (authStore.isAuthenticated) {
+    // Validation pour la mise à jour (mot de passe optionnel)
+    if (!registerForm.name || !registerForm.email) {
+      message.value = 'Veuillez remplir le nom et l\'email'
+      messageType.value = 'error'
+      return
+    }
+    
+    // Si un mot de passe est saisi, vérifier qu'il est confirmé
+    if (registerForm.password && !registerForm.confirmPassword) {
+      message.value = 'Veuillez confirmer votre nouveau mot de passe'
+      messageType.value = 'error'
+      return
+    }
+    
+    if (registerForm.password && registerForm.password !== registerForm.confirmPassword) {
+      message.value = 'Les mots de passe ne correspondent pas'
+      messageType.value = 'error'
+      return
+    }
+  } else {
+    // Validation pour l'inscription (tous les champs requis)
+    if (!registerForm.name || !registerForm.email || !registerForm.password || !registerForm.confirmPassword) {
+      message.value = 'Veuillez remplir tous les champs'
+      messageType.value = 'error'
+      return
+    }
 
-  if (registerForm.password !== registerForm.confirmPassword) {
-    message.value = 'Les mots de passe ne correspondent pas'
-    messageType.value = 'error'
-    return
+    if (registerForm.password !== registerForm.confirmPassword) {
+      message.value = 'Les mots de passe ne correspondent pas'
+      messageType.value = 'error'
+      return
+    }
   }
 
   isLoading.value = true
   message.value = ''
   
   try {
-    await authStore.register(registerForm.name, registerForm.email, registerForm.password)
-    message.value = 'Compte créé avec succès !'
-    messageType.value = 'success'
-    
-    // Fermer automatiquement le panneau après création réussie
-    setTimeout(() => {
-      closeLogin()
-    }, 1500)
+    // Si l'utilisateur est connecté, c'est une mise à jour
+    if (authStore.isAuthenticated) {
+      // Mise à jour du nom
+      if (registerForm.name !== authStore.currentUser?.name) {
+        const { error } = await supabase
+          .from('users')
+          .update({ 
+            name: registerForm.name.trim(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', authStore.currentUser?.id)
+        
+        if (error) {
+          message.value = 'Erreur lors de la modification du nom'
+          messageType.value = 'error'
+          return
+        }
+        
+        // Mettre à jour le store local
+        if (authStore.currentUser) {
+          authStore.currentUser.name = registerForm.name.trim()
+        }
+        
+        // Rafraîchir les données utilisateur depuis Supabase
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authStore.currentUser?.id)
+          .single()
+        
+        if (!userError && userData) {
+          // Mettre à jour le store avec les nouvelles données
+          authStore.user = {
+            id: userData.id,
+            email: userData.email,
+            name: userData.name,
+            role: userData.role,
+            created_at: userData.created_at
+          }
+        }
+      }
+      
+      // Mise à jour du mot de passe si fourni
+      if (registerForm.password) {
+        const { error } = await supabase.auth.updateUser({ 
+          password: registerForm.password 
+        })
+        
+        if (error) {
+          message.value = 'Erreur lors du changement de mot de passe'
+          messageType.value = 'error'
+          return
+        }
+      }
+      
+      message.value = 'Profil mis à jour avec succès !'
+      messageType.value = 'success'
+      
+      // Émettre un événement pour rafraîchir le dashboard admin
+      window.dispatchEvent(new CustomEvent('profile-updated'))
+      
+      // Fermer automatiquement le panneau après modification réussie
+      setTimeout(() => {
+        closeLogin()
+      }, 1500)
+    } else {
+      // Inscription normale
+      await authStore.register(registerForm.name, registerForm.email, registerForm.password)
+      message.value = 'Compte créé avec succès !'
+      messageType.value = 'success'
+      
+      // Fermer automatiquement le panneau après création réussie
+      setTimeout(() => {
+        closeLogin()
+      }, 1500)
+    }
     
   } catch (error) {
-    console.error('Erreur d\'inscription:', error)
-    message.value = 'Erreur lors de la création du compte. Veuillez réessayer.'
+    console.error('Erreur:', error)
+    message.value = authStore.isAuthenticated ? 'Erreur lors de la modification' : 'Erreur lors de la création du compte. Veuillez réessayer.'
     messageType.value = 'error'
   } finally {
     isLoading.value = false
@@ -844,6 +1093,20 @@ form button[type='button']:hover {
   margin-bottom: 1rem;
   font-size: 0.9rem;
   font-weight: 500;
+  min-height: 20px; /* Hauteur minimale pour éviter le décalage */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease; /* Transition fluide */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.message:empty {
+  min-height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 .message.success {
@@ -856,6 +1119,131 @@ form button[type='button']:hover {
   background: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+}
+
+.message.info {
+  background: rgba(255, 111, 97, 0.1);
+  color: #ff6f61;
+  border: 1px solid rgba(255, 111, 97, 0.3);
+}
+
+
+
+.verification-form {
+  margin-top: var(--spacing-lg);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+  display: block;
+  color: var(--text-color);
+  font-family: var(--font-family-text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 2.5rem;
+  border: 2px solid #e0e0e0;
+  border-radius: var(--btn-radius);
+  font-family: var(--font-family-text);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: var(--white);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #ff6f61;
+  box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.1);
+}
+
+.input-icon {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+}
+
+.btn-primary {
+  background: #ff6f61;
+  color: var(--white);
+  border: none;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--btn-radius);
+  font-family: var(--font-family-text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #e55a4f;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #ff6f61;
+  border: 2px solid #ff6f61;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--btn-radius);
+  font-family: var(--font-family-text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-secondary:hover {
+  background: #ff6f61;
+  color: var(--white);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
+}
+
+/* Responsive pour la vérification */
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column;
+  }
 }
 
 .account-section {
@@ -920,6 +1308,10 @@ form button[type='button']:hover {
   color: #ff6f61;
 }
 
+.account-btn:focus {
+  outline: none;
+}
+
 .logout-btn {
   background: #ff6f61;
   color: white;
@@ -943,6 +1335,10 @@ form button[type='button']:hover {
   box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
 }
 
+.logout-btn:focus {
+  outline: none;
+}
+
 .delete-btn {
   background: #dc3545;
   color: white;
@@ -964,6 +1360,10 @@ form button[type='button']:hover {
   color: #dc3545;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.delete-btn:focus {
+  outline: none;
 }
 
 /* Styles pour le footer discret */
@@ -996,6 +1396,10 @@ form button[type='button']:hover {
 .discrete-btn:hover {
   color: var(--text-color);
   background: rgba(144, 174, 176, 0.1);
+}
+
+.discrete-btn:focus {
+  outline: none;
 }
 
 .logout-discrete:hover {
@@ -1087,6 +1491,7 @@ form button[type='button']:hover {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
 
 
 </style> 
