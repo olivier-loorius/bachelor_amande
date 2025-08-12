@@ -106,6 +106,14 @@ const routes = [
     },
   },
   {
+    path: '/en-construction',
+    name: 'en-construction',
+    component: EnConstructionView,
+    meta: {
+      title: 'Page en construction - Amande Pâtisserie',
+    },
+  },
+  {
     path: '/reseau-en-construction/:reseau',
     name: 'reseau-en-construction',
     component: EnConstructionView,

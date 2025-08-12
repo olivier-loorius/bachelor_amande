@@ -69,7 +69,7 @@
                 type="text"
                 placeholder="Rechercher un utilisateur..."
                 class="search-input"
-                @input="searchQuery = $event.target.value"
+                @input="(event) => searchQuery = (event.target as HTMLInputElement).value"
               />
               <button 
                 v-if="searchQuery"
@@ -175,30 +175,281 @@
         </div>
       </section>
 
-      <!-- Section Gestion Composer (à venir) -->
-      <section class="dashboard-section coming-soon">
-        <div class="section-header">
-          <h2 class="section-title">
-            <i class="fas fa-palette"></i>
-            Gestion Composer
-          </h2>
-        </div>
-        
-        <div class="coming-soon-content">
-          <div class="coming-soon-icon">
-            <i class="fas fa-tools"></i>
+      <!-- Section Configuration des Produits -->
+      <section class="dashboard-section accordion-section">
+        <div class="section-header accordion-header" @click="toggleProductsSection">
+          <div class="header-left">
+            <h2 class="section-title">
+              <i class="fas fa-cog"></i>
+              Configuration des Produits
+            </h2>
+            <div class="section-stats">
+              <span class="stat-item">
+                <i class="fas fa-layer-group"></i>
+                {{ totalProducts }} produits configurés
+              </span>
+            </div>
           </div>
-          <h3>Fonctionnalité en cours de développement</h3>
-          <p>La gestion du module Composer sera bientôt disponible. Vous pourrez gérer les fonds, garnitures et configurations.</p>
+          <div class="accordion-icon">
+            <i class="fas fa-chevron-down" :class="{ 'rotated': isProductsSectionOpen }"></i>
+          </div>
+        </div>
+
+        <div class="accordion-content" :class="{ 'open': isProductsSectionOpen }">
+          <!-- Étape 1: Fonds de base -->
+          <div class="product-step-section">
+            <h3 class="subsection-title">
+              <span class="step-number">1</span>
+              Pour commencer, choisissez votre fond de tartelette
+            </h3>
+            <p class="step-description">Configurez les 3 fonds de base disponibles pour les tartelettes</p>
+            
+            <div class="products-grid">
+              <div v-for="(fond, index) in fonds" :key="index" class="product-config-card">
+                <div class="card-header">
+                  <h4>Fond {{ index + 1 }}</h4>
+                  <button @click="editFond(index)" class="edit-btn" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </div>
+                
+                <div class="product-preview">
+                  <img :src="fond.image || '/placeholder.jpg'" :alt="fond.nom" />
+                  <div class="product-info">
+                    <strong>{{ fond.nom || 'Nom à définir' }}</strong>
+                    <span class="status" :class="{ 'configured': fond.nom && fond.image, 'pending': !fond.nom || !fond.image }">
+                      {{ fond.nom && fond.image ? 'Configuré' : 'En attente' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Étape 2: Première couche de douceur -->
+          <div class="product-step-section">
+            <h3 class="subsection-title">
+              <span class="step-number">2</span>
+              Votre première couche de douceur
+            </h3>
+            <p class="step-description">Configurez les 4 CTA/liens de la première couche avec leurs 3 images d'évolution</p>
+            
+            <div class="products-grid">
+              <div v-for="(douceur, index) in premiereCoucheDouceur" :key="index" class="product-config-card">
+                <div class="card-header">
+                  <h4>CTA {{ index + 1 }}</h4>
+                  <button @click="editPremiereCouche(index)" class="edit-btn" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </div>
+                
+                <div class="product-preview">
+                  <div class="image-gallery">
+                    <img v-for="(img, imgIndex) in douceur.images" :key="imgIndex" 
+                         :src="img || '/placeholder.jpg'" :alt="`${douceur.nom} - Image ${imgIndex + 1}`" />
+                  </div>
+                  <div class="product-info">
+                    <strong>{{ douceur.nom || 'Nom du CTA à définir' }}</strong>
+                    <span class="status" :class="{ 'configured': douceur.nom && douceur.images.every(img => img), 'pending': !douceur.nom || douceur.images.some(img => !img) }">
+                      {{ douceur.nom && douceur.images.every(img => img) ? 'Configuré' : 'En attente' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Étape 3: Seconde couche de douceur -->
+          <div class="product-step-section">
+            <h3 class="subsection-title">
+              <span class="step-number">3</span>
+              Votre seconde couche de douceur
+            </h3>
+            <p class="step-description">Configurez les 4 CTA/liens de la seconde couche avec leurs 3 images d'évolution</p>
+            
+            <div class="products-grid">
+              <div v-for="(douceur, index) in secondeCoucheDouceur" :key="index" class="product-config-card">
+                <div class="card-header">
+                  <h4>CTA {{ index + 1 }}</h4>
+                  <button @click="editSecondeCouche(index)" class="edit-btn" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </div>
+                
+                <div class="product-preview">
+                  <div class="image-gallery">
+                    <img v-for="(img, imgIndex) in douceur.images" :key="imgIndex" 
+                         :src="img || '/placeholder.jpg'" :alt="`${douceur.nom} - Image ${imgIndex + 1}`" />
+                  </div>
+                  <div class="product-info">
+                    <strong>{{ douceur.nom || 'Nom du CTA à définir' }}</strong>
+                    <span class="status" :class="{ 'configured': douceur.nom && douceur.images.every(img => img), 'pending': !douceur.nom || douceur.images.some(img => !img) }">
+                      {{ douceur.nom && douceur.images.every(img => img) ? 'Configuré' : 'En attente' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Étape 4: La touche finale -->
+          <div class="product-step-section">
+            <h3 class="subsection-title">
+              <span class="step-number">4</span>
+              La touche finale
+            </h3>
+            <p class="step-description">Configurez les 4 CTA/liens de la touche finale avec leurs 3 images d'évolution</p>
+            
+            <div class="products-grid">
+              <div v-for="(finition, index) in toucheFinale" :key="index" class="product-config-card">
+                <div class="card-header">
+                  <h4>CTA {{ index + 1 }}</h4>
+                  <button @click="editToucheFinale(index)" class="edit-btn" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </div>
+                
+                <div class="product-preview">
+                  <div class="image-gallery">
+                    <img v-for="(img, imgIndex) in finition.images" :key="imgIndex" 
+                         :src="img || '/placeholder.jpg'" :alt="`${finition.nom} - Image ${imgIndex + 1}`" />
+                  </div>
+                  <div class="product-info">
+                    <strong>{{ finition.nom || 'Nom du CTA à définir' }}</strong>
+                    <span class="status" :class="{ 'configured': finition.nom && finition.images.every(img => img), 'pending': !finition.nom || finition.images.some(img => !img) }">
+                      {{ finition.nom && finition.images.every(img => img) ? 'Configuré' : 'En attente' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
+
+      <!-- Modal de configuration des produits -->
+      <div v-if="showProductModal" class="modal-overlay" @click="closeProductModal">
+        <div class="product-modal" @click.stop>
+          <div class="modal-header">
+            <h3>{{ modalTitle }}</h3>
+            <button @click="closeProductModal" class="close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="modal-content">
+            <!-- Configuration des fonds -->
+            <div v-if="editingType === 'fond'" class="product-config">
+              <div class="form-group">
+                <label for="fondName">Nom du fond *</label>
+                <input 
+                  id="fondName"
+                  v-model="editingProduct.nom" 
+                  type="text" 
+                  placeholder="Ex: Pâte sucrée vanille"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="fondImage">Image du fond *</label>
+                <input 
+                  id="fondImage"
+                  v-model="editingProduct.image" 
+                  type="url" 
+                  placeholder="https://exemple.com/image.jpg"
+                  required
+                />
+                <div class="image-preview" v-if="editingProduct.image">
+                  <img :src="editingProduct.image" alt="Aperçu" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Configuration des douceurs -->
+            <div v-if="editingType === 'douceur'" class="product-config">
+              <div class="form-group">
+                <label for="douceurName">Nom du CTA/Lien *</label>
+                <input 
+                  id="douceurName"
+                  v-model="editingProduct.nom" 
+                  type="text" 
+                  placeholder="Ex: Crème pâtissière vanille"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Images d'évolution (3 images) *</label>
+                <div class="image-inputs">
+                  <div v-for="(img, index) in editingProduct.images" :key="index" class="image-input">
+                    <label :for="`douceurImage${index + 1}`">Image {{ index + 1 }}</label>
+                    <input 
+                      :id="`douceurImage${index + 1}`"
+                      v-model="editingProduct.images[index]" 
+                      type="url" 
+                      :placeholder="`URL de l'image ${index + 1}`"
+                      required
+                    />
+                    <div class="image-preview" v-if="editingProduct.images[index]">
+                      <img :src="editingProduct.images[index]" alt="Aperçu" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Configuration des finitions -->
+            <div v-if="editingType === 'finition'" class="product-config">
+              <div class="form-group">
+                <label for="finitionName">Nom du CTA/Lien *</label>
+                <input 
+                  id="finitionName"
+                  v-model="editingProduct.nom" 
+                  type="text" 
+                  placeholder="Ex: Meringue italienne"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Images d'évolution (3 images) *</label>
+                <div class="image-inputs">
+                  <div v-for="(img, index) in editingProduct.images" :key="index" class="image-input">
+                    <label :for="`finitionImage${index + 1}`">Image {{ index + 1 }}</label>
+                    <input 
+                      :id="`finitionImage${index + 1}`"
+                      v-model="editingProduct.images[index]" 
+                      type="url" 
+                      :placeholder="`URL de l'image ${index + 1}`"
+                      required
+                    />
+                    <div class="image-preview" v-if="editingProduct.images[index]">
+                      <img :src="editingProduct.images[index]" alt="Aperçu" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="modal-actions">
+              <button @click="closeProductModal" class="btn-secondary">
+                Annuler
+              </button>
+              <button @click="saveProductConfig" class="btn-primary" :disabled="!canSave">
+                <i class="fas fa-save"></i>
+                Sauvegarder
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { supabase } from '@/services/supabaseService'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -216,13 +467,85 @@ interface User {
 const users = ref<User[]>([])
 const isLoading = ref(false)
 const isUsersSectionOpen = ref(false) // Par défaut fermé
+const isProductsSectionOpen = ref(true) // Par défaut ouvert pour voir toutes les étapes
+
 const searchQuery = ref('')
 const router = useRouter()
 const authStore = useAuthStore()
 
+// Variables pour la configuration des produits
+const showProductModal = ref(false)
+const editingProduct = ref<any>(null)
+const editingType = ref<string | null>(null) // 'fond', 'douceur', 'finition'
+const isSaving = ref(false)
+
+// Data for product configurations
+const fonds = ref([
+  { nom: 'Pâte sucrée vanille', image: null },
+  { nom: 'Pâte sucrée chocolat', image: null },
+  { nom: 'Pâte sucrée framboise', image: null }
+])
+
+const premiereCoucheDouceur = ref([
+  { nom: 'Crème pâtissière vanille', images: [null, null, null] },
+  { nom: 'Crème pâtissière chocolat', images: [null, null, null] },
+  { nom: 'Crème pâtissière framboise', images: [null, null, null] },
+  { nom: 'Crème pâtissière fraise', images: [null, null, null] }
+])
+
+const secondeCoucheDouceur = ref([
+  { nom: 'Crème pâtissière vanille', images: [null, null, null] },
+  { nom: 'Crème pâtissière chocolat', images: [null, null, null] },
+  { nom: 'Crème pâtissière framboise', images: [null, null, null] },
+  { nom: 'Crème pâtissière fraise', images: [null, null, null] }
+])
+
+const toucheFinale = ref([
+  { nom: 'Meringue italienne', images: [null, null, null] },
+  { nom: 'Meringue chantilly', images: [null, null, null] },
+  { nom: 'Glaçage miroir', images: [null, null, null] },
+  { nom: 'Décors chocolat', images: [null, null, null] }
+])
+
+
+
 // Computed properties
 const activeUsers = computed(() => users.value.filter(user => !user.deleted).length)
 const deletedUsers = computed(() => users.value.filter(user => user.deleted).length)
+
+// Computed properties pour les produits de configuration
+const totalProducts = computed(() => {
+  const fondsConfigured = fonds.value.filter(f => f.nom && f.image).length
+  const premiereCoucheConfigured = premiereCoucheDouceur.value.filter(d => d.nom && d.images.every((img: any) => img)).length
+  const secondeCoucheConfigured = secondeCoucheDouceur.value.filter(d => d.nom && d.images.every((img: any) => img)).length
+  const toucheFinaleConfigured = toucheFinale.value.filter(f => f.nom && f.images.every((img: any) => img)).length
+  return fondsConfigured + premiereCoucheConfigured + secondeCoucheConfigured + toucheFinaleConfigured
+})
+
+const modalTitle = computed(() => {
+  switch (editingType.value) {
+    case 'fond': return 'Configurer le fond'
+    case 'douceur': return 'Configurer le CTA de douceur'
+    case 'finition': return 'Configurer le CTA de finition'
+    default: return 'Configuration'
+  }
+})
+
+const canSave = computed(() => {
+  if (!editingProduct.value) return false
+  
+  switch (editingType.value) {
+    case 'fond':
+      return editingProduct.value.nom && editingProduct.value.image
+    case 'douceur':
+    case 'finition':
+      return editingProduct.value.nom && editingProduct.value.images.every((img: any) => img)
+    default:
+      return false
+  }
+})
+
+
 
 // Filtrage des utilisateurs par recherche
 const filteredUsers = computed(() => {
@@ -235,6 +558,104 @@ const filteredUsers = computed(() => {
   )
 })
 
+// Fonctions pour la configuration des produits
+const toggleProductsSection = () => {
+  isProductsSectionOpen.value = !isProductsSectionOpen.value
+}
+
+const editFond = (index: number) => {
+  editingProduct.value = fonds.value[index]
+  editingType.value = 'fond'
+  showProductModal.value = true
+}
+
+const editPremiereCouche = (index: number) => {
+  editingProduct.value = premiereCoucheDouceur.value[index]
+  editingType.value = 'douceur'
+  showProductModal.value = true
+}
+
+const editSecondeCouche = (index: number) => {
+  editingProduct.value = secondeCoucheDouceur.value[index]
+  editingType.value = 'douceur'
+  showProductModal.value = true
+}
+
+const editToucheFinale = (index: number) => {
+  editingProduct.value = toucheFinale.value[index]
+  editingType.value = 'finition'
+  showProductModal.value = true
+}
+
+const saveProductConfig = async () => {
+  if (!canSave.value) return
+
+  isSaving.value = true
+
+  try {
+    // Sauvegarder dans localStorage pour l'instant
+    if (editingType.value === 'fond') {
+      const fondIndex = fonds.value.findIndex(f => f === editingProduct.value)
+      if (fondIndex !== -1) {
+        fonds.value[fondIndex] = { ...editingProduct.value }
+      }
+    } else if (editingType.value === 'douceur') {
+      let douceurIndex = premiereCoucheDouceur.value.findIndex(d => d === editingProduct.value)
+      if (douceurIndex !== -1) {
+        premiereCoucheDouceur.value[douceurIndex] = { ...editingProduct.value }
+      } else {
+        douceurIndex = secondeCoucheDouceur.value.findIndex(d => d === editingProduct.value)
+        if (douceurIndex !== -1) {
+          secondeCoucheDouceur.value[douceurIndex] = { ...editingProduct.value }
+        }
+      }
+    } else if (editingType.value === 'finition') {
+      const finitionIndex = toucheFinale.value.findIndex(f => f === editingProduct.value)
+      if (finitionIndex !== -1) {
+        toucheFinale.value[finitionIndex] = { ...editingProduct.value }
+      }
+    }
+
+    // Sauvegarder dans localStorage
+    localStorage.setItem('amande_product_config', JSON.stringify({
+      fonds: fonds.value,
+      premiereCoucheDouceur: premiereCoucheDouceur.value,
+      secondeCoucheDouceur: secondeCoucheDouceur.value,
+      toucheFinale: toucheFinale.value
+    }))
+
+    console.log('✅ Configuration sauvegardée avec succès')
+    closeProductModal()
+
+  } catch (error) {
+    console.error('❌ Erreur lors de la sauvegarde de la configuration:', error)
+    alert('Erreur lors de la sauvegarde de la configuration')
+  } finally {
+    isSaving.value = false
+  }
+}
+
+const closeProductModal = () => {
+  showProductModal.value = false
+  editingProduct.value = null
+  editingType.value = null
+}
+
+const loadProductConfig = () => {
+  try {
+    const config = localStorage.getItem('amande_product_config')
+    if (config) {
+      const parsedConfig = JSON.parse(config)
+      if (parsedConfig.fonds) fonds.value = parsedConfig.fonds
+      if (parsedConfig.premiereCoucheDouceur) premiereCoucheDouceur.value = parsedConfig.premiereCoucheDouceur
+      if (parsedConfig.secondeCoucheDouceur) secondeCoucheDouceur.value = parsedConfig.secondeCoucheDouceur
+      if (parsedConfig.toucheFinale) toucheFinale.value = parsedConfig.toucheFinale
+    }
+  } catch (error) {
+    console.error('Erreur lors du chargement de la configuration:', error)
+  }
+}
+
 onMounted(async () => {
   // Vérifier si l'utilisateur est connecté et admin
   if (!authStore.user || !authStore.isAdmin) {
@@ -245,24 +666,26 @@ onMounted(async () => {
   
   console.log('✅ Accès admin autorisé')
   await loadUsers()
+  loadProductConfig() // Charger la configuration depuis localStorage au chargement
   
-      // Auto-refresh toutes les 30 secondes
-    setInterval(async () => {
-      await loadUsers()
-    }, 30000)
-    
-    // Écouter les modifications de profil pour rafraîchir le dashboard
-    const handleProfileUpdate = () => {
-      loadUsers()
-    }
-    
-    // Ajouter un listener pour les modifications de profil
-    window.addEventListener('profile-updated', handleProfileUpdate)
-    
-    // Cleanup
-    onUnmounted(() => {
-      window.removeEventListener('profile-updated', handleProfileUpdate)
-    })
+  // Auto-refresh toutes les 30 secondes
+  setInterval(async () => {
+    await loadUsers()
+    loadProductConfig() // Recharger la configuration au refresh
+  }, 30000)
+  
+  // Écouter les modifications de profil pour rafraîchir le dashboard
+  const handleProfileUpdate = () => {
+    loadUsers()
+  }
+  
+  // Ajouter un listener pour les modifications de profil
+  window.addEventListener('profile-updated', handleProfileUpdate)
+  
+  // Cleanup
+  onUnmounted(() => {
+    window.removeEventListener('profile-updated', handleProfileUpdate)
+  })
 })
 
 const loadUsers = async () => {
@@ -279,6 +702,10 @@ const loadUsers = async () => {
   }
   isLoading.value = false
 }
+
+
+
+
 
 const deleteUser = async (id: string) => {
   if (confirm('Confirmer la désactivation de cet utilisateur ?')) {
@@ -329,14 +756,26 @@ const maskEmail = (email: string) => {
 const toggleUsersSection = () => {
   isUsersSectionOpen.value = !isUsersSectionOpen.value
 }
+
+
 </script>
 
 <style scoped>
-/* Dashboard Container */
+/* Variables CSS pour les espacements */
+:root {
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+}
+
+/* Styles du dashboard admin */
 .admin-dashboard {
   min-height: 100vh;
-  background: var(--secondary-color);
-  font-family: var(--font-family-text);
+  background: #f5f5f5;
+  font-family: var(--font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
 }
 
 /* Header du Dashboard */
@@ -496,7 +935,7 @@ const toggleUsersSection = () => {
 }
 
 .accordion-content.open {
-  max-height: 2000px; /* Valeur suffisamment grande pour le contenu */
+  max-height: 6000px; /* Valeur plus grande pour afficher toutes les 4 étapes sur tous les écrans */
 }
 
 /* Barre de recherche */
@@ -925,6 +1364,424 @@ const toggleUsersSection = () => {
   }
 }
 
+/* Styles pour la gestion des produits */
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.products-table th {
+  background: #f8f9fa;
+  color: var(--text-color);
+  font-weight: 600;
+  text-align: left;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.products-table td {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.product-row {
+  transition: background-color 0.2s ease;
+}
+
+.product-row:hover {
+  background-color: #f8f9fa;
+}
+
+.product-image img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.product-name {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.product-category {
+  color: var(--text-color);
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+.product-price {
+  font-weight: 600;
+  color: var(--accent-color);
+  font-size: 1.1rem;
+}
+
+.product-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.stat-link {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
+.stat-link:hover {
+  color: var(--accent-color-dark);
+}
+
+.subsection-title {
+  color: var(--text-color);
+  font-family: var(--font-family-title);
+  font-size: 1.2rem;
+  margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--accent-color);
+}
+
+.create-first-btn {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.create-first-btn:hover {
+  background: var(--accent-color-dark);
+  transform: translateY(-1px);
+}
+
+/* Modal de produit */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-lg);
+}
+
+.product-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--text-color);
+  font-family: var(--font-family-title);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  padding: var(--spacing-xs);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.modal-content {
+  padding: var(--spacing-xl);
+}
+
+/* Barre de progression des étapes */
+.product-progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-xs);
+}
+
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.progress-dot.active {
+  background: var(--accent-color);
+  transform: scale(1.2);
+}
+
+.progress-dot.done {
+  background: var(--accent-color);
+}
+
+.progress-bar {
+  width: 40px;
+  height: 2px;
+  background: #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.progress-bar.done {
+  background: var(--accent-color);
+}
+
+/* Étapes du produit */
+.product-step {
+  margin-bottom: var(--spacing-xl);
+}
+
+.step-title {
+  color: var(--text-color);
+  font-family: var(--font-family-title);
+  font-size: 1.3rem;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--accent-color);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-color);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-family-text);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.1);
+}
+
+.form-help {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: #666;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Aperçu d'image */
+.image-preview {
+  margin-top: var(--spacing-md);
+  text-align: center;
+}
+
+.image-preview img {
+  max-width: 200px;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+}
+
+.preview-text {
+  margin-top: var(--spacing-sm);
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Résumé du produit */
+.product-summary {
+  background: #f8f9fa;
+  padding: var(--spacing-lg);
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.summary-item {
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.summary-item strong {
+  color: var(--text-color);
+  display: inline-block;
+  min-width: 100px;
+}
+
+.final-preview {
+  max-width: 150px;
+  max-height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  margin-top: var(--spacing-xs);
+}
+
+/* Navigation des étapes */
+.product-step-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid #e0e0e0;
+}
+
+.step-btn {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.step-btn.primary {
+  background: var(--accent-color);
+  color: white;
+}
+
+.step-btn.primary:hover:not(:disabled) {
+  background: var(--accent-color-dark);
+  transform: translateY(-2px);
+}
+
+.step-btn.primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.step-btn.secondary {
+  background: #f0f0f0;
+  color: var(--text-color);
+}
+
+.step-btn.secondary:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* Responsive pour les produits */
+@media (max-width: 768px) {
+  .product-modal {
+    max-width: 95vw;
+    margin: var(--spacing-sm);
+  }
+  
+  .modal-content {
+    padding: var(--spacing-lg);
+  }
+  
+  .product-step-navigation {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .step-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .products-table {
+    display: block;
+  }
+  
+  .products-table thead {
+    display: none;
+  }
+  
+  .products-table tbody {
+    display: block;
+  }
+  
+  .products-table tr {
+    display: block;
+    background: var(--white);
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-lg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .products-table td {
+    display: block;
+    padding: var(--spacing-sm) 0;
+    border: none;
+    text-align: left;
+  }
+  
+  .product-image img {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .product-actions {
+    justify-content: flex-end;
+  }
+}
+
 @media (max-width: 480px) {
   .dashboard-title {
     font-size: 1.8rem;
@@ -947,4 +1804,307 @@ const toggleUsersSection = () => {
     padding: var(--spacing-sm);
   }
 }
+
+/* Assurer que le contenu principal a un padding-bottom suffisant */
+.dashboard-content {
+  padding-bottom: var(--spacing-xxl);
+  min-height: calc(100vh - 100px);
+  position: relative;
+  z-index: 1;
+}
+
+/* Styles for product configurations */
+.product-step-section {
+  margin-bottom: var(--spacing-xxl);
+  padding: var(--spacing-lg);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-step-section:last-child {
+  margin-bottom: var(--spacing-xxl);
+  padding-bottom: var(--spacing-xxl);
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  margin-right: var(--spacing-md);
+  font-size: 1.1rem;
+}
+
+.step-description {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: var(--spacing-lg);
+  font-style: italic;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.product-config-card {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-config-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: #e0e0e0;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.card-header h4 {
+  margin: 0;
+  color: var(--text-color);
+  font-family: var(--font-family-title);
+  font-size: 1rem;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: rgba(255, 111, 97, 0.1);
+  color: var(--accent-color-dark);
+}
+
+.product-preview {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.product-preview img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-gallery {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-sm);
+}
+
+.image-gallery img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-info {
+  width: 100%;
+  text-align: center;
+}
+
+.product-info strong {
+  display: block;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status.configured {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Modal de configuration */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn-primary, .btn-secondary {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-color-dark);
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: var(--text-color);
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* Configuration des images multiples */
+.image-inputs {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.image-input {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.image-input label {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.image-input input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.image-input input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.1);
+}
+
+.image-input .image-preview {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-input .image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Responsive pour les configurations */
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .image-inputs {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .image-input {
+    width: 100%;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Ajuster l'espacement sur mobile pour éviter le chevauchement */
+  .dashboard-content {
+    padding-bottom: calc(var(--spacing-xxl) * 3);
+  }
+  
+  .product-step-section {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md);
+  }
+  
+  .product-step-section:last-child {
+    margin-bottom: calc(var(--spacing-xxl) * 3);
+    padding-bottom: calc(var(--spacing-xxl) * 3);
+  }
+}
+
 </style>

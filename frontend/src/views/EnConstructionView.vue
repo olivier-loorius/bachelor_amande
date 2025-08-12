@@ -1,109 +1,234 @@
 <template>
   <div class="en-construction">
-    <h1>Page en construction</h1>
-    <p>Cette page sera bientôt disponible !</p>
-    <div class="actions">
-      <button class="btn-secondary" @click="goBack">Retour</button>
-      <router-link class="btn-primary" to="/">Accueil</router-link>
+    <div class="construction-content">
+      <div class="construction-icon">
+        <i class="fas fa-hammer"></i>
+      </div>
+      
+      <h1 class="construction-title">Page en construction</h1>
+      
+      <p class="construction-text">
+        Cette page sera bientôt disponible ! Nous travaillons actuellement sur la finalisation de votre commande.
+      </p>
+      
+      <div class="construction-actions">
+        <button 
+          v-if="fromCart && isAuthenticated" 
+          class="btn-secondary" 
+          @click="goToCart"
+        >
+          <i class="fas fa-shopping-cart"></i>
+          Retour au panier
+        </button>
+        <button 
+          v-else 
+          class="btn-secondary" 
+          @click="goBack"
+        >
+          <i class="fas fa-arrow-left"></i>
+          Retour
+        </button>
+        
+        <router-link class="btn-primary" to="/">
+          <i class="fas fa-home"></i>
+          Accueil
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
 const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+
+// Détecter si l'utilisateur vient du panier
+const fromCart = ref(false)
+
+// Vérifier l'authentification
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+
 function goBack() {
   router.back()
 }
+
+function goToCart() {
+  // Rediriger vers la page d'accueil où le panier peut être ouvert
+  router.push('/')
+}
+
+onMounted(() => {
+  // Détecter si on vient du panier en vérifiant le referrer
+  const referrer = document.referrer
+  const currentHost = window.location.origin
+  
+  // Si le referrer est sur le même site et contient "panier" ou si on vient de la route /panier
+  if (referrer && referrer.includes(currentHost)) {
+    fromCart.value = referrer.includes('panier') || referrer.includes('/panier')
+  }
+  
+  // Alternative : vérifier si on vient de la route /panier via l'historique
+  if (route.query.from === 'panier') {
+    fromCart.value = true
+  }
+  
+  console.log('📍 Page EnConstruction - Venant du panier:', fromCart.value)
+  console.log('🔐 Utilisateur authentifié:', isAuthenticated.value)
+})
 </script>
 
 <style scoped>
 .en-construction {
-  min-height: 60vh;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 2rem;
   background: var(--secondary-color);
+  padding: var(--spacing-xxl);
 }
-h1 {
+
+.construction-content {
+  text-align: center;
+  max-width: 600px;
+  background: var(--white);
+  padding: var(--spacing-card);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.construction-icon {
+  font-size: 4rem;
   color: var(--accent-color);
-  font-size: 2.2rem;
+  margin-bottom: var(--spacing-xl);
+  animation: bounce 2s infinite;
+}
+
+.construction-title {
+  color: var(--accent-color);
+  font-size: 2.5rem;
   font-family: var(--font-family-title);
   letter-spacing: 1px;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-lg);
   text-transform: uppercase;
 }
-p {
+
+.construction-text {
   color: var(--text-color);
   font-family: var(--font-family-text);
   font-size: 1.1rem;
-  margin-bottom: 2rem;
+  line-height: 1.6;
+  margin-bottom: var(--spacing-xxl);
+  opacity: 0.8;
 }
-.actions {
+
+.construction-actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-lg);
   justify-content: center;
+  flex-wrap: wrap;
 }
+
+.btn-primary, .btn-secondary {
+  padding: var(--btn-padding);
+  border-radius: var(--btn-radius);
+  font-family: var(--font-family-text);
+  font-weight: 600;
+  font-size: var(--btn-font-size);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  border: none;
+  min-width: 160px;
+}
+
 .btn-primary {
   background: var(--accent-color);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: var(--font-family-text);
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  text-decoration: none;
+  color: var(--white);
 }
+
 .btn-primary:hover {
   background: var(--primary-color);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
 }
+
 .btn-secondary {
-  background: #fff;
-  color: #90aeb0;
-  border: 1px solid #90aeb0;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: var(--font-family-text);
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  background: var(--white);
+  color: var(--teal-color);
+  border: 2px solid var(--teal-color);
 }
+
 .btn-secondary:hover {
-  background: #90aeb0;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--teal-color);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-hover);
 }
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .en-construction {
-    padding: 1rem;
+    padding: var(--spacing-lg);
   }
-  h1 {
-    font-size: 1.4rem;
+  
+  .construction-content {
+    padding: var(--spacing-lg);
   }
-  p {
+  
+  .construction-icon {
+    font-size: 3rem;
+  }
+  
+  .construction-title {
+    font-size: 2rem;
+  }
+  
+  .construction-text {
     font-size: 1rem;
   }
+  
+  .construction-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
   .btn-primary, .btn-secondary {
-    padding: 0.7rem 1.25rem;
-    font-size: 0.85rem;
+    width: 100%;
+    max-width: 280px;
   }
 }
 </style> 

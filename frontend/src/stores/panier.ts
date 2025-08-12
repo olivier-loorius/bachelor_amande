@@ -30,7 +30,19 @@ export const usePanierStore = defineStore('panier', () => {
 
   // Charger le panier depuis le localStorage
   const chargerPanier = async () => {
-    const panierLocal = localStorage.getItem('panier')
+    // Vérifier si un utilisateur est connecté
+    if (!authStore.isAuthenticated) {
+      panier.value = []
+      return
+    }
+
+    const userId = authStore.currentUser?.id
+    if (!userId) {
+      panier.value = []
+      return
+    }
+
+    const panierLocal = localStorage.getItem(`panier_${userId}`)
     if (panierLocal) {
       try {
         panier.value = JSON.parse(panierLocal)
@@ -45,7 +57,13 @@ export const usePanierStore = defineStore('panier', () => {
 
   // Sauvegarder le panier
   const sauvegarderPanier = async () => {
-    localStorage.setItem('panier', JSON.stringify(panier.value))
+    // Vérifier si un utilisateur est connecté
+    if (!authStore.isAuthenticated || !authStore.currentUser?.id) {
+      return
+    }
+
+    const userId = authStore.currentUser.id
+    localStorage.setItem(`panier_${userId}`, JSON.stringify(panier.value))
   }
 
   // Ajouter au panier
@@ -107,10 +125,13 @@ export const usePanierStore = defineStore('panier', () => {
     }
   }
 
-  // Vider le panier
+  // Vider le panier (appelé lors de la déconnexion)
   const viderPanier = async () => {
     panier.value = []
-    await sauvegarderPanier()
+    // Nettoyer le localStorage de l'utilisateur précédent
+    if (authStore.currentUser?.id) {
+      localStorage.removeItem(`panier_${authStore.currentUser.id}`)
+    }
   }
 
   // Ouvrir/fermer le panier
@@ -142,6 +163,28 @@ export const usePanierStore = defineStore('panier', () => {
   watch(panier, async () => {
     await sauvegarderPanier()
   }, { deep: true })
+
+  // Écouter les changements d'authentification
+  watch(() => authStore.isAuthenticated, async (isAuthenticated) => {
+    if (isAuthenticated) {
+      // Utilisateur connecté, charger son panier
+      await chargerPanier()
+    } else {
+      // Utilisateur déconnecté, vider le panier
+      await viderPanier()
+    }
+  }, { immediate: true })
+
+  // Écouter les changements d'utilisateur
+  watch(() => authStore.currentUser, async (newUser, oldUser) => {
+    if (oldUser && newUser && oldUser.id !== newUser.id) {
+      // Changement d'utilisateur, vider l'ancien panier et charger le nouveau
+      await viderPanier()
+      if (newUser) {
+        await chargerPanier()
+      }
+    }
+  })
 
   // Charger le panier au démarrage
   chargerPanier()

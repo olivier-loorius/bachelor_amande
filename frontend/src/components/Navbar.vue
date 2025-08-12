@@ -22,9 +22,15 @@
       @click="closeMenu"
       role="menu"
     >
-      <li role="none"><router-link to="/composer" role="menuitem">COMPOSER</router-link></li>
-      <li role="none"><router-link to="/actualite" role="menuitem">ACTUALITE</router-link></li>
-      <li role="none"><router-link to="/catalogue" role="menuitem">CATALOGUE</router-link></li>
+      <li class="composer" role="none">
+        <router-link to="/composer" role="menuitem">COMPOSER</router-link>
+      </li>
+      <li class="actualite" role="none">
+        <router-link to="/actualite" role="menuitem">ACTUALITE</router-link>
+      </li>
+      <li class="catalogue" role="none">
+        <router-link to="/catalogue" role="menuitem">CATALOGUE</router-link>
+      </li>
     </ul>
     
     <div class="cta-container">
@@ -95,6 +101,8 @@ const router = useRouter()
 
 // Computed
 const nombreArticles = computed(() => {
+  // Ne montrer le compteur que si l'utilisateur est connecté
+  if (!authStore.isAuthenticated) return 0
   return panierStore.panier.reduce((sum, item) => sum + item.quantite, 0)
 })
 
@@ -112,10 +120,29 @@ const closeMenu = () => {
   isMenuOpen.value = false
 }
 
+// Fermer le menu lors d'un clic ailleurs
+const handleClickOutside = (event: Event) => {
+  const target = event.target as HTMLElement
+  const nav = document.querySelector('nav')
+  
+  if (nav && !nav.contains(target) && isMenuOpen.value) {
+    closeMenu()
+  }
+}
+
+// Fermer le menu lors d'une navigation
+const handleNavigation = () => {
+  if (isMenuOpen.value) {
+    closeMenu()
+  }
+}
+
 // Méthodes d'authentification
 const openLogin = () => {
   openCartAfterLogin.value = false
   isLoginOpen.value = true
+  // Fermer le menu mobile lors de l'ouverture de la connexion
+  closeMenu()
 }
 
 const closeLogin = () => {
@@ -136,6 +163,9 @@ const handleLoginSuccess = () => {
 
 // Méthodes de panier
 const openCart = () => {
+  // Fermer le menu mobile lors de l'ouverture du panier
+  closeMenu()
+  
   if (authStore.isAuthenticated) {
     panierStore.ouvrirPanier()
   } else {
@@ -168,10 +198,14 @@ const handleScroll = () => {
 // Lifecycle hooks
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
+  document.addEventListener('click', handleClickOutside)
+  router.afterEach(handleNavigation)
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  document.removeEventListener('click', handleClickOutside)
+  router.afterEach(() => {}) // Remove the listener after the component is unmounted
 })
 </script>
 
@@ -229,16 +263,42 @@ nav {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 
+// S'assurer que le logo n'a jamais de bordure
+.logo a,
+.logo a:focus,
+.logo a:hover,
+.logo a:active,
+.logo a.router-link-active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 // Menu burger (mobile)
 .menu {
   display: none;
-  cursor: pointer;
-  position: relative;
-  background: none;
+  background: transparent;
   border: none;
   padding: 0;
   width: 30px;
   height: 30px;
+  cursor: pointer;
+  outline: none;
+  
+  // Supprimer la bordure au focus/survol
+  &:focus,
+  &:hover {
+    outline: none;
+    box-shadow: none;
+    border: none;
+  }
+  
+  // Supprimer la bordure au clic
+  &:active {
+    outline: none;
+    box-shadow: none;
+    border: none;
+  }
 }
 
 .menu-icon {
@@ -335,6 +395,21 @@ a {
 a:hover {
   color: var(--accent-color);
   transform: translateY(-1px);
+}
+
+// Indication de la page active - bordure simple
+.actualite a.router-link-active,
+.composer a.router-link-active,
+.catalogue a.router-link-active {
+  color: var(--accent-color);
+  outline: 2px solid var(--accent-color);
+  outline-offset: 4px;
+  border-radius: 6px;
+  
+  // Pas de soulignement pour la page active
+  &::after {
+    display: none;
+  }
 }
 
 // CTA Container
