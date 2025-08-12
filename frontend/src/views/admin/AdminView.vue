@@ -203,11 +203,11 @@
           <!-- Barre d'actions rapides -->
           <div class="products-action-bar">
             <div class="action-group">
-              <button @click="loadProductConfig" class="action-btn secondary-btn" :disabled="isLoadingProducts">
-                <i class="fas fa-sync-alt" :class="{ 'fa-spin': isLoadingProducts }"></i>
-                {{ isLoadingProducts ? 'Chargement...' : 'Actualiser' }}
+              <button @click="loadProductConfig" class="action-btn secondary-btn" :disabled="isLoadingProducts || hasUnlockedProducts" :title="hasUnlockedProducts ? 'Sauvegardez d\'abord vos modifications avant d\'actualiser' : 'Actualiser la configuration'">
+                <i class="fas fa-sync-alt"></i>
+                <span>{{ isLoadingProducts ? 'Chargement...' : 'Actualiser' }}</span>
               </button>
-              <button @click="resetAllProducts" class="action-btn danger-btn" title="Remettre à zéro tous les produits">
+              <button @click="resetAllProducts" class="action-btn danger-btn" :disabled="hasUnlockedProducts" :title="hasUnlockedProducts ? 'Sauvegardez d\'abord vos modifications avant de remettre à zéro' : 'Remettre à zéro tous les produits'">
                 <i class="fas fa-undo"></i>
                 Reset complet
               </button>
@@ -243,12 +243,12 @@
                 <span class="step-number">1</span>
                 Fonds
               </h3>
-              <p class="step-description">4 produits avec 1 image chacun</p>
+              <p class="step-description">3 produits avec 1 image chacun</p>
               <div class="step-progress">
                 <div class="progress-bar">
                   <div class="progress-fill" :style="{ width: fondsProgress + '%' }"></div>
                 </div>
-                <span class="progress-text">{{ fondsConfigured }}/4 configurés</span>
+                <span class="progress-text">{{ fondsConfigured }}/3 configurés</span>
               </div>
             </div>
             
@@ -260,7 +260,7 @@
                     <button @click="toggleLock('fond', index)" class="action-btn edit-btn" :class="{ 'unlocked': !lockedProducts.fonds[index] }" :title="lockedProducts.fonds[index] ? 'Déverrouiller pour modifier' : 'Verrouiller'">
                       <i class="fas" :class="lockedProducts.fonds[index] ? 'fa-lock' : 'fa-unlock'"></i>
                     </button>
-                    <button @click="resetFond(index)" class="action-btn reset-btn" title="Remettre à zéro">
+                    <button @click="resetFond(index)" class="action-btn reset-btn" :disabled="lockedProducts.fonds[index]" :title="lockedProducts.fonds[index] ? 'Déverrouillez d\'abord pour remettre à zéro' : 'Remettre à zéro'">
                       <i class="fas fa-undo"></i>
                     </button>
                   </div>
@@ -281,22 +281,24 @@
                     
                     <div class="product-status">
                       <span class="status-badge" :class="{ 
-                        'configured': fond.nom && fond.image, 
-                        'pending': !fond.nom || !fond.image 
+                        'configured': lockedProducts.fonds[index] && fond.nom && fond.image, 
+                        'pending': !lockedProducts.fonds[index] || !fond.nom || !fond.image 
                       }">
-                        {{ fond.nom && fond.image ? '✅ Configuré' : '⏳ En attente' }}
+                        {{ lockedProducts.fonds[index] && fond.nom && fond.image ? '✅ Configuré' : '⏳ En attente' }}
                       </span>
                     </div>
                     
                     <div class="image-upload-group" :class="{ 'locked': lockedProducts.fonds[index] }">
                       <label>Image du produit :</label>
                       <div class="upload-container">
-                        <div class="upload-area" @click="lockedProducts.fonds[index] ? null : triggerFileUpload(index, 'fond')" @drop="lockedProducts.fonds[index] ? null : handleFileDrop($event, index, 'fond')" @dragover.prevent @dragenter.prevent :class="{ 'disabled': lockedProducts.fonds[index] }">
-                          <i class="fas fa-cloud-upload-alt"></i>
-                          <span>Glissez une image ici ou cliquez pour sélectionner</span>
+                        <div class="upload-area" @click="lockedProducts.fonds[index] ? null : triggerFileUpload(index, 'fond')" @drop="lockedProducts.fonds[index] ? null : handleFileDrop($event, index, 'fond')" @dragover.prevent @dragenter.prevent @dragleave.prevent @dragenter="handleDragEnter($event, index, 'fond')" @dragleave="handleDragLeave($event, index, 'fond')" :class="{ 'disabled': lockedProducts.fonds[index], 'dragover': dragStates.fonds[index] }">
+                          <i class="fas fa-cloud-upload-alt" v-if="!isUploadingImages"></i>
+                          <i class="fas fa-spinner fa-spin" v-else></i>
+                          <span v-if="!isUploadingImages">Glissez une image depuis un dossier ou cliquez pour sélectionner</span>
+                          <span v-else>Upload en cours...</span>
                         </div>
                         <input 
-                          :ref="`fileInput-${index}-fond`"
+                          :id="`fileInput-${index}-fond`"
                           type="file" 
                           accept="image/*"
                           @change="handleFileSelect($event, index, 'fond')"
@@ -361,7 +363,7 @@
                     <button @click="toggleLock('premiere', index)" class="action-btn edit-btn" :class="{ 'unlocked': !lockedProducts.premiereDouceur[index] }" :title="lockedProducts.premiereDouceur[index] ? 'Déverrouiller pour modifier' : 'Verrouiller'">
                       <i class="fas" :class="lockedProducts.premiereDouceur[index] ? 'fa-lock' : 'fa-unlock'"></i>
                     </button>
-                    <button @click="resetDouceur(index, 'premiere')" class="action-btn reset-btn" title="Remettre à zéro">
+                    <button @click="resetDouceur(index, 'premiere')" class="action-btn reset-btn" :disabled="lockedProducts.premiereDouceur[index]" :title="lockedProducts.premiereDouceur[index] ? 'Déverrouillez d\'abord pour remettre à zéro' : 'Remettre à zéro'">
                       <i class="fas fa-undo"></i>
                     </button>
                   </div>
@@ -382,22 +384,22 @@
                     
                     <div class="product-status">
                       <span class="status-badge" :class="{ 
-                        'configured': douceur.nom && douceur.images.every(img => img), 
-                        'pending': !douceur.nom || douceur.images.some(img => !img) 
+                        'configured': lockedProducts.premiereDouceur[index] && douceur.nom && douceur.images.every(img => img), 
+                        'pending': !lockedProducts.premiereDouceur[index] || !douceur.nom || douceur.images.some(img => !img) 
                       }">
-                        {{ douceur.nom && douceur.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
+                        {{ lockedProducts.premiereDouceur[index] && douceur.nom && douceur.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
                       </span>
                     </div>
                     
                     <div class="image-upload-group" :class="{ 'locked': lockedProducts.premiereDouceur[index] }">
                       <label>Images d'évolution :</label>
                       <div class="upload-container">
-                        <div class="upload-area" @click="lockedProducts.premiereDouceur[index] ? null : triggerFileUpload(index, 'premiere')" @drop="lockedProducts.premiereDouceur[index] ? null : handleFileDrop($event, index, 'premiere')" @dragover.prevent @dragenter.prevent :class="{ 'disabled': lockedProducts.premiereDouceur[index] }">
+                        <div class="upload-area" @click="lockedProducts.premiereDouceur[index] ? null : triggerFileUpload(index, 'premiere')" @drop="lockedProducts.premiereDouceur[index] ? null : handleFileDrop($event, index, 'premiere')" @dragover.prevent @dragenter.prevent @dragleave.prevent @dragenter="handleDragEnter($event, index, 'premiere')" @dragleave="handleDragLeave($event, index, 'premiere')" :class="{ 'disabled': lockedProducts.premiereDouceur[index], 'dragover': dragStates.premiereDouceur[index] }">
                           <i class="fas fa-cloud-upload-alt"></i>
-                          <span>Glissez 3 images ici ou cliquez pour sélectionner</span>
+                          <span>Glissez 3 images depuis un dossier ou cliquez pour sélectionner</span>
                         </div>
                         <input 
-                          :ref="`fileInput-${index}-premiere`"
+                          :id="`fileInput-${index}-premiere`"
                           type="file" 
                           accept="image/*"
                           multiple
@@ -469,7 +471,7 @@
                     <button @click="toggleLock('seconde', index)" class="action-btn edit-btn" :class="{ 'unlocked': !lockedProducts.secondeDouceur[index] }" :title="lockedProducts.secondeDouceur[index] ? 'Déverrouiller pour modifier' : 'Verrouiller'">
                       <i class="fas" :class="lockedProducts.secondeDouceur[index] ? 'fa-lock' : 'fa-unlock'"></i>
                     </button>
-                    <button @click="resetDouceur(index, 'seconde')" class="action-btn reset-btn" title="Remettre à zéro">
+                    <button @click="resetDouceur(index, 'seconde')" class="action-btn reset-btn" :disabled="lockedProducts.secondeDouceur[index]" :title="lockedProducts.secondeDouceur[index] ? 'Déverrouillez d\'abord pour remettre à zéro' : 'Remettre à zéro'">
                       <i class="fas fa-undo"></i>
                     </button>
                   </div>
@@ -490,22 +492,22 @@
                     
                     <div class="product-status">
                       <span class="status-badge" :class="{ 
-                        'configured': douceur.nom && douceur.images.every(img => img), 
-                        'pending': !douceur.nom || douceur.images.some(img => !img) 
+                        'configured': lockedProducts.secondeDouceur[index] && douceur.nom && douceur.images.every(img => img), 
+                        'pending': !lockedProducts.secondeDouceur[index] || !douceur.nom || douceur.images.some(img => !img) 
                       }">
-                        {{ douceur.nom && douceur.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
+                        {{ lockedProducts.secondeDouceur[index] && douceur.nom && douceur.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
                       </span>
                     </div>
                     
                     <div class="image-upload-group" :class="{ 'locked': lockedProducts.secondeDouceur[index] }">
                       <label>Images d'évolution :</label>
                       <div class="upload-container">
-                        <div class="upload-area" @click="lockedProducts.secondeDouceur[index] ? null : triggerFileUpload(index, 'seconde')" @drop="lockedProducts.secondeDouceur[index] ? null : handleFileDrop($event, index, 'seconde')" @dragover.prevent @dragenter.prevent :class="{ 'disabled': lockedProducts.secondeDouceur[index] }">
+                        <div class="upload-area" @click="lockedProducts.secondeDouceur[index] ? null : triggerFileUpload(index, 'seconde')" @drop="lockedProducts.secondeDouceur[index] ? null : handleFileDrop($event, index, 'seconde')" @dragover.prevent @dragenter.prevent @dragleave.prevent @dragenter="handleDragEnter($event, index, 'seconde')" @dragleave="handleDragLeave($event, index, 'seconde')" :class="{ 'disabled': lockedProducts.secondeDouceur[index], 'dragover': dragStates.secondeDouceur[index] }">
                           <i class="fas fa-cloud-upload-alt"></i>
-                          <span>Glissez 3 images ici ou cliquez pour sélectionner</span>
+                          <span>Glissez 3 images depuis un dossier ou cliquez pour sélectionner</span>
                         </div>
                         <input 
-                          :ref="`fileInput-${index}-seconde`"
+                          :id="`fileInput-${index}-seconde`"
                           type="file" 
                           accept="image/*"
                           multiple
@@ -577,7 +579,7 @@
                     <button @click="toggleLock('finition', index)" class="action-btn edit-btn" :class="{ 'unlocked': !lockedProducts.finitions[index] }" :title="lockedProducts.finitions[index] ? 'Déverrouiller pour modifier' : 'Verrouiller'">
                       <i class="fas" :class="lockedProducts.finitions[index] ? 'fa-lock' : 'fa-unlock'"></i>
                     </button>
-                    <button @click="resetFinition(index)" class="action-btn reset-btn" title="Remettre à zéro">
+                    <button @click="resetFinition(index)" class="action-btn reset-btn" :disabled="lockedProducts.finitions[index]" :title="lockedProducts.finitions[index] ? 'Déverrouillez d\'abord pour remettre à zéro' : 'Remettre à zéro'">
                       <i class="fas fa-undo"></i>
                     </button>
                   </div>
@@ -598,22 +600,22 @@
                     
                     <div class="product-status">
                       <span class="status-badge" :class="{ 
-                        'configured': finition.nom && finition.images.every(img => img), 
-                        'pending': !finition.nom || finition.images.some(img => !img) 
+                        'configured': lockedProducts.finitions[index] && finition.nom && finition.images.every(img => img), 
+                        'pending': !lockedProducts.finitions[index] || !finition.nom || finition.images.some(img => !img) 
                       }">
-                        {{ finition.nom && finition.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
+                        {{ lockedProducts.finitions[index] && finition.nom && finition.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
                       </span>
                     </div>
                     
                     <div class="image-upload-group" :class="{ 'locked': lockedProducts.finitions[index] }">
                       <label>Images d'évolution :</label>
                       <div class="upload-container">
-                        <div class="upload-area" @click="lockedProducts.finitions[index] ? null : triggerFileUpload(index, 'finition')" @drop="lockedProducts.finitions[index] ? null : handleFileDrop($event, index, 'finition')" @dragover.prevent @dragenter.prevent :class="{ 'disabled': lockedProducts.finitions[index] }">
+                        <div class="upload-area" @click="lockedProducts.finitions[index] ? null : triggerFileUpload(index, 'finition')" @drop="lockedProducts.finitions[index] ? null : handleFileDrop($event, index, 'finition')" @dragover.prevent @dragenter.prevent @dragleave.prevent @dragenter="handleDragEnter($event, index, 'finition')" @dragleave="handleDragLeave($event, index, 'finition')" :class="{ 'disabled': lockedProducts.finitions[index], 'dragover': dragStates.finitions[index] }">
                           <i class="fas fa-cloud-upload-alt"></i>
-                          <span>Glissez 3 images ici ou cliquez pour sélectionner</span>
+                          <span>Glissez 3 images depuis un dossier ou cliquez pour sélectionner</span>
                         </div>
                         <input 
-                          :ref="`fileInput-${index}-finition`"
+                          :id="`fileInput-${index}-finition`"
                           type="file" 
                           accept="image/*"
                           multiple
@@ -786,7 +788,8 @@
 <script setup lang="ts">
 import { supabase } from '@/services/supabaseService'
 import { productConfigService } from '@/services/productConfigService'
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import type { ProductConfig } from '@/services/productConfigService'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -816,19 +819,27 @@ const editingProduct = ref<any>(null)
 const editingType = ref<string | null>(null) // 'fond', 'douceur', 'finition'
 const isSaving = ref(false)
 const isLoadingProducts = ref(false)
+const isUploadingImages = ref(false)
 const productsViewMode = ref<'grid' | 'list'>('grid')
 
 // État de verrouillage pour chaque produit
 const lockedProducts = ref({
-  fonds: [true, true, true, true],
+  fonds: [true, true, true],
   premiereDouceur: [true, true, true, true],
   secondeDouceur: [true, true, true, true],
   finitions: [true, true, true, true]
 })
 
+// État de drag & drop pour chaque zone d'upload
+const dragStates = ref({
+  fonds: [false, false, false],
+  premiereDouceur: [false, false, false, false],
+  secondeDouceur: [false, false, false, false],
+  finitions: [false, false, false, false]
+})
+
 // Data for product configurations
 const fonds = ref([
-  { nom: '', image: null as string | null },
   { nom: '', image: null as string | null },
   { nom: '', image: null as string | null },
   { nom: '', image: null as string | null }
@@ -875,10 +886,18 @@ const totalPending = computed(() => {
 })
 
 // Progress bars pour chaque étape
-const fondsProgress = computed(() => (fondsConfigured.value / 4) * 100)
+const fondsProgress = computed(() => (fondsConfigured.value / 3) * 100)
 const premiereCoucheProgress = computed(() => (premiereCoucheConfigured.value / 4) * 100)
 const secondeCoucheProgress = computed(() => (secondeCoucheConfigured.value / 4) * 100)
 const toucheFinaleProgress = computed(() => (toucheFinaleConfigured.value / 4) * 100)
+
+// Vérifier s'il y a des produits déverrouillés (modifications en cours)
+const hasUnlockedProducts = computed(() => {
+  return lockedProducts.value.fonds.some(locked => !locked) ||
+         lockedProducts.value.premiereDouceur.some(locked => !locked) ||
+         lockedProducts.value.secondeDouceur.some(locked => !locked) ||
+         lockedProducts.value.finitions.some(locked => !locked)
+})
 
 const modalTitle = computed(() => {
   switch (editingType.value) {
@@ -922,15 +941,46 @@ const toggleProductsSection = () => {
 }
 
 // Fonctions de verrouillage/déverrouillage
-const toggleLock = (type: string, index: number) => {
-  if (type === 'fond') {
-    lockedProducts.value.fonds[index] = !lockedProducts.value.fonds[index]
-  } else if (type === 'premiere') {
-    lockedProducts.value.premiereDouceur[index] = !lockedProducts.value.premiereDouceur[index]
-  } else if (type === 'seconde') {
-    lockedProducts.value.secondeDouceur[index] = !lockedProducts.value.secondeDouceur[index]
-  } else if (type === 'finition') {
-    lockedProducts.value.finitions[index] = !lockedProducts.value.finitions[index]
+const toggleLock = async (type: string, index: number) => {
+  try {
+    let configType: string = ''
+    let newLockedState: boolean = false
+    
+    if (type === 'fond') {
+      lockedProducts.value.fonds[index] = !lockedProducts.value.fonds[index]
+      configType = 'fonds'
+      newLockedState = lockedProducts.value.fonds[index]
+    } else if (type === 'premiere') {
+      lockedProducts.value.premiereDouceur[index] = !lockedProducts.value.premiereDouceur[index]
+      configType = 'premiere_couche_douceur'
+      newLockedState = lockedProducts.value.premiereDouceur[index]
+    } else if (type === 'seconde') {
+      lockedProducts.value.secondeDouceur[index] = !lockedProducts.value.secondeDouceur[index]
+      configType = 'seconde_couche_douceur'
+      newLockedState = lockedProducts.value.secondeDouceur[index]
+    } else if (type === 'finition') {
+      lockedProducts.value.finitions[index] = !lockedProducts.value.finitions[index]
+      configType = 'touche_finale'
+      newLockedState = lockedProducts.value.finitions[index]
+    }
+    
+    // Sauvegarder l'état de verrouillage dans Supabase
+    if (configType) {
+      await productConfigService.updateProductLock(configType, index, newLockedState)
+      console.log(`✅ État de verrouillage mis à jour pour ${configType} index ${index}: ${newLockedState}`)
+    }
+  } catch (error) {
+    console.error('❌ Erreur lors de la mise à jour du verrouillage:', error)
+    // Annuler le changement en cas d'erreur
+    if (type === 'fond') {
+      lockedProducts.value.fonds[index] = !lockedProducts.value.fonds[index]
+    } else if (type === 'premiere') {
+      lockedProducts.value.premiereDouceur[index] = !lockedProducts.value.premiereDouceur[index]
+    } else if (type === 'seconde') {
+      lockedProducts.value.secondeDouceur[index] = !lockedProducts.value.secondeDouceur[index]
+    } else if (type === 'finition') {
+      lockedProducts.value.finitions[index] = !lockedProducts.value.finitions[index]
+    }
   }
 }
 
@@ -948,8 +998,8 @@ const validateProduct = async (type: string, index: number) => {
       await saveFinition(index)
     }
     
-    // Re-verrouiller le produit
-    toggleLock(type, index)
+    // Re-verrouiller le produit (sauvegarde automatique dans Supabase)
+    await toggleLock(type, index)
     
     console.log('✅ Produit validé et verrouillé')
   } catch (error) {
@@ -958,24 +1008,34 @@ const validateProduct = async (type: string, index: number) => {
 }
 
 // Fonctions de suppression d'images individuelles
-const removeImage = (type: string, index: number, imageIndex?: number) => {
+const removeImage = async (type: string, index: number, imageIndex?: number) => {
   if (type === 'fond') {
     if (confirm('Supprimer cette image ?')) {
+      const currentImage = fonds.value[index].image
+      if (currentImage) {
+        // Supprimer de Supabase Storage
+        await productConfigService.deleteImage(currentImage)
+      }
       fonds.value[index].image = null
-      saveFond(index)
+      await saveFond(index)
     }
   } else {
     if (confirm(`Supprimer l'image ${imageIndex! + 1} ?`)) {
       const array = type === 'premiere' ? premiereCoucheDouceur : 
                     type === 'seconde' ? secondeCoucheDouceur : toucheFinale
+      const currentImage = array.value[index].images[imageIndex!]
+      if (currentImage) {
+        // Supprimer de Supabase Storage
+        await productConfigService.deleteImage(currentImage)
+      }
       array.value[index].images[imageIndex!] = null
       
       if (type === 'premiere') {
-        saveDouceur(index, 'premiere')
+        await saveDouceur(index, 'premiere')
       } else if (type === 'seconde') {
-        saveDouceur(index, 'seconde')
+        await saveDouceur(index, 'seconde')
       } else {
-        saveFinition(index)
+        await saveFinition(index)
       }
     }
   }
@@ -983,58 +1043,142 @@ const removeImage = (type: string, index: number, imageIndex?: number) => {
 
 // Fonctions CRUD pour les fonds
 // Fonctions de sauvegarde pour les fonds
-const saveFond = (index: number) => {
-  fonds.value[index] = { ...fonds.value[index] }
-  saveProductConfig()
+const saveFond = async (index: number) => {
+  try {
+    const fond = fonds.value[index]
+    const config: ProductConfig = {
+      config_type: 'fonds',
+      product_index: index,
+      nom: fond.nom,
+      images: fond.image ? [fond.image] : []
+    }
+    
+    await productConfigService.upsertProductConfig(config)
+    console.log('✅ Fond sauvegardé dans Supabase')
+  } catch (error) {
+    console.error('❌ Erreur lors de la sauvegarde du fond:', error)
+  }
 }
 
 // Fonctions de sauvegarde pour les douceurs
-const saveDouceur = (index: number, type: 'premiere' | 'seconde') => {
-  const array = type === 'premiere' ? premiereCoucheDouceur : secondeCoucheDouceur
-  array.value[index] = { ...array.value[index] }
-  saveProductConfig()
+const saveDouceur = async (index: number, type: 'premiere' | 'seconde') => {
+  try {
+    const array = type === 'premiere' ? premiereCoucheDouceur : secondeCoucheDouceur
+    const douceur = array.value[index]
+    const configType = type === 'premiere' ? 'premiere_couche_douceur' : 'seconde_couche_douceur'
+    
+    const config: ProductConfig = {
+      config_type: configType,
+      product_index: index,
+      nom: douceur.nom,
+      images: douceur.images.filter((img): img is string => img !== null)
+    }
+    
+    await productConfigService.upsertProductConfig(config)
+    console.log(`✅ Douceur ${type} sauvegardée dans Supabase`)
+  } catch (error) {
+    console.error(`❌ Erreur lors de la sauvegarde de la douceur ${type}:`, error)
+  }
 }
 
 // Fonctions de sauvegarde pour les finitions
-const saveFinition = (index: number) => {
-  toucheFinale.value[index] = { ...toucheFinale.value[index] }
-  saveProductConfig()
+const saveFinition = async (index: number) => {
+  try {
+    const finition = toucheFinale.value[index]
+    const config: ProductConfig = {
+      config_type: 'touche_finale',
+      product_index: index,
+      nom: finition.nom,
+      images: finition.images.filter((img): img is string => img !== null)
+    }
+    
+    await productConfigService.upsertProductConfig(config)
+    console.log('✅ Finition sauvegardée dans Supabase')
+  } catch (error) {
+    console.error('❌ Erreur lors de la sauvegarde de la finition:', error)
+  }
 }
 
 
 
 // Fonction pour reset complet
-const resetAllProducts = () => {
+const resetAllProducts = async () => {
   if (confirm('Êtes-vous sûr de vouloir remettre à zéro tous les produits ? Cette action est irréversible.')) {
-    fonds.value = [
-      { nom: '', image: null as string | null },
-      { nom: '', image: null as string | null },
-      { nom: '', image: null as string | null },
-      { nom: '', image: null as string | null }
-    ]
-    
-    premiereCoucheDouceur.value = [
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-    ]
-    
-    secondeCoucheDouceur.value = [
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-    ]
-    
-    toucheFinale.value = [
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-      { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-    ]
-    
-    saveProductConfig()
+    try {
+      // Supprimer toutes les images de Supabase Storage
+      for (let i = 0; i < 3; i++) {
+        if (fonds.value[i]?.image) {
+          await productConfigService.deleteImage(fonds.value[i].image!)
+        }
+      }
+      
+      for (let i = 0; i < 4; i++) {
+        if (premiereCoucheDouceur.value[i]?.images) {
+          for (const image of premiereCoucheDouceur.value[i].images) {
+            if (image) {
+              await productConfigService.deleteImage(image)
+            }
+          }
+        }
+        if (secondeCoucheDouceur.value[i]?.images) {
+          for (const image of secondeCoucheDouceur.value[i].images) {
+            if (image) {
+              await productConfigService.deleteImage(image)
+            }
+          }
+        }
+        if (toucheFinale.value[i]?.images) {
+          for (const image of toucheFinale.value[i].images) {
+            if (image) {
+              await productConfigService.deleteImage(image)
+            }
+          }
+        }
+      }
+      
+      // Réinitialiser les arrays
+      fonds.value = [
+        { nom: '', image: null as string | null },
+        { nom: '', image: null as string | null },
+        { nom: '', image: null as string | null }
+      ]
+      
+      premiereCoucheDouceur.value = [
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] }
+      ]
+      
+      secondeCoucheDouceur.value = [
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] }
+      ]
+      
+      toucheFinale.value = [
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
+        { nom: '', images: [null as string | null, null as string | null, null as string | null] }
+      ]
+      
+      // Sauvegarder la configuration vide dans Supabase
+      for (let i = 0; i < 3; i++) {
+        await saveFond(i)
+      }
+      for (let i = 0; i < 4; i++) {
+        await saveDouceur(i, 'premiere')
+        await saveDouceur(i, 'seconde')
+        await saveFinition(i)
+      }
+      
+      console.log('✅ Tous les produits ont été remis à zéro')
+    } catch (error) {
+      console.error('❌ Erreur lors du reset complet:', error)
+      alert('Erreur lors du reset complet')
+    }
   }
 }
 
@@ -1092,18 +1236,96 @@ const closeProductModal = () => {
   editingType.value = null
 }
 
-const loadProductConfig = () => {
+const loadProductConfig = async () => {
   try {
-    const config = localStorage.getItem('amande_product_config')
-    if (config) {
-      const parsedConfig = JSON.parse(config)
-      if (parsedConfig.fonds) fonds.value = parsedConfig.fonds
-      if (parsedConfig.premiereCoucheDouceur) premiereCoucheDouceur.value = parsedConfig.premiereCoucheDouceur
-      if (parsedConfig.secondeCoucheDouceur) secondeCoucheDouceur.value = parsedConfig.secondeCoucheDouceur
-      if (parsedConfig.toucheFinale) toucheFinale.value = parsedConfig.toucheFinale
+    isLoadingProducts.value = true
+    console.log('🔄 Chargement de la configuration depuis Supabase...')
+    
+    // Charger depuis Supabase
+    const configs = await productConfigService.getAllProductConfig()
+    console.log('📦 Configuration chargée:', configs)
+    
+    // Réinitialiser les arrays
+    fonds.value = []
+    premiereCoucheDouceur.value = []
+    secondeCoucheDouceur.value = []
+    toucheFinale.value = []
+    
+    // Réinitialiser l'état de verrouillage
+    lockedProducts.value.fonds = [true, true, true]
+    lockedProducts.value.premiereDouceur = [true, true, true, true]
+    lockedProducts.value.secondeDouceur = [true, true, true, true]
+    lockedProducts.value.finitions = [true, true, true, true]
+    
+    // Organiser les configurations par type
+    configs.forEach(config => {
+      switch (config.config_type) {
+        case 'fonds':
+          fonds.value[config.product_index] = {
+            nom: config.nom || '',
+            image: config.images && config.images.length > 0 ? config.images[0] : null
+          }
+          // Charger l'état de verrouillage
+          if (config.locked !== undefined) {
+            lockedProducts.value.fonds[config.product_index] = config.locked
+          } else {
+            lockedProducts.value.fonds[config.product_index] = true // Verrouillé par défaut
+          }
+          break
+        case 'premiere_couche_douceur':
+          premiereCoucheDouceur.value[config.product_index] = {
+            nom: config.nom || '',
+            images: config.images && config.images.length > 0 ? config.images : [null, null, null]
+          }
+          // Charger l'état de verrouillage
+          if (config.locked !== undefined) {
+            lockedProducts.value.premiereDouceur[config.product_index] = config.locked
+          } else {
+            lockedProducts.value.premiereDouceur[config.product_index] = true // Verrouillé par défaut
+          }
+          break
+        case 'seconde_couche_douceur':
+          secondeCoucheDouceur.value[config.product_index] = {
+            nom: config.nom || '',
+            images: config.images && config.images.length > 0 ? config.images : [null, null, null]
+          }
+          // Charger l'état de verrouillage
+          if (config.locked !== undefined) {
+            lockedProducts.value.secondeDouceur[config.product_index] = config.locked
+          } else {
+            lockedProducts.value.secondeDouceur[config.product_index] = true // Verrouillé par défaut
+          }
+          break
+        case 'touche_finale':
+          toucheFinale.value[config.product_index] = {
+            nom: config.nom || '',
+            images: config.images && config.images.length > 0 ? config.images : [null, null, null]
+          }
+          // Charger l'état de verrouillage
+          if (config.locked !== undefined) {
+            lockedProducts.value.finitions[config.product_index] = config.locked
+          } else {
+            lockedProducts.value.finitions[config.product_index] = true // Verrouillé par défaut
+          }
+          break
+      }
+    })
+    
+    // S'assurer que tous les indices sont définis
+    for (let i = 0; i < 3; i++) {
+      if (!fonds.value[i]) fonds.value[i] = { nom: '', image: null }
     }
+    for (let i = 0; i < 4; i++) {
+      if (!premiereCoucheDouceur.value[i]) premiereCoucheDouceur.value[i] = { nom: '', images: [null, null, null] }
+      if (!secondeCoucheDouceur.value[i]) secondeCoucheDouceur.value[i] = { nom: '', images: [null, null, null] }
+      if (!toucheFinale.value[i]) toucheFinale.value[i] = { nom: '', images: [null, null, null] }
+    }
+    
+    console.log('✅ Configuration chargée avec succès')
   } catch (error) {
-    console.error('Erreur lors du chargement de la configuration:', error)
+    console.error('❌ Erreur lors du chargement de la configuration:', error)
+  } finally {
+    isLoadingProducts.value = false
   }
 }
 
@@ -1117,12 +1339,12 @@ onMounted(async () => {
   
   console.log('✅ Accès admin autorisé')
   await loadUsers()
-  loadProductConfig() // Charger la configuration depuis localStorage au chargement
+  await loadProductConfig() // Charger la configuration depuis Supabase au chargement
   
   // Auto-refresh toutes les 30 secondes
   setInterval(async () => {
     await loadUsers()
-    loadProductConfig() // Recharger la configuration au refresh
+    await loadProductConfig() // Recharger la configuration au refresh
   }, 30000)
   
   // Écouter les modifications de profil pour rafraîchir le dashboard
@@ -1210,20 +1432,64 @@ const toggleUsersSection = () => {
 
 // Fonctions pour l'upload d'images
 const triggerFileUpload = (index: number, type: string) => {
-  const inputRef = `fileInput-${index}-${type}`
-  const input = document.querySelector(`[ref="${inputRef}"]`) as HTMLInputElement
-  if (input) {
-    input.click()
+  // Utiliser nextTick pour s'assurer que le DOM est mis à jour
+  nextTick(() => {
+    const inputId = `fileInput-${index}-${type}`
+    const input = document.getElementById(inputId) as HTMLInputElement
+    if (input) {
+      input.click()
+    } else {
+      console.error(`Input file non trouvé: ${inputId}`)
+    }
+  })
+}
+
+const handleDragEnter = (event: DragEvent, index: number, type: string) => {
+  event.preventDefault()
+  if (type === 'fond') {
+    dragStates.value.fonds[index] = true
+  } else if (type === 'premiere') {
+    dragStates.value.premiereDouceur[index] = true
+  } else if (type === 'seconde') {
+    dragStates.value.secondeDouceur[index] = true
+  } else if (type === 'finition') {
+    dragStates.value.finitions[index] = true
+  }
+}
+
+const handleDragLeave = (event: DragEvent, index: number, type: string) => {
+  event.preventDefault()
+  if (type === 'fond') {
+    dragStates.value.fonds[index] = false
+  } else if (type === 'premiere') {
+    dragStates.value.premiereDouceur[index] = false
+  } else if (type === 'seconde') {
+    dragStates.value.secondeDouceur[index] = false
+  } else if (type === 'finition') {
+    dragStates.value.finitions[index] = false
   }
 }
 
 const handleFileDrop = (event: DragEvent, index: number, type: string) => {
   event.preventDefault()
+  // Réinitialiser l'état de drag
+  if (type === 'fond') {
+    dragStates.value.fonds[index] = false
+  } else if (type === 'premiere') {
+    dragStates.value.premiereDouceur[index] = false
+  } else if (type === 'seconde') {
+    dragStates.value.secondeDouceur[index] = false
+  } else if (type === 'finition') {
+    dragStates.value.finitions[index] = false
+  }
+  
   const files = event.dataTransfer?.files
   if (files) {
     handleFiles(files, index, type)
   }
 }
+
+
 
 const handleFileSelect = (event: Event, index: number, type: string) => {
   const target = event.target as HTMLInputElement
@@ -1232,58 +1498,96 @@ const handleFileSelect = (event: Event, index: number, type: string) => {
   }
 }
 
-const handleFiles = (files: FileList, index: number, type: string) => {
+const handleFiles = async (files: FileList, index: number, type: string) => {
   const fileArray = Array.from(files)
   
-  if (type === 'fond') {
-    // Pour les fonds, prendre seulement la première image
-    if (fileArray.length > 0) {
-      const file = fileArray[0]
-      const imageUrl = URL.createObjectURL(file)
-      fonds.value[index].image = imageUrl
-      saveFond(index)
-    }
-  } else {
-    // Pour les autres types, prendre jusqu'à 3 images
-    const maxImages = Math.min(fileArray.length, 3)
-    const array = type === 'premiere' ? premiereCoucheDouceur : 
-                  type === 'seconde' ? secondeCoucheDouceur : toucheFinale
+  try {
+    isUploadingImages.value = true
     
-    for (let i = 0; i < maxImages; i++) {
-      const file = fileArray[i]
-      const imageUrl = URL.createObjectURL(file)
-      array.value[index].images[i] = imageUrl
-    }
-    
-    if (type === 'premiere') {
-      saveDouceur(index, 'premiere')
-    } else if (type === 'seconde') {
-      saveDouceur(index, 'seconde')
+    if (type === 'fond') {
+      // Pour les fonds, prendre seulement la première image
+      if (fileArray.length > 0) {
+        const file = fileArray[0]
+        // Upload vers Supabase Storage
+        const imageUrl = await productConfigService.uploadImage(file, 'fonds', index)
+        if (imageUrl) {
+          fonds.value[index].image = imageUrl
+          await saveFond(index)
+        } else {
+          alert('Erreur lors de l\'upload de l\'image')
+        }
+      }
     } else {
-      saveFinition(index)
+      // Pour les autres types, prendre jusqu'à 3 images
+      const maxImages = Math.min(fileArray.length, 3)
+      const array = type === 'premiere' ? premiereCoucheDouceur : 
+                    type === 'seconde' ? secondeCoucheDouceur : toucheFinale
+      
+      for (let i = 0; i < maxImages; i++) {
+        const file = fileArray[i]
+        // Upload vers Supabase Storage
+        const imageUrl = await productConfigService.uploadImage(file, type === 'premiere' ? 'premiere_couche_douceur' : type === 'seconde' ? 'seconde_couche_douceur' : 'touche_finale', index, i)
+        if (imageUrl) {
+          array.value[index].images[i] = imageUrl
+        } else {
+          alert(`Erreur lors de l'upload de l'image ${i + 1}`)
+        }
+      }
+      
+      if (type === 'premiere') {
+        await saveDouceur(index, 'premiere')
+      } else if (type === 'seconde') {
+        await saveDouceur(index, 'seconde')
+      } else {
+        await saveFinition(index)
+      }
     }
+  } catch (error) {
+    console.error('Erreur lors du traitement des fichiers:', error)
+    alert('Erreur lors du traitement des fichiers')
+  } finally {
+    isUploadingImages.value = false
   }
 }
 
-const resetFond = (index: number) => {
+const resetFond = async (index: number) => {
   if (confirm('Remettre à zéro ce produit ?')) {
+    const currentImage = fonds.value[index].image
+    if (currentImage) {
+      // Supprimer de Supabase Storage
+      await productConfigService.deleteImage(currentImage)
+    }
     fonds.value[index] = { nom: '', image: null as string | null }
-    saveFond(index)
+    await saveFond(index)
   }
 }
 
-const resetDouceur = (index: number, type: 'premiere' | 'seconde') => {
+const resetDouceur = async (index: number, type: 'premiere' | 'seconde') => {
   if (confirm('Remettre à zéro ce produit ?')) {
     const array = type === 'premiere' ? premiereCoucheDouceur : secondeCoucheDouceur
+    const currentImages = array.value[index].images
+    // Supprimer toutes les images de Supabase Storage
+    for (const image of currentImages) {
+      if (image) {
+        await productConfigService.deleteImage(image)
+      }
+    }
     array.value[index] = { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-    saveDouceur(index, type)
+    await saveDouceur(index, type)
   }
 }
 
-const resetFinition = (index: number) => {
+const resetFinition = async (index: number) => {
   if (confirm('Remettre à zéro ce produit ?')) {
+    const currentImages = toucheFinale.value[index].images
+    // Supprimer toutes les images de Supabase Storage
+    for (const image of currentImages) {
+      if (image) {
+        await productConfigService.deleteImage(image)
+      }
+    }
     toucheFinale.value[index] = { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-    saveFinition(index)
+    await saveFinition(index)
   }
 }
 
@@ -1303,6 +1607,24 @@ const initializeSupabaseConfig = async () => {
   } catch (error) {
     console.error('Erreur lors de l\'initialisation:', error)
     alert('Erreur lors de l\'initialisation de la configuration Supabase')
+  } finally {
+    isLoadingProducts.value = false
+  }
+}
+
+// Fonction pour tester le verrouillage
+const testLocking = async () => {
+  try {
+    isLoadingProducts.value = true
+    const success = await productConfigService.testLocking()
+    if (success) {
+      alert('Le système de verrouillage fonctionne correctement !')
+    } else {
+      alert('Erreur lors du test du verrouillage.')
+    }
+  } catch (error) {
+    console.error('Erreur lors du test du verrouillage:', error)
+    alert('Erreur lors du test du verrouillage.')
   } finally {
     isLoadingProducts.value = false
   }
@@ -2485,7 +2807,9 @@ const initializeSupabaseConfig = async () => {
 }
 
 .products-container.grid {
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .products-container.list {
@@ -2850,8 +3174,10 @@ const initializeSupabaseConfig = async () => {
 }
 
 .upload-area.dragover {
-  border-color: var(--accent-color);
-  background: rgba(255, 111, 97, 0.1);
+  border-color: #383961;
+  background: #e3f2fd;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(56, 57, 97, 0.2);
 }
 
 .upload-area i {
@@ -3095,6 +3421,13 @@ const initializeSupabaseConfig = async () => {
   background: #5a6268 !important;
 }
 
+.reset-btn:disabled {
+  background: #adb5bd !important;
+  color: #6c757d !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* Styles pour le système de verrouillage */
 .edit-btn {
   background: #383961 !important;
@@ -3207,8 +3540,8 @@ const initializeSupabaseConfig = async () => {
 
 .remove-image-btn {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 4px;
+  right: 4px;
   background: #dc3545;
   color: white;
   border: none;
