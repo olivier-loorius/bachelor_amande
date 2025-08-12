@@ -36,9 +36,10 @@
                 "
               >
                 <img
-                  :src="fond.image"
+                  :src="fond.image || '/placeholder-fond.svg'"
                   :alt="fond.nom"
                     style="width:100%;height:100%;object-fit:cover;border-radius:5px !important;box-sizing:border-box;display:block;margin:0;background:none;border:none;padding:0;"
+                  @error="$event.target.src = '/placeholder-fond.svg'"
                 />
                 <div
                   v-if="selectedFond?.id === fond.id"
@@ -86,9 +87,10 @@
                     "
                   >
                     <img
-                      :src="fonds[fondIndex].image"
+                      :src="fonds[fondIndex].image || '/placeholder-fond.svg'"
                       :alt="fonds[fondIndex].nom"
                       style="width:100%;height:100%;object-fit:cover;border-radius:5px !important;box-sizing:border-box;display:block;margin:0;background:none;border:none;padding:0;"
+                      @error="$event.target.src = '/placeholder-fond.svg'"
                     />
                     <div
                       v-if="selectedFond?.id === fonds[fondIndex].id"
@@ -139,7 +141,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="garniture-img-mobile" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="garniture-img-mobile" @error="$event.target.src = '/placeholder-garniture.svg'" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -165,7 +167,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-              <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" />
+              <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="$event.target.src = '/placeholder-garniture.svg'" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -221,7 +223,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" class="garniture-img-mobile" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" class="garniture-img-mobile" @error="$event.target.src = '/placeholder-garniture.svg'" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -247,7 +249,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="$event.target.src = '/placeholder-garniture.svg'" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -303,7 +305,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" class="garniture-img-mobile" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" class="garniture-img-mobile" @error="$event.target.src = '/placeholder-garniture.svg'" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -329,7 +331,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="$event.target.src = '/placeholder-garniture.svg'" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -407,7 +409,7 @@
             </div>
             </div>
               <div class="composer-step5-img">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="composer-step5-img-el" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="composer-step5-img-el" @error="$event.target.src = '/placeholder-garniture.svg'" />
                 <div v-else class="garniture-img-placeholder composer-step5-img-el">Aucun fond sélectionné</div>
           </div>
             </div>
@@ -522,51 +524,37 @@ import LoginPromptModal from '@/components/LoginPromptModal.vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePanierStore } from '@/stores/panier'
 import { compositionsService, type Composition } from '@/services/supabaseService'
-import fondNature from '@/assets/images/fondNature.jpg'
-import fondCacao from '@/assets/images/fondCacao.jpg'
-import fondNoisette from '@/assets/images/fondNoisette.jpg'
-import fondNatureCremeDamande from '@/assets/images/fondNatureCrèmeDamande.jpg'
-import fondNatureCajou from '@/assets/images/fondNatureCajou.jpg'
-import fondNaturePraline from '@/assets/images/fondNaturePraliné.png'
-import fondNaturePeche from '@/assets/images/fontNaturePeche.png'
-import fondCacaoCremeDamande from '@/assets/images/fondCacaoCrèmeDamande.png'
-import fondCacaoCajou from '@/assets/images/fondCacaoCajou (2).png'
-import fondCacaoPraline from '@/assets/images/fondCacaoPraliné.png'
-import fondCacaoPeche from '@/assets/images/fondCacaoPeche.png'
-import fondNoisetteCremeDamande from '@/assets/images/fondNoisettCremDamande.png'
-import fondNoisetteCajou from '@/assets/images/fondNoisetteCajou.png'
-import fondNoisettePraline from '@/assets/images/fondNoisettePraliné.png'
-import fondNoisettePeche from '@/assets/images/fondNoisettePeche.png'
+
 
 const fonds = [
-  { id: 1, nom: 'Pâte sucrée amande', image: fondNature },
-  { id: 2, nom: 'Pâte sucrée cacao', image: fondCacao },
-  { id: 3, nom: 'Pâte sucrée noisette', image: fondNoisette },
+  { id: 1, nom: 'Pâte sucrée amande', image: null },
+  { id: 2, nom: 'Pâte sucrée cacao', image: null },
+  { id: 3, nom: 'Pâte sucrée noisette', image: null },
 ]
 const garnitures1 = [
-    { id: 1, nom: 'Crème d\'amande', image: '' },
-  { id: 2, nom: 'Caramel cajou', image: '' },
-    { id: 3, nom: 'Croustillant praliné', image: '' },
-  { id: 4, nom: 'Compotée de pêche', image: '' },
-  { id: 5, nom: 'Crème citron', image: '' },
+    { id: 1, nom: 'Crème d\'amande', image: null },
+  { id: 2, nom: 'Caramel cajou', image: null },
+    { id: 3, nom: 'Croustillant praliné', image: null },
+  { id: 4, nom: 'Compotée de pêche', image: null },
+  { id: 5, nom: 'Crème citron', image: null },
 ]
 const garnitures2 = [
-  { id: 1, nom: 'Fraises' },
-  { id: 2, nom: 'Framboises' },
-  { id: 3, nom: 'Myrtilles' },
-  { id: 4, nom: 'Crème chantilly' },
-  { id: 5, nom: 'Coulis de fruits' },
+  { id: 1, nom: 'Fraises', image: null },
+  { id: 2, nom: 'Framboises', image: null },
+  { id: 3, nom: 'Myrtilles', image: null },
+  { id: 4, nom: 'Crème chantilly', image: null },
+  { id: 5, nom: 'Coulis de fruits', image: null },
 ]
   const garnitures3 = [
-    { id: 1, nom: 'Fruits frais' },
-    { id: 2, nom: 'Crème chantilly' },
-    { id: 3, nom: 'Coulis de fruits' },
-    { id: 4, nom: 'Fruits secs' },
+    { id: 1, nom: 'Fruits frais', image: null },
+    { id: 2, nom: 'Crème chantilly', image: null },
+    { id: 3, nom: 'Coulis de fruits', image: null },
+    { id: 4, nom: 'Fruits secs', image: null },
 ]
 const finitions = [
-  { id: 1, nom: 'Coulis & fruits secs' },
-  { id: 2, nom: 'Fruits frais' },
-  { id: 3, nom: 'Rosace de crème' },
+  { id: 1, nom: 'Coulis & fruits secs', image: null },
+  { id: 2, nom: 'Fruits frais', image: null },
+  { id: 3, nom: 'Rosace de crème', image: null },
 ]
 
 const selectedFond = ref(null as null | { id: number, nom: string })
@@ -796,45 +784,12 @@ function deselectGarniture1() {
 }
 
   function getGarnitureImage(fond: { id: number, nom: string, image?: string } | null, garniture: { id: number, nom: string } | null) {
-  if (!fond) return '';
-  if (!garniture) return fond.image;
-    if (fond.image === fondNature && garniture.nom === "Crème d'amande") {
-    return fondNatureCremeDamande;
-  }
-    if (fond.image === fondNature && garniture.nom === "Caramel cajou") {
-    return fondNatureCajou;
-  }
-    if (fond.image === fondNature && garniture.nom === "Croustillant praliné") {
-    return fondNaturePraline;
-  }
-    if (fond.image === fondNature && garniture.nom === "Compotée de pêche") {
-    return fondNaturePeche;
-  }
-    if (fond.image === fondCacao && garniture.nom === "Crème d'amande") {
-    return fondCacaoCremeDamande;
-  }
-    if (fond.image === fondCacao && garniture.nom === "Caramel cajou") {
-    return fondCacaoCajou;
-  }
-    if (fond.image === fondCacao && garniture.nom === "Croustillant praliné") {
-    return fondCacaoPraline;
-  }
-    if (fond.image === fondCacao && garniture.nom === "Compotée de pêche") {
-    return fondCacaoPeche;
-  }
-    if (fond.image === fondNoisette && garniture.nom === "Crème d'amande") {
-    return fondNoisetteCremeDamande;
-  }
-    if (fond.image === fondNoisette && garniture.nom === "Caramel cajou") {
-    return fondNoisetteCajou;
-  }
-    if (fond.image === fondNoisette && garniture.nom === "Croustillant praliné") {
-    return fondNoisettePraline;
-  }
-    if (fond.image === fondNoisette && garniture.nom === "Compotée de pêche") {
-    return fondNoisettePeche;
-  }
-  return fond.image;
+  if (!fond) return '/placeholder-fond.svg';
+  if (!garniture) return fond.image || '/placeholder-fond.svg';
+  // Logique simplifiée - retourner l'image du fond ou un placeholder
+  // Logique simplifiée - retourner l'image du fond ou un placeholder
+  // Logique simplifiée - retourner l'image du fond ou un placeholder
+  return fond.image || '/placeholder-fond.svg';
 }
 
 function handleClickOutsideFond(event: MouseEvent) {
