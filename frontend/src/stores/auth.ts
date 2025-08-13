@@ -16,19 +16,18 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoading = ref(false)
 
   const isLoggedIn = computed(() => !!user.value)
-  const isAuthenticated = computed(() => !!user.value)
-  const currentUser = computed(() => user.value)
   const isAdmin = computed(() => user.value?.role === 'admin')
 
   // Inscription
-  const register = async (nom: string, email: string, password: string) => {
+  const register = async (credentials: { nom: string; email: string; password: string }) => {
+    const { nom, email, password } = credentials
     isLoading.value = true
     
     try {
       const authData = await registerUser({ email, password, name: nom })
-      
-      // Le trigger créera automatiquement l'utilisateur dans public.users
-      // On récupère les infos utilisateur
+      if (!authData.user) {
+        throw new Error('Erreur lors de la création du compte')
+      }
       const userInfos = await getUserInfos(authData.user.id)
       
       user.value = {
@@ -45,7 +44,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (error) {
       console.error('Erreur register:', error)
-      return { success: false, message: error.message }
+      return { success: false, message: error instanceof Error ? error.message : 'Erreur lors de l\'inscription' }
     } finally {
       isLoading.value = false
     }
@@ -57,6 +56,9 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const authData = await loginUser(credentials)
+      if (!authData.user) {
+        throw new Error('Erreur lors de la connexion')
+      }
       const userInfos = await getUserInfos(authData.user.id)
       
       user.value = {
@@ -72,7 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
         message: userInfos.role === 'admin' ? 'Connexion admin réussie' : 'Connexion réussie' 
       }
     } catch (error) {
-      return { success: false, message: error.message }
+      return { success: false, message: error instanceof Error ? error.message : 'Erreur lors de la connexion' }
     } finally {
       isLoading.value = false
     }
@@ -94,15 +96,10 @@ export const useAuthStore = defineStore('auth', () => {
   // Suppression de compte
   const deleteAccount = async () => {
     try {
-      console.log('🗑️ Début de la suppression du compte...')
-      
       if (!user.value) {
         throw new Error('Aucun utilisateur connecté')
       }
 
-      console.log('👤 Utilisateur à supprimer:', user.value.email)
-
-                    // Désactiver le compte directement avec Supabase
       const { error } = await supabase
         .from('users')
         .update({ deleted: true })
@@ -112,9 +109,6 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('Erreur lors de la désactivation: ' + error.message)
       }
 
-      console.log('✅ Compte désactivé avec succès')
-
-      // Déconnexion après soft delete réussi
       await logoutUser()
       user.value = null
 
@@ -123,10 +117,10 @@ export const useAuthStore = defineStore('auth', () => {
         message: 'Compte désactivé avec succès' 
       }
     } catch (error) {
-      console.error('❌ Erreur deleteAccount:', error)
+      console.error('Erreur deleteAccount:', error)
       return { 
         success: false, 
-        message: error.message || 'Erreur lors de la suppression du compte' 
+        message: error instanceof Error ? error.message : 'Erreur lors de la suppression du compte' 
       }
     }
   }
@@ -150,19 +144,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Initialiser au démarrage
-  // initialize() // Commenté pour éviter la connexion automatique
-
   return {
     user,
     isLoading,
     isLoggedIn,
-    isAuthenticated,
-    currentUser,
     isAdmin,
     login,
     register,
     logout,
-    deleteAccount
+    deleteAccount,
+    initialize
   }
 }) 

@@ -124,12 +124,7 @@
         </div>
       </div>
     </div>
-    <LogoutModal 
-      :show="isLogoutModalOpen" 
-      :userName="currentUser?.name"
-      @close="closeLogoutModal"
-      @confirm="handleLogoutConfirm"
-    />
+
   </div>
 </template>
 
@@ -139,7 +134,6 @@ import { useRouter } from 'vue-router'
 import { usePanierStore } from '@/stores/panier'
 import { useAuthStore } from '@/stores/auth'
 import AddToCartModal from '@/components/AddToCartModal.vue'
-import LogoutModal from '@/components/LogoutModal.vue'
 
 interface Props {
   isOpen: boolean
@@ -151,7 +145,7 @@ const emit = defineEmits<{
 }>()
 
 const isMobile = ref(false)
-const isLogoutModalOpen = ref(false)
+
 
 const panierStore = usePanierStore()
 
@@ -162,8 +156,8 @@ const router = useRouter()
 // Computed
 const totalPanier = computed(() => panierStore.total)
 const nombreArticlesPanier = computed(() => panierStore.nombreArticles)
-const isAuthenticated = computed(() => authStore.isAuthenticated)
-const currentUser = computed(() => authStore.currentUser)
+const isAuthenticated = computed(() => authStore.isLoggedIn)
+const currentUser = computed(() => authStore.user)
 
 // Watcher pour déboguer l'authentification
 watch(isAuthenticated, (newValue) => {
@@ -204,22 +198,11 @@ const login = () => {
   // Pour l'instant, on simule une connexion
 }
 
-const openLogoutModal = () => {
-  isLogoutModalOpen.value = true
-}
-
-const closeLogoutModal = () => {
-  isLogoutModalOpen.value = false
-}
-
-const handleLogoutConfirm = () => {
-  authStore.logout()
-  // currentStep.value = 1 // This line is removed as per the edit hint
-}
-
 const handleLogout = () => {
-  openLogoutModal()
+  authStore.logout()
 }
+
+
 
 const nextStep = () => {
   // currentStep.value++ // This line is removed as per the edit hint

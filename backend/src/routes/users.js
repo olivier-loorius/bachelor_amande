@@ -3,7 +3,6 @@ const { supabase, supabaseAdmin } = require('../config/supabase');
 
 const router = express.Router();
 
-// Récupérer tous les utilisateurs
 router.get('/', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -25,7 +24,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Ajouter un utilisateur (pour test)
 router.post('/', async (req, res) => {
   try {
     const { email, name, role = 'user' } = req.body;
@@ -46,12 +44,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Soft delete simple - VERSION ULTRA SIMPLE
 router.post('/delete-account', async (req, res) => {
   try {
     console.log('🔍 Début du soft delete...');
     
-    // Récupérer le token d'authentification depuis les headers
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -61,7 +57,6 @@ router.post('/delete-account', async (req, res) => {
     const token = authHeader.substring(7);
     console.log('🔑 Token extrait:', token.substring(0, 20) + '...');
 
-    // Vérifier l'authentification avec Supabase
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
@@ -70,7 +65,6 @@ router.post('/delete-account', async (req, res) => {
 
     console.log(`✅ Utilisateur authentifié: ${user.email} (${user.id})`);
 
-    // Update simple : juste mettre deleted = true
     console.log('🗑️ Update simple...');
     
     const { error } = await supabaseAdmin
@@ -97,35 +91,6 @@ router.post('/delete-account', async (req, res) => {
   } catch (error) {
     console.error('❌ Exception:', error);
     res.status(500).json({ error: 'Erreur serveur: ' + error.message });
-  }
-});
-
-// Test route pour vérifier l'update
-router.post('/test-update', async (req, res) => {
-  try {
-    const { userId } = req.body;
-    
-    console.log('🧪 Test update pour userId:', userId);
-    
-    const { data, error } = await supabaseAdmin
-      .from('users')
-      .update({ 
-        deleted: true,
-        deleted_at: new Date().toISOString()
-      })
-      .eq('id', userId)
-      .select();
-
-    if (error) {
-      console.error('❌ Erreur test update:', error);
-      return res.status(500).json({ error: error.message });
-    }
-
-    console.log('✅ Test update réussi:', data);
-    res.json({ success: true, data });
-  } catch (error) {
-    console.error('❌ Erreur test:', error);
-    res.status(500).json({ error: error.message });
   }
 });
 

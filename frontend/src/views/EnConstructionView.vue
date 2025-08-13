@@ -51,7 +51,7 @@ const authStore = useAuthStore()
 const fromCart = ref(false)
 
 // Vérifier l'authentification
-const isAuthenticated = computed(() => authStore.isAuthenticated)
+const isAuthenticated = computed(() => authStore.isLoggedIn)
 
 function goBack() {
   router.back()

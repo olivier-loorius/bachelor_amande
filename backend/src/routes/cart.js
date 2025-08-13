@@ -3,7 +3,6 @@ const { supabase } = require('../config/supabase');
 
 const router = express.Router();
 
-// Récupérer tous les paniers (pour debug)
 router.get('/', async (req, res) => {
   try {
     const { data, error } = await supabase

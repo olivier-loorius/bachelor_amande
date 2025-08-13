@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!authStore.isAuthenticated">
+    <div v-if="!authStore.isLoggedIn">
       <button @click="openLogin" class="open-login-btn">Ouvrir Connexion</button>
       <LoginPanel :isOpen="isLoginOpen" @close="closeLogin" />
     </div>
@@ -30,7 +30,7 @@ function closeLogin() {
 
 onMounted(() => {
   // Si l'utilisateur est déjà connecté, rediriger vers l'accueil
-  if (authStore.isAuthenticated) {
+  if (authStore.isLoggedIn) {
     router.push('/')
   }
 })

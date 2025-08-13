@@ -5,7 +5,7 @@
       <div class="header-content">
         <h1 class="dashboard-title">Dashboard Admin</h1>
         <p class="welcome-message">
-          Bienvenue, <strong>{{ authStore.currentUser?.name || 'Administrateur' }}</strong> ! 
+          Bienvenue, <strong>{{ authStore.user?.name || 'Administrateur' }}</strong> ! 
           Gérez vos utilisateurs et votre contenu depuis cet espace.
         </p>
       </div>
@@ -263,6 +263,12 @@
                     <button @click="resetFond(index)" class="action-btn reset-btn" :disabled="lockedProducts.fonds[index]" :title="lockedProducts.fonds[index] ? 'Déverrouillez d\'abord pour remettre à zéro' : 'Remettre à zéro'">
                       <i class="fas fa-undo"></i>
                     </button>
+                    <span class="status-badge-header" :class="{ 
+                      'configured': lockedProducts.fonds[index] && fond.nom && fond.image, 
+                      'pending': !lockedProducts.fonds[index] || !fond.nom || !fond.image 
+                    }">
+                      {{ lockedProducts.fonds[index] && fond.nom && fond.image ? '✅' : '⏳' }}
+                    </span>
                   </div>
                 </div>
                 
@@ -277,15 +283,6 @@
                         :disabled="lockedProducts.fonds[index]"
                         @blur="saveFond(index)"
                       />
-                    </div>
-                    
-                    <div class="product-status">
-                      <span class="status-badge" :class="{ 
-                        'configured': lockedProducts.fonds[index] && fond.nom && fond.image, 
-                        'pending': !lockedProducts.fonds[index] || !fond.nom || !fond.image 
-                      }">
-                        {{ lockedProducts.fonds[index] && fond.nom && fond.image ? '✅ Configuré' : '⏳ En attente' }}
-                      </span>
                     </div>
                     
                     <div class="image-upload-group" :class="{ 'locked': lockedProducts.fonds[index] }">
@@ -306,14 +303,6 @@
                           :disabled="lockedProducts.fonds[index]"
                         />
                       </div>
-                    </div>
-                    
-                    <!-- Bouton de validation -->
-                    <div v-if="!lockedProducts.fonds[index]" class="validation-actions">
-                      <button @click="validateProduct('fond', index)" class="action-btn validate-btn" :disabled="!fond.nom || !fond.image">
-                        <i class="fas fa-check"></i>
-                        Valider
-                      </button>
                     </div>
                   </div>
                   
@@ -366,6 +355,12 @@
                     <button @click="resetDouceur(index, 'premiere')" class="action-btn reset-btn" :disabled="lockedProducts.premiereDouceur[index]" :title="lockedProducts.premiereDouceur[index] ? 'Déverrouillez d\'abord pour remettre à zéro' : 'Remettre à zéro'">
                       <i class="fas fa-undo"></i>
                     </button>
+                    <span class="status-badge-header" :class="{ 
+                      'configured': lockedProducts.premiereDouceur[index] && douceur.nom && douceur.images.every(img => img), 
+                      'pending': !lockedProducts.premiereDouceur[index] || !douceur.nom || douceur.images.some(img => !img) 
+                    }">
+                      {{ lockedProducts.premiereDouceur[index] && douceur.nom && douceur.images.every(img => img) ? '✅' : '⏳' }}
+                    </span>
                   </div>
                 </div>
                 
@@ -382,14 +377,7 @@
                       />
                     </div>
                     
-                    <div class="product-status">
-                      <span class="status-badge" :class="{ 
-                        'configured': lockedProducts.premiereDouceur[index] && douceur.nom && douceur.images.every(img => img), 
-                        'pending': !lockedProducts.premiereDouceur[index] || !douceur.nom || douceur.images.some(img => !img) 
-                      }">
-                        {{ lockedProducts.premiereDouceur[index] && douceur.nom && douceur.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
-                      </span>
-                    </div>
+
                     
                     <div class="image-upload-group" :class="{ 'locked': lockedProducts.premiereDouceur[index] }">
                       <label>Images d'évolution :</label>
@@ -410,13 +398,7 @@
                       </div>
                     </div>
                     
-                    <!-- Bouton de validation -->
-                    <div v-if="!lockedProducts.premiereDouceur[index]" class="validation-actions">
-                      <button @click="validateProduct('premiere', index)" class="action-btn validate-btn" :disabled="!douceur.nom || !douceur.images.every(img => img)">
-                        <i class="fas fa-check"></i>
-                        Valider
-                      </button>
-                    </div>
+
                   </div>
                   
                   <!-- Affichage des 3 images sur lignes séparées -->
@@ -474,6 +456,12 @@
                     <button @click="resetDouceur(index, 'seconde')" class="action-btn reset-btn" :disabled="lockedProducts.secondeDouceur[index]" :title="lockedProducts.secondeDouceur[index] ? 'Déverrouillez d\'abord pour remettre à zéro' : 'Remettre à zéro'">
                       <i class="fas fa-undo"></i>
                     </button>
+                    <span class="status-badge-header" :class="{ 
+                      'configured': lockedProducts.secondeDouceur[index] && douceur.nom && douceur.images.every(img => img), 
+                      'pending': !lockedProducts.secondeDouceur[index] || !douceur.nom || douceur.images.some(img => !img) 
+                    }">
+                      {{ lockedProducts.secondeDouceur[index] && douceur.nom && douceur.images.every(img => img) ? '✅' : '⏳' }}
+                    </span>
                   </div>
                 </div>
                 
@@ -490,14 +478,7 @@
                       />
                     </div>
                     
-                    <div class="product-status">
-                      <span class="status-badge" :class="{ 
-                        'configured': lockedProducts.secondeDouceur[index] && douceur.nom && douceur.images.every(img => img), 
-                        'pending': !lockedProducts.secondeDouceur[index] || !douceur.nom || douceur.images.some(img => !img) 
-                      }">
-                        {{ lockedProducts.secondeDouceur[index] && douceur.nom && douceur.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
-                      </span>
-                    </div>
+
                     
                     <div class="image-upload-group" :class="{ 'locked': lockedProducts.secondeDouceur[index] }">
                       <label>Images d'évolution :</label>
@@ -518,13 +499,7 @@
                       </div>
                     </div>
                     
-                    <!-- Bouton de validation -->
-                    <div v-if="!lockedProducts.secondeDouceur[index]" class="validation-actions">
-                      <button @click="validateProduct('seconde', index)" class="action-btn validate-btn" :disabled="!douceur.nom || !douceur.images.every(img => img)">
-                        <i class="fas fa-check"></i>
-                        Valider
-                      </button>
-                    </div>
+
                   </div>
                   
                   <!-- Affichage des 3 images sur lignes séparées -->
@@ -582,6 +557,12 @@
                     <button @click="resetFinition(index)" class="action-btn reset-btn" :disabled="lockedProducts.finitions[index]" :title="lockedProducts.finitions[index] ? 'Déverrouillez d\'abord pour remettre à zéro' : 'Remettre à zéro'">
                       <i class="fas fa-undo"></i>
                     </button>
+                    <span class="status-badge-header" :class="{ 
+                      'configured': lockedProducts.finitions[index] && finition.nom && finition.images.every(img => img), 
+                      'pending': !lockedProducts.finitions[index] || !finition.nom || finition.images.some(img => !img) 
+                    }">
+                      {{ lockedProducts.finitions[index] && finition.nom && finition.images.every(img => img) ? '✅' : '⏳' }}
+                    </span>
                   </div>
                 </div>
                 
@@ -598,14 +579,7 @@
                       />
                     </div>
                     
-                    <div class="product-status">
-                      <span class="status-badge" :class="{ 
-                        'configured': lockedProducts.finitions[index] && finition.nom && finition.images.every(img => img), 
-                        'pending': !lockedProducts.finitions[index] || !finition.nom || finition.images.some(img => !img) 
-                      }">
-                        {{ lockedProducts.finitions[index] && finition.nom && finition.images.every(img => img) ? '✅ Configuré' : '⏳ En attente' }}
-                      </span>
-                    </div>
+
                     
                     <div class="image-upload-group" :class="{ 'locked': lockedProducts.finitions[index] }">
                       <label>Images d'évolution :</label>

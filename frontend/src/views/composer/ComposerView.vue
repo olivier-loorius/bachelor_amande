@@ -39,7 +39,7 @@
                   :src="fond.image || '/placeholder-fond.svg'"
                   :alt="fond.nom"
                     style="width:100%;height:100%;object-fit:cover;border-radius:5px !important;box-sizing:border-box;display:block;margin:0;background:none;border:none;padding:0;"
-                  @error="$event.target.src = '/placeholder-fond.svg'"
+                  @error="(event) => handleImageError(event, '/placeholder-fond.svg')"
                 />
                 <div
                   v-if="selectedFond?.id === fond.id"
@@ -90,7 +90,7 @@
                       :src="fonds[fondIndex].image || '/placeholder-fond.svg'"
                       :alt="fonds[fondIndex].nom"
                       style="width:100%;height:100%;object-fit:cover;border-radius:5px !important;box-sizing:border-box;display:block;margin:0;background:none;border:none;padding:0;"
-                      @error="$event.target.src = '/placeholder-fond.svg'"
+                      @error="(event) => handleImageError(event, '/placeholder-fond.svg')"
                     />
                     <div
                       v-if="selectedFond?.id === fonds[fondIndex].id"
@@ -141,7 +141,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="garniture-img-mobile" @error="$event.target.src = '/placeholder-garniture.svg'" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="garniture-img-mobile" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -167,7 +167,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-              <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="$event.target.src = '/placeholder-garniture.svg'" />
+              <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -223,7 +223,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" class="garniture-img-mobile" @error="$event.target.src = '/placeholder-garniture.svg'" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" class="garniture-img-mobile" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -249,7 +249,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="$event.target.src = '/placeholder-garniture.svg'" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -305,7 +305,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" class="garniture-img-mobile" @error="$event.target.src = '/placeholder-garniture.svg'" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" class="garniture-img-mobile" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -331,7 +331,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="$event.target.src = '/placeholder-garniture.svg'" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -409,7 +409,7 @@
             </div>
             </div>
               <div class="composer-step5-img">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="composer-step5-img-el" @error="$event.target.src = '/placeholder-garniture.svg'" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="composer-step5-img-el" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
                 <div v-else class="garniture-img-placeholder composer-step5-img-el">Aucun fond sélectionné</div>
           </div>
             </div>
@@ -446,7 +446,7 @@
             </div>
             
             <!-- CRUD Section -->
-            <div class="crud-section" v-if="authStore.isAuthenticated">
+            <div class="crud-section" v-if="authStore.isLoggedIn">
               <div class="save-composition-section">
                 <input 
                   v-model="compositionName" 
@@ -474,7 +474,7 @@
                 <div v-if="showCompositionsList" class="compositions-list">
                   <div v-for="comp in userCompositions" :key="comp.id" class="composition-item">
                     <div class="composition-info">
-                      <h4>{{ comp.nom }}</h4>
+                      <h4>{{ comp.name }}</h4>
                       <p class="composition-date">{{ new Date(comp.created_at!).toLocaleDateString() }}</p>
                     </div>
                     <div class="composition-actions">
@@ -507,20 +507,12 @@
       @close="closeAddModal"
     />
 
-    <!-- Modal d'incitation à la connexion -->
-    <LoginPromptModal 
-      :isOpen="showLoginPrompt" 
-      @close="closeLoginPrompt"
-      @loginSuccess="handleLoginSuccess"
-      @registerSuccess="handleRegisterSuccess"
-      @openCart="openCartAfterLogin"
-    />
+
   </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import AddToCartModal from '@/components/AddToCartModal.vue'
-import LoginPromptModal from '@/components/LoginPromptModal.vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePanierStore } from '@/stores/panier'
 import { compositionsService, type Composition } from '@/services/supabaseService'
@@ -617,6 +609,14 @@ const peutValider = computed(() => {
     return !!selectedFond.value && !!selectedGarniture1.value && !!selectedGarniture2.value && !!selectedGarniture3.value && !!selectedFinition.value && quantite.value > 0
 })
 
+// Fonction helper pour gérer les erreurs d'images
+const handleImageError = (event: Event, placeholder: string = '/placeholder-fond.svg') => {
+  const target = event.target as HTMLImageElement
+  if (target) {
+    target.src = placeholder
+  }
+}
+
 // Charger la configuration des produits
 const loadProductConfiguration = async () => {
   try {
@@ -655,8 +655,8 @@ function recommencer() {
   selectedFinition.value = null
   quantite.value = 1
 }
-function ajouterAuPanier() {
-  if (!authStore.isAuthenticated) {
+async function ajouterAuPanier() {
+  if (!authStore.isLoggedIn) {
     showLoginPrompt.value = true
     return
   }
@@ -675,7 +675,7 @@ function ajouterAuPanier() {
   }
   
   // Ajouter au panier
-  const success = panierStore.ajouterAuPanier(produit)
+  const success = await panierStore.ajouterAuPanier(produit)
   
   if (success) {
     showAddModal.value = true
@@ -711,7 +711,7 @@ function ajouterAuPanier() {
 
 // CRUD Functions
 async function saveComposition() {
-  if (!authStore.isAuthenticated) {
+  if (!authStore.isLoggedIn) {
     showLoginPrompt.value = true
     return
   }
@@ -731,26 +731,32 @@ async function saveComposition() {
   isLoading.value = true
   
   try {
-    const composition: Omit<Composition, 'id' | 'created_at' | 'updated_at'> = {
-      user_id: authStore.currentUser?.id,
-      nom: compositionName.value.trim(),
-      ingredients: {
-        fond: selectedFond.value,
-        garnitures: [selectedGarniture1.value, selectedGarniture2.value, selectedGarniture3.value],
-        finition: selectedFinition.value
-      }
+    if (!authStore.user?.id) {
+      saveMessage.value = 'Erreur: utilisateur non connecté'
+      saveMessageType.value = 'error'
+      return
     }
     
-    const { data, error } = await compositionsService.saveComposition(composition)
+    const composition: Omit<Composition, 'id' | 'created_at' | 'updated_at'> = {
+      user_id: authStore.user.id,
+      name: compositionName.value.trim(),
+      fond: selectedFond.value?.nom || '',
+      garniture1: selectedGarniture1.value?.nom || '',
+      garniture2: selectedGarniture2.value?.nom || '',
+      garniture3: selectedFinition.value?.nom || '',
+      finition: selectedFinition.value?.nom || ''
+    }
     
-    if (error) {
-      saveMessage.value = 'Erreur lors de la sauvegarde'
-      saveMessageType.value = 'error'
-    } else {
+    const result = await compositionsService.createComposition(composition)
+    
+    if (result) {
       saveMessage.value = 'Composition sauvegardée avec succès !'
       saveMessageType.value = 'success'
       compositionName.value = ''
       await loadUserCompositions()
+    } else {
+      saveMessage.value = 'Erreur lors de la sauvegarde'
+      saveMessageType.value = 'error'
     }
   } catch (error) {
     saveMessage.value = 'Erreur lors de la sauvegarde'
@@ -761,35 +767,38 @@ async function saveComposition() {
 }
 
 async function loadUserCompositions() {
-  if (!authStore.isAuthenticated) return
+  if (!authStore.isLoggedIn) return
   
   try {
-    const { data, error } = await compositionsService.getUserCompositions(authStore.currentUser!.id)
-    if (!error && data) {
-      userCompositions.value = data
-    }
+    const data = await compositionsService.getUserCompositions(authStore.user!.id)
+    userCompositions.value = data
   } catch (error) {
     console.error('Erreur lors du chargement des compositions:', error)
   }
 }
 
 async function loadComposition(composition: Composition) {
-  if (composition.ingredients) {
-    selectedFond.value = composition.ingredients.fond
-    selectedGarniture1.value = composition.ingredients.garnitures[0] || null
-    selectedGarniture2.value = composition.ingredients.garnitures[1] || null
-    selectedGarniture3.value = composition.ingredients.garnitures[2] || null
-    selectedFinition.value = composition.ingredients.finition
-    compositionName.value = composition.nom
-  }
+  // Trouver les objets correspondants aux noms stockés
+  const fond = fonds.value.find(f => f.nom === composition.fond)
+  const garniture1 = garnitures1.value.find(g => g.nom === composition.garniture1)
+  const garniture2 = garnitures2.value.find(g => g.nom === composition.garniture2)
+  const garniture3 = garnitures3.value.find(g => g.nom === composition.garniture3)
+  const finition = finitions.value.find(f => f.nom === composition.garniture3)
+  
+  selectedFond.value = fond || null
+  selectedGarniture1.value = garniture1 || null
+  selectedGarniture2.value = garniture2 || null
+  selectedGarniture3.value = garniture3 || null
+  selectedFinition.value = finition || null
+  compositionName.value = composition.name
 }
 
 async function deleteComposition(id: string) {
-  if (!authStore.isAuthenticated) return
+  if (!authStore.isLoggedIn) return
   
   try {
-    const { error } = await compositionsService.deleteComposition(id, authStore.currentUser!.id)
-    if (!error) {
+    const success = await compositionsService.deleteComposition(id)
+    if (success) {
       await loadUserCompositions()
     }
   } catch (error) {
@@ -898,7 +907,7 @@ function goToPrevStep() {
     if (fondIndex.value > 0) fondIndex.value--;
   }
   function nextFond() {
-    if (fondIndex.value < fonds.length - 1) fondIndex.value++;
+    if (fondIndex.value < fonds.value.length - 1) fondIndex.value++;
   }
   function handleFondSwipe(e: TouchEvent) {
     let startX = 0;

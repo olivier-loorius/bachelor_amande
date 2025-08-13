@@ -24,15 +24,15 @@
                 <i class="fas fa-user-circle"></i>
               </div>
               <div class="user-details">
-                <h3>{{ authStore.currentUser?.name || 'Utilisateur' }}</h3>
-                <p class="user-email">{{ maskEmail(authStore.currentUser?.email) }}</p>
+                        <h3>{{ authStore.user?.name || 'Utilisateur' }}</h3>
+        <p class="user-email">{{ maskEmail(authStore.user?.email) }}</p>
                 <span class="member-since">Membre depuis {{ getMemberSince() }}</span>
               </div>
             </div>
 
                          <div class="account-actions">
                <button 
-                 v-if="authStore.currentUser?.role !== 'admin'"
+                 v-if="authStore.user?.role !== 'admin'"
                  @click="openEditProfile" 
                  class="account-btn"
                >
@@ -61,7 +61,7 @@
                    Se déconnecter
                  </button>
                  <button 
-                   v-if="authStore.currentUser?.role !== 'admin'"
+                   v-if="authStore.user?.role !== 'admin'"
                    @click="startDeleteProcess" 
                    class="discrete-btn delete-discrete"
                  >
@@ -235,9 +235,9 @@
                  v-model="registerForm.password"
                  :type="showPassword ? 'text' : 'password'"
                  id="registerPassword"
-                 :placeholder="authStore.isAuthenticated ? 'Laissez vide pour ne pas changer' : 'Entrez votre mot de passe'"
+                 :placeholder="authStore.isLoggedIn ? 'Laissez vide pour ne pas changer' : 'Entrez votre mot de passe'"
                  autocomplete="new-password"
-                 :required="!authStore.isAuthenticated"
+                 :required="!authStore.isLoggedIn"
                  style="padding-right: 2.5rem;"
                />
                <i 
@@ -254,9 +254,9 @@
                  v-model="registerForm.confirmPassword"
                  :type="showConfirmPassword ? 'text' : 'password'"
                  id="confirmPassword"
-                 :placeholder="authStore.isAuthenticated ? 'Confirmez si vous changez le mot de passe' : 'Confirmez votre mot de passe'"
+                 :placeholder="authStore.isLoggedIn ? 'Confirmez si vous changez le mot de passe' : 'Confirmez votre mot de passe'"
                  autocomplete="new-password"
-                 :required="!authStore.isAuthenticated"
+                 :required="!authStore.isLoggedIn"
                  style="padding-right: 2.5rem;"
                />
                <i 
@@ -269,12 +269,12 @@
             
             <div class="form-actions">
               <button type="submit" :disabled="isLoading" class="btn-primary">
-                <i :class="authStore.isAuthenticated ? 'fas fa-edit' : 'fas fa-user-plus'"></i>
-                <span v-if="!isLoading">{{ authStore.isAuthenticated ? 'Mettre à jour' : 'Créer un compte' }}</span>
-                <span v-else>{{ authStore.isAuthenticated ? 'Mise à jour...' : 'Création...' }}</span>
+                <i :class="authStore.isLoggedIn ? 'fas fa-edit' : 'fas fa-user-plus'"></i>
+                <span v-if="!isLoading">{{ authStore.isLoggedIn ? 'Mettre à jour' : 'Créer un compte' }}</span>
+                <span v-else>{{ authStore.isLoggedIn ? 'Mise à jour...' : 'Création...' }}</span>
               </button>
               
-              <button v-if="authStore.isAuthenticated" type="button" @click="currentMode = 'account'" class="btn-secondary">
+              <button v-if="authStore.isLoggedIn" type="button" @click="currentMode = 'account'" class="btn-secondary">
                 <i class="fas fa-arrow-left"></i>
                 Annuler
               </button>
@@ -570,14 +570,14 @@ const handleDeleteAccount = async () => {
 
 const openEditProfile = () => {
   // Vérification de sécurité : s'assurer que l'utilisateur est connecté
-  if (!authStore.isAuthenticated || !authStore.currentUser) {
+  if (!authStore.isLoggedIn || !authStore.user) {
     message.value = 'Vous devez être connecté pour modifier votre profil'
     messageType.value = 'error'
     return
   }
   
   // Vérification de sécurité : empêcher les admins de modifier leur profil
-  if (authStore.currentUser.role === 'admin') {
+  if (authStore.user.role === 'admin') {
     message.value = 'Les administrateurs ne peuvent pas modifier leur profil depuis l\'interface pour des raisons de sécurité. Contactez le support technique.'
     messageType.value = 'error'
     return
@@ -615,7 +615,7 @@ const verifyPassword = async () => {
     message.value = 'Vérification en cours...'
     
     // Vérification de sécurité supplémentaire
-    if (!authStore.currentUser?.email) {
+    if (!authStore.user?.email) {
       message.value = 'Erreur : Impossible de récupérer vos informations'
       messageType.value = 'error'
       return
@@ -623,7 +623,7 @@ const verifyPassword = async () => {
     
     // Vérifier le mot de passe avec Supabase
     const { error } = await supabase.auth.signInWithPassword({
-      email: authStore.currentUser.email,
+      email: authStore.user.email,
       password: passwordVerification.value
     })
     
@@ -636,8 +636,8 @@ const verifyPassword = async () => {
       currentMode.value = 'register'
       
       // Pré-remplir le formulaire avec les données actuelles
-      registerForm.name = authStore.currentUser?.name || ''
-      registerForm.email = authStore.currentUser?.email || ''
+      registerForm.name = authStore.user?.name || ''
+      registerForm.email = authStore.user?.email || ''
       registerForm.password = '' // Laisser vide pour indiquer qu'il est optionnel
       registerForm.confirmPassword = '' // Laisser vide pour indiquer qu'il est optionnel
       
@@ -660,13 +660,13 @@ const maskEmail = (email: string | undefined) => {
 }
 
 const getMemberSince = () => {
-  if (!authStore.currentUser?.created_at) return 'récemment'
-  const date = new Date(authStore.currentUser.created_at)
+  if (!authStore.user?.created_at) return 'récemment'
+  const date = new Date(authStore.user.created_at)
   return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 }
 
 // Surveiller l'état de connexion pour vider les champs lors de la déconnexion
-watch(() => authStore.isAuthenticated, (isAuthenticated, wasAuthenticated) => {
+watch(() => authStore.isLoggedIn, (isAuthenticated, wasAuthenticated) => {
   if (!isAuthenticated && props.isOpen) {
     // Si le panneau est ouvert mais l'utilisateur n'est pas connecté
     switchToLogin()
@@ -681,7 +681,7 @@ watch(() => authStore.isAuthenticated, (isAuthenticated, wasAuthenticated) => {
 // Surveiller l'ouverture du panneau pour déterminer le mode d'affichage
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen) {
-    if (authStore.isAuthenticated) {
+    if (authStore.isLoggedIn) {
       // Si l'utilisateur est connecté, afficher la page compte
       switchToAccount()
     } else {
@@ -734,14 +734,14 @@ const handleLogin = async () => {
 
 const handleRegister = async () => {
   // Vérification de sécurité : s'assurer que l'utilisateur est connecté pour les modifications
-  if (authStore.isAuthenticated && (!authStore.currentUser || !authStore.currentUser.id)) {
+  if (authStore.isLoggedIn && (!authStore.user || !authStore.user.id)) {
     message.value = 'Erreur de sécurité : Impossible de récupérer vos informations'
     messageType.value = 'error'
     return
   }
   
   // Si l'utilisateur est connecté, c'est une mise à jour
-  if (authStore.isAuthenticated) {
+  if (authStore.isLoggedIn) {
     // Validation pour la mise à jour (mot de passe optionnel)
     if (!registerForm.name || !registerForm.email) {
       message.value = 'Veuillez remplir le nom et l\'email'
@@ -781,16 +781,16 @@ const handleRegister = async () => {
   
   try {
     // Si l'utilisateur est connecté, c'est une mise à jour
-    if (authStore.isAuthenticated) {
+    if (authStore.isLoggedIn) {
       // Mise à jour du nom
-      if (registerForm.name !== authStore.currentUser?.name) {
+      if (registerForm.name !== authStore.user?.name) {
         const { error } = await supabase
           .from('users')
           .update({ 
             name: registerForm.name.trim(),
             updated_at: new Date().toISOString()
           })
-          .eq('id', authStore.currentUser?.id)
+          .eq('id', authStore.user?.id)
         
         if (error) {
           message.value = 'Erreur lors de la modification du nom'
@@ -799,15 +799,15 @@ const handleRegister = async () => {
         }
         
         // Mettre à jour le store local
-        if (authStore.currentUser) {
-          authStore.currentUser.name = registerForm.name.trim()
+        if (authStore.user) {
+          authStore.user.name = registerForm.name.trim()
         }
         
         // Rafraîchir les données utilisateur depuis Supabase
         const { data: userData, error: userError } = await supabase
           .from('users')
           .select('*')
-          .eq('id', authStore.currentUser?.id)
+          .eq('id', authStore.user?.id)
           .single()
         
         if (!userError && userData) {
@@ -847,7 +847,11 @@ const handleRegister = async () => {
       }, 1500)
     } else {
       // Inscription normale
-      await authStore.register(registerForm.name, registerForm.email, registerForm.password)
+      await authStore.register({
+        nom: registerForm.name,
+        email: registerForm.email,
+        password: registerForm.password
+      })
       message.value = 'Compte créé avec succès !'
       messageType.value = 'success'
       
@@ -859,7 +863,7 @@ const handleRegister = async () => {
     
   } catch (error) {
     console.error('Erreur:', error)
-    message.value = authStore.isAuthenticated ? 'Erreur lors de la modification' : 'Erreur lors de la création du compte. Veuillez réessayer.'
+    message.value = authStore.isLoggedIn ? 'Erreur lors de la modification' : 'Erreur lors de la création du compte. Veuillez réessayer.'
     messageType.value = 'error'
   } finally {
     isLoading.value = false

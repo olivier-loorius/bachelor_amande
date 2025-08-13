@@ -244,7 +244,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 
 const currentSlide = ref(0)
 const totalSlides = 3
-let autoSlideInterval: number | null = null
+let autoSlideInterval: NodeJS.Timeout | null = null
 
 const currentCatalogueSlide = ref(0)
 const totalCatalogueSlides = 3

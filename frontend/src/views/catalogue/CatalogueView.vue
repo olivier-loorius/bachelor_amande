@@ -135,14 +135,7 @@
     @viewCart="ouvrirPanier"
   />
 
-  <!-- Modal d'incitation à la connexion -->
-  <LoginPromptModal 
-    :isOpen="showLoginPrompt" 
-    @close="closeLoginPrompt"
-    @loginSuccess="handleLoginSuccess"
-    @registerSuccess="handleRegisterSuccess"
-    @openCart="openCartAfterLogin"
-  />
+
   
   <div v-if="showImageZoom" class="image-zoom-overlay" @click="closeImageZoom">
     <div class="image-zoom-container" @click.stop>
@@ -258,7 +251,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import AddToCartModal from '@/components/AddToCartModal.vue'
-import LoginPromptModal from '@/components/LoginPromptModal.vue'
 import { usePanierStore } from '@/stores/panier'
 import { useAuthStore } from '@/stores/auth'
 import CartAnimation from '@/components/CartAnimation.vue'
@@ -334,13 +326,13 @@ const showProduitModal = ref(false)
 const produitModal = ref<Produit | null>(null)
 const showLoginPrompt = ref(false)
 
-const ajouterAuPanier = (produit: Produit) => {
-  if (!authStore.isAuthenticated) {
+const ajouterAuPanier = async (produit: Produit) => {
+  if (!authStore.isLoggedIn) {
     showLoginPrompt.value = true
     return
   }
   
-  const success = panierStore.ajouterAuPanier(produit)
+  const success = await panierStore.ajouterAuPanier(produit)
   if (success) {
     produitAjoute.value = produit
     showAddModal.value = true
@@ -409,7 +401,7 @@ const openCartAfterLogin = () => {
 }
 
 const ajouterAuPanierMobile = (produit: Produit) => {
-  if (!authStore.isAuthenticated) {
+  if (!authStore.isLoggedIn) {
     showLoginPrompt.value = true
     return
   }

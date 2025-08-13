@@ -25,7 +25,7 @@ if (envExists) {
   console.log('SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here');
   console.log('');
   console.log('# Configuration du serveur');
-  console.log('PORT=3000');
+  console.log('PORT=3001');
   console.log('NODE_ENV=development');
   console.log('');
   console.log('🔗 Obtenez ces valeurs depuis votre dashboard Supabase');

@@ -20,29 +20,6 @@ export interface Composition {
   updated_at?: string
 }
 
-// Service simple pour les utilisateurs
-export const userService = {
-  // Récupérer tous les utilisateurs
-  async getAllUsers() {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    return { data, error }
-  },
-
-  // Récupérer tous les admins
-  async getAllAdmins() {
-    const { data, error } = await supabase
-      .from('admins')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    return { data, error }
-  }
-}
-
 // Service pour les compositions
 export const compositionsService = {
   // Récupérer toutes les compositions d'un utilisateur

@@ -35,7 +35,7 @@
     
     <div class="cta-container">
       <!-- CTA Admin (visible seulement pour les admins) -->
-      <div v-if="authStore.isAuthenticated && authStore.currentUser?.role === 'admin'" class="cta-item admin">
+      <div v-if="authStore.isLoggedIn && authStore.user?.role === 'admin'" class="cta-item admin">
         <router-link to="/admin" class="cta-button admin-btn" title="Administration">
           <i class="fas fa-cog"></i>
         </router-link>
@@ -45,12 +45,12 @@
         <button 
           @click="openLogin" 
           class="cta-button login-btn" 
-          :class="{ 'connected': authStore.isAuthenticated }"
-          :title="authStore.isAuthenticated ? 'Mon compte' : 'Se connecter'"
-          :aria-label="authStore.isAuthenticated ? 'Mon compte' : 'Se connecter'"
+          :class="{ 'connected': authStore.isLoggedIn }"
+          :title="authStore.isLoggedIn ? 'Mon compte' : 'Se connecter'"
+          :aria-label="authStore.isLoggedIn ? 'Mon compte' : 'Se connecter'"
         >
-          <i :class="authStore.isAuthenticated ? 'fas fa-user-check' : 'fas fa-user'"></i>
-          <div v-if="authStore.isAuthenticated" class="status-indicator" aria-label="Connecté"></div>
+          <i :class="authStore.isLoggedIn ? 'fas fa-user-check' : 'fas fa-user'"></i>
+          <div v-if="authStore.isLoggedIn" class="status-indicator" aria-label="Connecté"></div>
         </button>
       </div>
       
@@ -58,9 +58,9 @@
         <button 
           @click="openCart" 
           class="cta-button cart-btn" 
-          :class="{ 'disabled': !authStore.isAuthenticated }" 
-          :title="authStore.isAuthenticated ? 'Mon panier' : 'Connectez-vous pour accéder au panier'"
-          :aria-label="authStore.isAuthenticated ? 'Mon panier' : 'Connectez-vous pour accéder au panier'"
+          :class="{ 'disabled': !authStore.isLoggedIn }" 
+          :title="authStore.isLoggedIn ? 'Mon panier' : 'Connectez-vous pour accéder au panier'"
+          :aria-label="authStore.isLoggedIn ? 'Mon panier' : 'Connectez-vous pour accéder au panier'"
         >
           <i class="fas fa-shopping-cart"></i>
           <span v-if="nombreArticles > 0" class="cart-count" aria-label="Nombre d'articles">{{ nombreArticles }}</span>
@@ -102,12 +102,12 @@ const router = useRouter()
 // Computed
 const nombreArticles = computed(() => {
   // Ne montrer le compteur que si l'utilisateur est connecté
-  if (!authStore.isAuthenticated) return 0
+  if (!authStore.isLoggedIn) return 0
   return panierStore.panier.reduce((sum, item) => sum + item.quantite, 0)
 })
 
 // Watchers
-watch(() => authStore.isAuthenticated, (newValue) => {
+watch(() => authStore.isLoggedIn, (newValue) => {
   // État d'authentification changé
 })
 
@@ -166,7 +166,7 @@ const openCart = () => {
   // Fermer le menu mobile lors de l'ouverture du panier
   closeMenu()
   
-  if (authStore.isAuthenticated) {
+  if (authStore.isLoggedIn) {
     panierStore.ouvrirPanier()
   } else {
     openLoginForCart()

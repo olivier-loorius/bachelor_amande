@@ -166,6 +166,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+
+const siteUrl = 'Amande Pâtisserie'
 </script>
 
 <style scoped>
