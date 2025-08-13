@@ -524,38 +524,67 @@ import LoginPromptModal from '@/components/LoginPromptModal.vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePanierStore } from '@/stores/panier'
 import { compositionsService, type Composition } from '@/services/supabaseService'
+import { productConfigService, type ProductConfig } from '@/services/productConfigService'
 
 
-const fonds = [
-  { id: 1, nom: 'Pâte sucrée amande', image: null },
-  { id: 2, nom: 'Pâte sucrée cacao', image: null },
-  { id: 3, nom: 'Pâte sucrée noisette', image: null },
-]
-const garnitures1 = [
-    { id: 1, nom: 'Crème d\'amande', image: null },
-  { id: 2, nom: 'Caramel cajou', image: null },
-    { id: 3, nom: 'Croustillant praliné', image: null },
-  { id: 4, nom: 'Compotée de pêche', image: null },
-  { id: 5, nom: 'Crème citron', image: null },
-]
-const garnitures2 = [
-  { id: 1, nom: 'Fraises', image: null },
-  { id: 2, nom: 'Framboises', image: null },
-  { id: 3, nom: 'Myrtilles', image: null },
-  { id: 4, nom: 'Crème chantilly', image: null },
-  { id: 5, nom: 'Coulis de fruits', image: null },
-]
-  const garnitures3 = [
-    { id: 1, nom: 'Fruits frais', image: null },
-    { id: 2, nom: 'Crème chantilly', image: null },
-    { id: 3, nom: 'Coulis de fruits', image: null },
-    { id: 4, nom: 'Fruits secs', image: null },
-]
-const finitions = [
-  { id: 1, nom: 'Coulis & fruits secs', image: null },
-  { id: 2, nom: 'Fruits frais', image: null },
-  { id: 3, nom: 'Rosace de crème', image: null },
-]
+// Configuration des produits depuis Supabase
+const productConfig = ref<ProductConfig[]>([])
+
+// Computed properties pour organiser les données
+const fonds = computed(() => {
+  return productConfig.value
+    .filter(p => p.config_type === 'fonds')
+    .sort((a, b) => a.product_index - b.product_index)
+    .map(p => ({
+      id: p.product_index + 1,
+      nom: p.nom || 'Fond à configurer',
+      image: p.images && p.images.length > 0 ? p.images[0] : null
+    }))
+})
+
+const garnitures1 = computed(() => {
+  return productConfig.value
+    .filter(p => p.config_type === 'premiere_couche_douceur')
+    .sort((a, b) => a.product_index - b.product_index)
+    .map(p => ({
+      id: p.product_index + 1,
+      nom: p.nom || 'Garniture à configurer',
+      image: p.images && p.images.length > 0 ? p.images[0] : null
+    }))
+})
+
+const garnitures2 = computed(() => {
+  return productConfig.value
+    .filter(p => p.config_type === 'seconde_couche_douceur')
+    .sort((a, b) => a.product_index - b.product_index)
+    .map(p => ({
+      id: p.product_index + 1,
+      nom: p.nom || 'Garniture à configurer',
+      image: p.images && p.images.length > 0 ? p.images[0] : null
+    }))
+})
+
+const garnitures3 = computed(() => {
+  return productConfig.value
+    .filter(p => p.config_type === 'touche_finale')
+    .sort((a, b) => a.product_index - b.product_index)
+    .map(p => ({
+      id: p.product_index + 1,
+      nom: p.nom || 'Garniture à configurer',
+      image: p.images && p.images.length > 0 ? p.images[0] : null
+    }))
+})
+
+const finitions = computed(() => {
+  return productConfig.value
+    .filter(p => p.config_type === 'touche_finale')
+    .sort((a, b) => a.product_index - b.product_index)
+    .map(p => ({
+      id: p.product_index + 1,
+      nom: p.nom || 'Finition à configurer',
+      image: p.images && p.images.length > 0 ? p.images[0] : null
+    }))
+})
 
 const selectedFond = ref(null as null | { id: number, nom: string })
 const selectedGarniture1 = ref(null as null | { id: number, nom: string })
@@ -587,6 +616,19 @@ const saveMessageType = ref<'success' | 'error'>('success')
 const peutValider = computed(() => {
     return !!selectedFond.value && !!selectedGarniture1.value && !!selectedGarniture2.value && !!selectedGarniture3.value && !!selectedFinition.value && quantite.value > 0
 })
+
+// Charger la configuration des produits
+const loadProductConfiguration = async () => {
+  try {
+    console.log('🔄 Chargement de la configuration des produits...')
+    const config = await productConfigService.getAllProductConfig()
+    productConfig.value = config
+    console.log('✅ Configuration chargée:', config.length, 'produits')
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement de la configuration:', error)
+    productConfig.value = []
+  }
+}
 
 function selectFond(fond: { id: number, nom: string }) {
   selectedFond.value = fond
@@ -798,11 +840,13 @@ function handleClickOutsideFond(event: MouseEvent) {
     deselectFond()
   }
 }
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('mousedown', handleClickOutsideFond)
   if (!selectedGarniture2.value && selectedGarniture1.value) {
     selectedGarniture2.value = selectedGarniture1.value;
   }
+  // Charger la configuration des produits depuis Supabase
+  await loadProductConfiguration()
 })
 onBeforeUnmount(() => {
   document.removeEventListener('mousedown', handleClickOutsideFond)
