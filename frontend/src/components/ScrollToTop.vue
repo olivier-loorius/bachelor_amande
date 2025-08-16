@@ -2,6 +2,7 @@
   <button 
     @click="scrollToTop" 
     class="scroll-to-top-btn"
+    :class="{ 'admin-mode': isAdminRoute }"
     aria-label="Retour en haut de la page"
   >
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -11,11 +12,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const isAdminRoute = computed(() => {
+  return route.path.startsWith('/admin')
+})
+
 const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  })
+  window.scrollTo(0, 0)
 }
 </script>
 
@@ -24,7 +31,7 @@ const scrollToTop = () => {
   position: fixed;
   width: 45px;
   height: 45px;
-  background: var(--accent-color);
+  background: #ff6f61;
   color: #fff;
   border: none;
   border-radius: 50%;
@@ -34,11 +41,21 @@ const scrollToTop = () => {
   justify-content: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 999;
-  transition: transform 0.2s ease;
+  outline: none;
+}
+
+.scroll-to-top-btn.admin-mode {
+  background: #01192b; /* Couleur bleue du dashboard */
+}
+
+.scroll-to-top-btn:focus {
+  outline: none;
+  border: none;
 }
 
 .scroll-to-top-btn:active {
-  transform: scale(0.95);
+  outline: none;
+  border: none;
 }
 
 /* Desktop : en bas à droite */
@@ -46,8 +63,8 @@ const scrollToTop = () => {
   .scroll-to-top-btn {
     bottom: 30px;
     right: 30px;
-    width: 50px;
-    height: 50px;
+    width: 35px;
+    height: 35px;
     top: auto;
   }
 }

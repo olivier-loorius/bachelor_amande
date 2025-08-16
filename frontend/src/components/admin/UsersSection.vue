@@ -242,6 +242,8 @@ const maskEmail = (email: string) => {
 </script>
 
 <style lang="scss" scoped>
+@use 'sass:color';
+
 /* Variables admin */
 $admin-primary: #383961;
 $admin-secondary: #FCD581;
@@ -488,7 +490,7 @@ $admin-danger: #dc3545;
   gap: 0.5rem;
   
   &:hover {
-    background: darken($admin-danger, 10%);
+    background: color.adjust($admin-danger, $lightness: -10%);
     transform: translateY(-1px);
   }
   

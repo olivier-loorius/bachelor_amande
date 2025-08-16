@@ -885,7 +885,7 @@ onUnmounted(() => {
   position: relative;
   padding: 6rem 0;
   color: #fff;
-  background: #fff;
+  background: var(--teal-color);
 }
 
 .cta-background {
@@ -962,11 +962,12 @@ onUnmounted(() => {
   display: flex;
   gap: 1.5rem;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
   animation: fadeInUp 1s ease-out 0.6s both;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
 }
 
@@ -981,6 +982,9 @@ onUnmounted(() => {
   white-space: nowrap;
   min-width: fit-content;
   box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-cta:hover {

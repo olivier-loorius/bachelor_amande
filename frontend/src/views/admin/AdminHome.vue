@@ -282,7 +282,7 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/_admin-variables.scss';
+@use '@/assets/styles/_admin-variables.scss' as *;
 
 .admin-home {
   padding: 2rem;
@@ -352,5 +352,44 @@ onMounted(async () => {
   }
 }
 
+/* Responsive mobile */
+@media (max-width: 768px) {
+  .admin-home {
+    padding: 1rem;
+  }
+  
+  .admin-header {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .header-left {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .header-title {
+    font-size: 1.5rem;
+    justify-content: center;
+  }
+  
+  .header-subtitle {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  
+  .admin-logout-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+}
 
 </style>

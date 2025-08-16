@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer" role="contentinfo" aria-label="Pied de page">
+  <footer class="footer" :class="{ 'admin-mode': isAdminRoute }" role="contentinfo" aria-label="Pied de page">
     <div class="footer-content">
       <div class="footer-main">
         <div class="footer-logo">
@@ -69,6 +69,15 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const isAdminRoute = computed(() => {
+  return route.path.startsWith('/admin')
+})
+
 const scrollToTop = (): void => {
   window.scrollTo({
     top: 0,
@@ -90,6 +99,11 @@ $transition-duration: 0.3s;
   padding: $footer-padding-desktop 0 0;
   font-family: var(--font-family-text);
   position: relative;
+}
+
+.footer.admin-mode {
+  background: var(--secondary-color);
+  color: var(--primary-color);
 }
 
 .footer-content {
@@ -171,6 +185,26 @@ $transition-duration: 0.3s;
     font-size: 0.95rem;
     text-align: left;
   }
+}
+
+.footer.admin-mode .footer-section h3 {
+  color: var(--accent-color);
+}
+
+.footer.admin-mode .footer-section p {
+  color: var(--primary-color);
+}
+
+.footer.admin-mode .footer-legal a {
+  color: var(--primary-color);
+}
+
+.footer.admin-mode .footer-bottom p {
+  color: var(--primary-color);
+}
+
+.footer.admin-mode .social-icons a {
+  color: var(--primary-color);
 }
 
 .social-icons {

@@ -950,12 +950,14 @@ onBeforeUnmount(() => {
 
 .login-panel.mobile-view {
   width: 100%;
-  height: 80vh;
+  height: 100vh;
   position: fixed;
   top: 0;
   border-radius: 0 0 20px 20px;
   transform: translateY(-100%);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .login-overlay.active .login-panel.mobile-view {
@@ -1208,7 +1210,6 @@ form button[type='button']:hover {
 
 .btn-primary:hover:not(:disabled) {
   background: #e55a4f;
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
 }
 
@@ -1221,7 +1222,8 @@ form button[type='button']:hover {
 .btn-secondary {
   background: transparent;
   color: #ff6f61;
-  border: 2px solid #ff6f61;
+  border: none;
+  border-bottom: 2px solid #ff6f61;
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--btn-radius);
   font-family: var(--font-family-text);
@@ -1239,7 +1241,6 @@ form button[type='button']:hover {
 .btn-secondary:hover {
   background: #ff6f61;
   color: var(--white);
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
 }
 
@@ -1247,6 +1248,28 @@ form button[type='button']:hover {
 @media (max-width: 768px) {
   .form-actions {
     flex-direction: column;
+    margin-top: 1rem;
+  }
+  
+  .login-panel.mobile-view {
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .login-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+  
+  form {
+    gap: 0.8rem;
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
   }
 }
 

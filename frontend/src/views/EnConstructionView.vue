@@ -54,7 +54,13 @@ const fromCart = ref(false)
 const isAuthenticated = computed(() => authStore.isLoggedIn)
 
 function goBack() {
-  router.back()
+  // Vérifier s'il y a un historique
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    // Si pas d'historique, aller à l'accueil
+    router.push('/')
+  }
 }
 
 function goToCart() {
@@ -165,7 +171,7 @@ onMounted(() => {
 .btn-secondary {
   background: var(--white);
   color: var(--teal-color);
-  border: 2px solid var(--teal-color);
+  border: 1px solid var(--teal-color);
 }
 
 .btn-secondary:hover {
