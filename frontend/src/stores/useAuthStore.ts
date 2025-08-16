@@ -1,9 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+interface User {
+  id: string
+  name: string
+  email: string
+  role: string
+  created_at: string
+  updated_at?: string
+  deleted?: boolean
+  deleted_at?: string
+}
+
 export const useAuthStore = defineStore('auth', () => {
   // COPIE EXACTE de l'état d'authentification
-  const user = ref(null)
+  const user = ref<User | null>(null)
   const isAdmin = ref(false)
 
   // COPIE EXACTE des computed properties

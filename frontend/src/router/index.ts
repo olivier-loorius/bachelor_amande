@@ -11,7 +11,7 @@ import ComposerView from '@/views/composer/ComposerView.vue'
 import CatalogueView from '@/views/catalogue/CatalogueView.vue'
 import ConstructionView from '@/views/utils/ConstructionView.vue'
 import EnConstructionView from '@/views/EnConstructionView.vue'
-import AdminView from '@/views/admin/AdminView.vue'
+import AdminHome from '@/views/admin/AdminHome.vue'
 
 const routes = [
   {
@@ -125,7 +125,7 @@ const routes = [
   {
     path: '/admin',
     name: 'admin',
-    component: AdminView,
+    component: AdminHome,
     meta: {
       title: 'Dashboard Admin - Amande Pâtisserie',
       requiresAuth: true,

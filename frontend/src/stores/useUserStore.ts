@@ -68,6 +68,39 @@ export const useUserStore = defineStore('users', () => {
     searchQuery.value = query
   }
 
+  // COPIE EXACTE de la fonction de suppression d'utilisateur
+  const deleteUser = async (userId: string) => {
+    try {
+      console.log(`🗑️ Tentative de suppression de l'utilisateur ${userId}...`)
+      
+      const { error } = await supabase
+        .from('users')
+        .update({ 
+          deleted: true, 
+          deleted_at: new Date().toISOString() 
+        })
+        .eq('id', userId)
+      
+      if (error) {
+        console.error('❌ Erreur lors de la suppression:', error)
+        return false
+      }
+      
+      // Mettre à jour l'état local
+      const userIndex = users.value.findIndex(u => u.id === userId)
+      if (userIndex !== -1) {
+        users.value[userIndex].deleted = true
+        users.value[userIndex].deleted_at = new Date().toISOString()
+      }
+      
+      console.log(`✅ Utilisateur ${userId} supprimé avec succès`)
+      return true
+    } catch (error) {
+      console.error('❌ Erreur lors de la suppression:', error)
+      return false
+    }
+  }
+
   return {
     // État
     users,
@@ -83,6 +116,7 @@ export const useUserStore = defineStore('users', () => {
     // Actions
     loadUsers,
     toggleUsersSection,
-    updateSearchQuery
+    updateSearchQuery,
+    deleteUser
   }
 })

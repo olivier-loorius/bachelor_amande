@@ -1,15 +1,8 @@
-// Variables admin
-$admin-primary: #383961;
-$admin-secondary: #FCD581;
-$admin-bg-light: #f8f9fa;
-$admin-text-dark: #2c3e50;
-$admin-text-light: #6c757d;
-$admin-success: #28a745;
-$admin-danger: #dc3545;
-$admin-warning: #ffc107;
+// ========================================
+// STYLES ADMIN - UTILISE LES VARIABLES DÉDIÉES
+// ========================================
 
-// Typographie admin
-$admin-font-family: 'Roboto', sans-serif;
+@import './_admin-variables';
 
 // Styles simples pour les boutons
 .btn {
