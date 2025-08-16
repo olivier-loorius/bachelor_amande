@@ -2,13 +2,11 @@
   <div class="page-container">
     <main class="content-container composer-content">
       <div class="composer-card card">
-        <h1 class="section-title">Actualités</h1>
-        
+        <h1 class="section-title">Actualités</h1> 
         <section class="composer-section">
           <div class="section-desc">
             <p>Retrouvez ici toutes les actualités, recettes exclusives et événements gourmands de la pâtisserie Amande.</p>
           </div>
-          
           <div class="actualite-grid">
             <article 
               v-for="article in articles" 
@@ -45,7 +43,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-// Articles d'actualité harmonisés avec le style de ComposerView
 const articles = ref([
   {
     title: 'Les secrets des éclairs parfaits',
@@ -90,14 +87,12 @@ const articles = ref([
 ])
 
 function getArticleId(title: string) {
-  // Associer un ID unique à chaque article (exemple simple basé sur l'ordre)
   const index = articles.value.findIndex((a) => a.title === title)
   return index >= 0 ? index + 1 : 1
 }
 </script>
 
 <style scoped>
-
 
 .page-container {
   display: flex;

@@ -3,8 +3,6 @@
     <main class="content-container">
       <div class="composer-card card">
         <h1 class="composer-title section-title">Mentions Légales</h1>
-        
-        <!-- Section Définitions -->
         <section class="composer-section">
           <h2 class="composer-step-title">Définitions</h2>
           <div class="composer-step-desc">
@@ -16,8 +14,6 @@
             <p><strong>Informations personnelles :</strong> « Les informations qui permettent, sous quelque forme que ce soit, directement ou non, l'identification des personnes physiques auxquelles elles s'appliquent » (article 4 de la loi n° 78-17 du 6 janvier 1978).</p>
           </div>
         </section>
-
-        <!-- Section 1. Présentation -->
         <section class="composer-section">
           <h2 class="composer-step-title">1. Présentation du site internet</h2>
           <div class="composer-step-desc">
@@ -40,8 +36,6 @@
             </div>
           </div>
         </section>
-
-        <!-- Section 2. Conditions générales -->
         <section class="composer-section">
           <h2 class="composer-step-title">2. Conditions générales d'utilisation</h2>
           <div class="composer-step-desc">
@@ -50,8 +44,6 @@
             <p>Ce site internet est normalement accessible à tout moment aux utilisateurs. Une interruption pour raison de maintenance technique peut être toutefois décidée par {{ siteUrl }}, qui s'efforcera alors de communiquer préalablement aux utilisateurs les dates et heures de l'intervention.</p>
           </div>
         </section>
-
-        <!-- Section 3. Description services -->
         <section class="composer-section">
           <h2 class="composer-step-title">3. Description des services fournis</h2>
           <div class="composer-step-desc">
@@ -59,8 +51,6 @@
             <p>Toutes les informations indiquées sur le site {{ siteUrl }} sont données à titre indicatif, et sont susceptibles d'évoluer. Par ailleurs, les renseignements figurant sur le site {{ siteUrl }} ne sont pas exhaustifs. Ils sont donnés sous réserve de modifications ayant été apportées depuis leur mise en ligne.</p>
           </div>
         </section>
-
-        <!-- Section 4. Limitations techniques -->
         <section class="composer-section">
           <h2 class="composer-step-title">4. Limitations contractuelles sur les données techniques</h2>
           <div class="composer-step-desc">
@@ -70,8 +60,6 @@
             <p>{{ siteUrl }} et l'hébergeur ne pourront être tenus responsables en cas de dysfonctionnement du réseau Internet, des lignes téléphoniques ou du matériel informatique et de téléphonie lié notamment à l'encombrement du réseau empêchant l'accès au serveur.</p>
           </div>
         </section>
-
-        <!-- Section 5. Propriété intellectuelle -->
         <section class="composer-section">
           <h2 class="composer-step-title">5. Propriété intellectuelle et contrefaçons</h2>
           <div class="composer-step-desc">
@@ -80,8 +68,6 @@
             <p>Toute exploitation non autorisée du site ou de l'un quelconque des éléments qu'il contient sera considérée comme constitutive d'une contrefaçon et poursuivie conformément aux dispositions des articles L.335-2 et suivants du Code de Propriété Intellectuelle.</p>
           </div>
         </section>
-
-        <!-- Section 6. Limitations responsabilité -->
         <section class="composer-section">
           <h2 class="composer-step-title">6. Limitations de responsabilité</h2>
           <div class="composer-step-desc">
@@ -90,8 +76,6 @@
             <p>{{ siteUrl }} ne pourra également être tenu responsable des dommages indirects (tels par exemple qu'une perte de marché ou perte d'une chance) consécutifs à l'utilisation du site {{ siteUrl }}.</p>
           </div>
         </section>
-
-        <!-- Section 7. Gestion données personnelles -->
         <section class="composer-section">
           <h2 class="composer-step-title">7. Gestion des données personnelles</h2>
           <div class="composer-step-desc">
@@ -129,8 +113,6 @@
             </address>
           </div>
         </section>
-
-        <!-- Section 8. Notification incident -->
         <section class="composer-section">
           <h2 class="composer-step-title">8. Notification d'incident</h2>
           <div class="composer-step-desc">
@@ -138,8 +120,6 @@
             <p>Si nous prenions connaissance d'une brèche de la sécurité, nous avertirions les utilisateurs concernés afin qu'ils puissent prendre les mesures appropriées. Nos procédures de notification d'incident tiennent compte de nos obligations légales, qu'elles se situent au niveau national ou européen.</p>
           </div>
         </section>
-
-        <!-- Section 9. Cookies -->
         <section class="composer-section">
           <h2 class="composer-step-title">9. Liens hypertextes « cookies » et balises internet</h2>
           <div class="composer-step-desc">
@@ -151,8 +131,6 @@
             <p>L'Utilisateur peut configurer son navigateur pour refuser les cookies. Dans ce cas, certaines fonctionnalités du site pourraient ne pas fonctionner correctement.</p>
           </div>
         </section>
-
-        <!-- Section 10. Droit applicable -->
         <section class="composer-section">
           <h2 class="composer-step-title">10. Droit applicable et attribution de juridiction</h2>
           <div class="composer-step-desc">
@@ -171,7 +149,6 @@ const siteUrl = 'Amande Pâtisserie'
 </script>
 
 <style scoped>
-
 
 .page-container {
   display: flex;

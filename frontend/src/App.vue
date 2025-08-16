@@ -24,16 +24,20 @@ const panierStore = usePanierStore()
 <style>
 html, body, #app {
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .main-content {
   padding-top: 80px; /* Hauteur de la navbar */
+  min-height: calc(100vh - 80px);
 }
 
 /* Mobile : ajuster le padding */
 @media (max-width: 768px) {
   .main-content {
     padding-top: 65px; /* Hauteur de la navbar mobile */
+    min-height: calc(100vh - 65px);
   }
 }
 </style>

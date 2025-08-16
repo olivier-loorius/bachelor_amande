@@ -130,7 +130,6 @@ $transition-duration: 0.3s;
 }
 
 .logo-container:hover {
-  transform: scale(1.05);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   border-color: var(--accent-color);
 }
@@ -182,11 +181,15 @@ $transition-duration: 0.3s;
   a {
     color: var(--secondary-color);
     font-size: 1.1rem;
-    transition: all $transition-duration ease;
+    transition: color $transition-duration ease;
+    outline: none;
     
     &:hover {
       color: var(--accent-color);
-      transform: translateY(-2px);
+    }
+    
+    &:focus {
+      outline: none;
     }
   }
 }
@@ -204,11 +207,15 @@ $transition-duration: 0.3s;
     color: var(--secondary-color);
     text-decoration: none;
     font-size: 0.9rem;
-    transition: all $transition-duration ease;
+    transition: color $transition-duration ease;
+    outline: none;
     
     &:hover {
       color: var(--accent-color);
-      transform: translateY(-1px);
+    }
+    
+    &:focus {
+      outline: none;
     }
   }
 }

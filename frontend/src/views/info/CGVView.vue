@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-// Page CGV harmonisée avec le style de ComposerView
+
 </script>
 
 <style scoped>

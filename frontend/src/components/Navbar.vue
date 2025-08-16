@@ -85,33 +85,25 @@ import LoginPanel from '@/components/auth/LoginPanel.vue'
 import { usePanierStore } from '@/stores/panier'
 import { useAuthStore } from '@/stores/auth'
 
-// État local
 const isMenuOpen = ref(false)
 const isLoginOpen = ref(false)
 const openCartAfterLogin = ref(false)
 const isNavHidden = ref(false)
 
-// Scroll tracking
 let lastScrollY = 0
 
-// Stores et composables
 const panierStore = usePanierStore()
 const authStore = useAuthStore()
 const router = useRouter()
 
-// Computed
 const nombreArticles = computed(() => {
-  // Ne montrer le compteur que si l'utilisateur est connecté
   if (!authStore.isLoggedIn) return 0
   return panierStore.panier.reduce((sum, item) => sum + item.quantite, 0)
 })
 
-// Watchers
 watch(() => authStore.isLoggedIn, (newValue) => {
-  // État d'authentification changé
 })
 
-// Méthodes de navigation
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
@@ -120,7 +112,6 @@ const closeMenu = () => {
   isMenuOpen.value = false
 }
 
-// Fermer le menu lors d'un clic ailleurs
 const handleClickOutside = (event: Event) => {
   const target = event.target as HTMLElement
   const nav = document.querySelector('nav')
@@ -130,18 +121,15 @@ const handleClickOutside = (event: Event) => {
   }
 }
 
-// Fermer le menu lors d'une navigation
 const handleNavigation = () => {
   if (isMenuOpen.value) {
     closeMenu()
   }
 }
 
-// Méthodes d'authentification
 const openLogin = () => {
   openCartAfterLogin.value = false
   isLoginOpen.value = true
-  // Fermer le menu mobile lors de l'ouverture de la connexion
   closeMenu()
 }
 
@@ -151,19 +139,12 @@ const closeLogin = () => {
 }
 
 const handleLoginSuccess = () => {
-  // Connexion réussie - rester sur la page actuelle
-  
-  // Si l'utilisateur est sur la page /login, le rediriger vers l'accueil
   if (router.currentRoute.value.path === '/login') {
     router.push('/')
   }
-  
-  // Aucune autre redirection, l'utilisateur reste sur la page où il était
 }
 
-// Méthodes de panier
 const openCart = () => {
-  // Fermer le menu mobile lors de l'ouverture du panier
   closeMenu()
   
   if (authStore.isLoggedIn) {
@@ -178,7 +159,6 @@ const openLoginForCart = () => {
   isLoginOpen.value = true
 }
 
-// Gestion du scroll
 const handleScroll = () => {
   const currentScrollY = window.scrollY
   const scrollThreshold = 5
@@ -195,7 +175,6 @@ const handleScroll = () => {
   lastScrollY = currentScrollY
 }
 
-// Lifecycle hooks
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   document.addEventListener('click', handleClickOutside)
@@ -205,20 +184,16 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
   document.removeEventListener('click', handleClickOutside)
-  router.afterEach(() => {}) // Remove the listener after the component is unmounted
+  router.afterEach(() => {})
 })
 </script>
 
 <style lang="scss">
 
 
-// Variables locales
 $navbar-height-desktop: 80px;
 $navbar-height-mobile: 65px;
-$transition-duration: 0.4s;
-$transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
 
-// Navbar principale
 nav {
   display: flex;
   justify-content: space-between;
@@ -233,7 +208,7 @@ nav {
   left: 0;
   right: 0;
   z-index: 1000;
-  transition: transform $transition-duration $transition-timing;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 }
 
@@ -241,7 +216,6 @@ nav {
   transform: translateY(-100%);
 }
 
-// Logo
 .logo {
   margin-left: 20px;
   display: flex;
@@ -263,7 +237,6 @@ nav {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 
-// S'assurer que le logo n'a jamais de bordure
 .logo a,
 .logo a:focus,
 .logo a:hover,
@@ -274,7 +247,6 @@ nav {
   box-shadow: none !important;
 }
 
-// Menu burger (mobile)
 .menu {
   display: none;
   background: transparent;
@@ -285,7 +257,6 @@ nav {
   cursor: pointer;
   outline: none;
   
-  // Supprimer la bordure au focus/survol
   &:focus,
   &:hover {
     outline: none;
@@ -293,7 +264,6 @@ nav {
     border: none;
   }
   
-  // Supprimer la bordure au clic
   &:active {
     outline: none;
     box-shadow: none;
@@ -343,7 +313,6 @@ nav {
   top: 0;
 }
 
-// Navigation principale
 ul {
   list-style: none;
   display: flex;
@@ -371,7 +340,6 @@ a {
   position: relative;
 }
 
-// Effet de soulignement au hover
 .actualite a::after,
 .composer a::after,
 .catalogue a::after {
@@ -397,7 +365,6 @@ a:hover {
   transform: translateY(-1px);
 }
 
-// Indication de la page active - bordure simple
 .actualite a.router-link-active,
 .composer a.router-link-active,
 .catalogue a.router-link-active {
@@ -406,20 +373,17 @@ a:hover {
   outline-offset: 4px;
   border-radius: 6px;
   
-  // Pas de soulignement pour la page active
   &::after {
     display: none;
   }
 }
 
-// CTA Container
 .cta-container {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-// CTA Items
 .cta-item {
   position: relative;
 }
@@ -445,30 +409,25 @@ a:hover {
 
 /* Styles de focus personnalisés pour chaque CTA */
 .cta-button:focus {
-  outline: none; /* Supprime la bordure de focus par défaut */
+  outline: none;
 }
 
 .login-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(144, 174, 176, 0.3); /* Bordure de focus pour le bouton login */
+  box-shadow: 0 0 0 2px rgba(144, 174, 176, 0.3);
 }
 
 .login-btn.connected:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3); /* Bordure de focus pour le bouton connecté */
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
 }
 
 .cart-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.3); /* Bordure de focus pour le bouton panier */
+  box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.3);
 }
 
 .admin-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(56, 57, 97, 0.3); /* Bordure de focus pour le bouton admin */
+  box-shadow: 0 0 0 2px rgba(56, 57, 97, 0.3);
 }
 
-// Bouton de connexion
 .login-btn {
   background-color: #90aeb0;
   color: white;
@@ -482,7 +441,6 @@ a:hover {
   box-shadow: 0 4px 12px rgba(144, 174, 176, 0.3);
 }
 
-// État connecté
 .login-btn.connected {
   background: linear-gradient(135deg, #28a745, #20c997);
   color: white;
@@ -496,7 +454,6 @@ a:hover {
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
-// Bouton de panier
 .cart-btn {
   background-color: var(--accent-color);
   color: var(--secondary-color);
@@ -523,7 +480,6 @@ a:hover {
   box-shadow: none;
 }
 
-// Bouton admin (desktop)
 .admin-btn {
   background: #383961;
   color: white;
@@ -535,7 +491,6 @@ a:hover {
   color: #383961;
 }
 
-// Icônes des CTA
 .cta-button i {
   font-size: 1rem;
   color: inherit;
@@ -550,7 +505,6 @@ a:hover {
   transform: translate(-50%, -50%);
 }
 
-// Compteur d'articles
 .cart-count {
   position: absolute;
   top: -8px;
@@ -570,7 +524,6 @@ a:hover {
   line-height: 1;
 }
 
-// Indicateur de statut connecté
 .status-indicator {
   position: absolute;
   top: -5px;
@@ -583,9 +536,7 @@ a:hover {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-// Styles responsives
 @media (max-width: 768px) {
-  // Menu burger visible
   .menu {
     display: flex;
     z-index: 1000;
@@ -599,7 +550,6 @@ a:hover {
     order: 4;
   }
 
-  // Navbar mobile
   nav {
     display: flex;
     align-items: center;
@@ -608,7 +558,6 @@ a:hover {
     height: $navbar-height-mobile;
   }
 
-  // Logo mobile
   .logo {
     margin-left: 6px;
     flex: 0 0 auto;
@@ -623,7 +572,6 @@ a:hover {
     margin-bottom: -10px;
   }
 
-  // CTA mobile
   .cta-container {
     display: flex;
     align-items: center;
@@ -649,28 +597,23 @@ a:hover {
     outline: none; /* Supprime la bordure de focus par défaut */
   }
   
-  /* Styles de focus pour mobile */
   .cta-button:focus {
     outline: none;
   }
   
   .login-btn:focus {
-    outline: none;
     box-shadow: 0 0 0 2px rgba(144, 174, 176, 0.3);
   }
   
   .login-btn.connected:focus {
-    outline: none;
     box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
   }
   
   .cart-btn:focus {
-    outline: none;
     box-shadow: 0 0 0 2px rgba(255, 111, 97, 0.3);
   }
   
   .admin-btn:focus {
-    outline: none;
     box-shadow: 0 0 0 2px rgba(56, 57, 97, 0.3);
   }
   
@@ -689,7 +632,6 @@ a:hover {
     right: -1px;
   }
   
-  /* Styles pour le CTA Admin */
   .admin-btn {
     background: #383961;
     color: white;
@@ -700,7 +642,6 @@ a:hover {
     color: #383961;
   }
   
-  /* Styles pour le CTA Admin mobile */
   .login-btn.connected {
     background: linear-gradient(135deg, #28a745, #20c997);
     color: white;
@@ -713,7 +654,6 @@ a:hover {
     box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
   }
 
-  // Menu dropdown mobile
   ul {
     display: none;
     flex-direction: column;
@@ -740,7 +680,6 @@ a:hover {
     right: 0;
   }
 
-  // Liens du menu mobile
   ul li {
     font-family: var(--font-family-text);
     text-transform: uppercase;

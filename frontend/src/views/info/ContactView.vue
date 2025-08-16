@@ -68,7 +68,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-// Formulaire de contact harmonisé avec le style de ComposerView
 const form = ref({
   name: '',
   email: '',
@@ -77,8 +76,6 @@ const form = ref({
 })
 
 function submitForm() {
-  // Traitement du formulaire
-  // Ici vous pouvez ajouter la logique d'envoi du formulaire
   alert('Merci pour votre message! Nous vous contacterons bientôt.')
   resetForm()
 }
@@ -94,7 +91,6 @@ function resetForm() {
 </script>
 
 <style scoped>
-
 
 .page-container {
   display: flex;

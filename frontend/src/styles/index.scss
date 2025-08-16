@@ -1,0 +1,10 @@
+/* Fichier principal des styles - Import de tous les fichiers SCSS */
+
+// Variables et mixins
+@import 'variables';
+
+// Styles globaux
+@import 'global';
+
+// Styles spécifiques à l'admin
+@import 'admin';

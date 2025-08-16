@@ -306,7 +306,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
 }
 
 .hero-background {
@@ -488,7 +487,6 @@ onUnmounted(() => {
   max-width: 900px;
   margin: 0 auto 3rem;
   height: 400px;
-  overflow: hidden;
 }
 
 .news-slider {
@@ -654,7 +652,6 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  overflow: hidden;
 }
 
 .catalogue-slide {
@@ -888,7 +885,6 @@ onUnmounted(() => {
   position: relative;
   padding: 6rem 0;
   color: #fff;
-  overflow: hidden;
   background: #fff;
 }
 

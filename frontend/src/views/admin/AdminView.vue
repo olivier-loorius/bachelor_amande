@@ -1,6 +1,5 @@
 <template>
   <div class="admin-dashboard">
-    <!-- Header du Dashboard -->
     <header class="dashboard-header">
       <div class="header-content">
         <h1 class="dashboard-title">Dashboard Admin</h1>
@@ -10,7 +9,6 @@
         </p>
       </div>
       
-      <!-- Barre d'actions -->
       <div class="action-bar">
         <button 
           @click="loadUsers"
@@ -33,9 +31,7 @@
       </div>
     </header>
 
-    <!-- Contenu principal -->
     <main class="dashboard-content">
-            <!-- Section Gestion des Utilisateurs -->
       <section class="dashboard-section accordion-section">
         <div class="section-header accordion-header" @click="toggleUsersSection">
           <div class="header-left">
@@ -60,7 +56,6 @@
         </div>
 
         <div class="accordion-content" :class="{ 'open': isUsersSectionOpen }">
-          <!-- Barre de recherche -->
           <div class="search-container">
             <div class="search-input-wrapper">
               <i class="fas fa-search search-icon"></i>
@@ -175,7 +170,6 @@
         </div>
       </section>
 
-      <!-- Section Configuration des Produits -->
       <section class="dashboard-section accordion-section">
         <div class="section-header accordion-header" @click="toggleProductsSection">
           <div class="header-left">
@@ -200,7 +194,6 @@
         </div>
 
         <div class="accordion-content" :class="{ 'open': isProductsSectionOpen }">
-          <!-- Barre d'actions rapides -->
           <div class="products-action-bar">
             <div class="action-group">
               <button @click="loadProductConfig" class="action-btn secondary-btn" :disabled="isLoadingProducts || hasUnlockedProducts" :title="hasUnlockedProducts ? 'Sauvegardez d\'abord vos modifications avant d\'actualiser' : 'Actualiser la configuration'">
@@ -236,7 +229,6 @@
             </div>
           </div>
 
-          <!-- Étape 1: Fonds -->
           <div class="product-step-section">
             <div class="step-header">
               <h3 class="subsection-title">
@@ -304,10 +296,9 @@
                         />
                       </div>
                     </div>
-                  </div>
-                  
-                  <!-- Vignette agrandie de l'image -->
-                  <div class="image-preview-large">
+                                      </div>
+                    
+                    <div class="image-preview-large">
                     <div v-if="fond.image" class="image-with-actions">
                       <img 
                         :src="fond.image" 
@@ -328,7 +319,6 @@
             </div>
           </div>
 
-          <!-- Étape 2: Première couche de douceur -->
           <div class="product-step-section">
             <div class="step-header">
               <h3 class="subsection-title">
@@ -401,7 +391,6 @@
 
                   </div>
                   
-                  <!-- Affichage des 3 images sur lignes séparées -->
                   <div class="selected-images-preview">
                     <h4>Images sélectionnées :</h4>
                     <div class="images-vertical">
@@ -429,7 +418,6 @@
             </div>
           </div>
 
-          <!-- Étape 3: Seconde couche de douceur -->
           <div class="product-step-section">
             <div class="step-header">
               <h3 class="subsection-title">
@@ -502,7 +490,6 @@
 
                   </div>
                   
-                  <!-- Affichage des 3 images sur lignes séparées -->
                   <div class="selected-images-preview">
                     <h4>Images sélectionnées :</h4>
                     <div class="images-vertical">
@@ -530,7 +517,6 @@
             </div>
           </div>
 
-          <!-- Étape 4: La touche finale -->
           <div class="product-step-section">
             <div class="step-header">
               <h3 class="subsection-title">
@@ -600,7 +586,6 @@
                       </div>
                     </div>
                     
-                    <!-- Bouton de validation -->
                     <div v-if="!lockedProducts.finitions[index]" class="validation-actions">
                       <button @click="validateProduct('finition', index)" class="action-btn validate-btn" :disabled="!finition.nom || !finition.images.every(img => img)">
                         <i class="fas fa-check"></i>
@@ -609,7 +594,6 @@
                     </div>
                   </div>
                   
-                  <!-- Affichage des 3 images sur lignes séparées -->
                   <div class="selected-images-preview">
                     <h4>Images sélectionnées :</h4>
                     <div class="images-vertical">
@@ -639,7 +623,6 @@
         </div>
       </section>
 
-      <!-- Modal de configuration des produits -->
       <div v-if="showProductModal" class="modal-overlay" @click="closeProductModal">
         <div class="product-modal" @click.stop>
           <div class="modal-header">
@@ -650,7 +633,6 @@
           </div>
 
           <div class="modal-content">
-            <!-- Configuration des fonds -->
             <div v-if="editingType === 'fond'" class="product-config">
               <div class="form-group">
                 <label for="fondName">Nom du fond *</label>
@@ -677,7 +659,6 @@
               </div>
             </div>
 
-            <!-- Configuration des douceurs -->
             <div v-if="editingType === 'douceur'" class="product-config">
               <div class="form-group">
                 <label for="douceurName">Nom du produit *</label>
@@ -709,7 +690,6 @@
               </div>
             </div>
 
-            <!-- Configuration des finitions -->
             <div v-if="editingType === 'finition'" class="product-config">
               <div class="form-group">
                 <label for="finitionName">Nom du produit *</label>
@@ -741,7 +721,6 @@
               </div>
             </div>
 
-            <!-- Actions -->
             <div class="modal-actions">
               <button @click="closeProductModal" class="btn-secondary">
                 Annuler
@@ -778,127 +757,301 @@ interface User {
   deleted_at?: string
 }
 
+// Interfaces génériques pour les produits
+interface BaseProduct {
+  nom: string
+}
+
+interface FondProduct extends BaseProduct {
+  image: string | null
+}
+
+interface MultiImageProduct extends BaseProduct {
+  images: (string | null)[]
+}
+
+/**
+ * ARCHITECTURE OPTIMISÉE DES PRODUITS
+ * ===================================
+ * 
+ * Cette section utilise une architecture générique pour gérer tous les types de produits
+ * (fonds, douceurs, finitions) de manière unifiée, éliminant la duplication de code.
+ * 
+ * STRUCTURES PRINCIPALES :
+ * - products: Structure centralisée pour tous les produits
+ * - productStates: Structure centralisée pour les états (locked, drag)
+ * - PRODUCT_TYPES: Configuration centralisée des types de produits
+ * 
+ * HELPERS GÉNÉRIQUES :
+ * - getProductArray(): Accès générique aux arrays de produits
+ * - getProductState(): Accès générique aux états
+ * - setProductState(): Modification générique des états
+ * - isProductLocked(): Vérification de l'état de verrouillage
+ * - isDragState(): Vérification de l'état de drag & drop
+ * 
+ * COMPATIBILITÉ :
+ * - Les computed properties fonds, premiereCoucheDouceur, etc. maintiennent la compatibilité
+ * - lockedProducts et dragStates sont des computed properties pour le template
+ * - Toutes les fonctions existantes continuent de fonctionner
+ */
+
 const users = ref<User[]>([])
 const isLoading = ref(false)
-const isUsersSectionOpen = ref(false) // Par défaut fermé
-const isProductsSectionOpen = ref(true) // Par défaut ouvert pour voir toutes les étapes
+const isUsersSectionOpen = ref(false)
+const isProductsSectionOpen = ref(true)
 
 const searchQuery = ref('')
 const router = useRouter()
 const authStore = useAuthStore()
 
-// Variables pour la configuration des produits
 const showProductModal = ref(false)
 const editingProduct = ref<any>(null)
-const editingType = ref<string | null>(null) // 'fond', 'douceur', 'finition'
-const isSaving = ref(false)
+const editingType = ref<string | null>(null)
 const isLoadingProducts = ref(false)
 const isUploadingImages = ref(false)
 const productsViewMode = ref<'grid' | 'list'>('grid')
 
-// État de verrouillage pour chaque produit
-const lockedProducts = ref({
-  fonds: [true, true, true],
-  premiereDouceur: [true, true, true, true],
-  secondeDouceur: [true, true, true, true],
-  finitions: [true, true, true, true]
+// Helper pour la gestion des types de produits
+const PRODUCT_TYPES = {
+  fond: {
+    array: 'fonds',
+    configType: 'fonds',
+    imageCount: 1,
+    saveFunction: 'saveFond'
+  },
+  premiere: {
+    array: 'premiereCoucheDouceur',
+    configType: 'premiere_couche_douceur',
+    imageCount: 3,
+    saveFunction: 'saveDouceur'
+  },
+  seconde: {
+    array: 'secondeCoucheDouceur',
+    configType: 'seconde_couche_douceur',
+    imageCount: 3,
+    saveFunction: 'saveDouceur'
+  },
+  finition: {
+    array: 'toucheFinale',
+    configType: 'touche_finale',
+    imageCount: 3,
+    saveFunction: 'saveFinition'
+  }
+} as const
+
+// Structure générique pour les états
+const productStates = ref({
+  locked: {
+    fonds: Array(3).fill(true),
+    premiereDouceur: Array(4).fill(true),
+    secondeDouceur: Array(4).fill(true),
+    finitions: Array(4).fill(true)
+  },
+  drag: {
+    fonds: Array(3).fill(false),
+    premiereDouceur: Array(4).fill(false),
+    secondeDouceur: Array(4).fill(false),
+    finitions: Array(4).fill(false)
+  }
 })
 
-// État de drag & drop pour chaque zone d'upload
-const dragStates = ref({
-  fonds: [false, false, false],
-  premiereDouceur: [false, false, false, false],
-  secondeDouceur: [false, false, false, false],
-  finitions: [false, false, false, false]
+// Références pour maintenir la compatibilité
+
+// Helpers génériques pour accéder aux produits et états
+const getProductArray = (type: keyof typeof PRODUCT_TYPES) => {
+  return products.value[PRODUCT_TYPES[type].array as keyof typeof products.value]
+}
+
+const getProductState = (type: keyof typeof PRODUCT_TYPES, stateType: 'locked' | 'drag') => {
+  const arrayKey = PRODUCT_TYPES[type].array === 'premiereCoucheDouceur' ? 'premiereDouceur' :
+                   PRODUCT_TYPES[type].array === 'secondeCoucheDouceur' ? 'secondeDouceur' :
+                   PRODUCT_TYPES[type].array === 'toucheFinale' ? 'finitions' : 'fonds'
+  return productStates.value[stateType][arrayKey as keyof typeof productStates.value.locked]
+}
+
+const setProductState = (type: keyof typeof PRODUCT_TYPES, stateType: 'locked' | 'drag', index: number, value: boolean) => {
+  const arrayKey = PRODUCT_TYPES[type].array === 'premiereCoucheDouceur' ? 'premiereDouceur' :
+                   PRODUCT_TYPES[type].array === 'secondeCoucheDouceur' ? 'secondeDouceur' :
+                   PRODUCT_TYPES[type].array === 'toucheFinale' ? 'finitions' : 'fonds'
+  productStates.value[stateType][arrayKey as keyof typeof productStates.value.locked][index] = value
+}
+
+// Helpers pour le template (compatibilité)
+const isProductLocked = (type: string, index: number) => {
+  const productType = PRODUCT_TYPES[type as keyof typeof PRODUCT_TYPES]
+  if (!productType) return true
+  
+  if (type === 'fond') {
+    return productStates.value.locked.fonds[index]
+  } else if (type === 'premiere') {
+    return productStates.value.locked.premiereDouceur[index]
+  } else if (type === 'seconde') {
+    return productStates.value.locked.secondeDouceur[index]
+  } else if (type === 'finition') {
+    return productStates.value.locked.finitions[index]
+  }
+  return true
+}
+
+const isDragState = (type: string, index: number) => {
+  const productType = PRODUCT_TYPES[type as keyof typeof PRODUCT_TYPES]
+  if (!productType) return false
+  
+  if (type === 'fond') {
+    return productStates.value.drag.fonds[index]
+  } else if (type === 'premiere') {
+    return productStates.value.drag.premiereDouceur[index]
+  } else if (type === 'seconde') {
+    return productStates.value.drag.secondeDouceur[index]
+  } else if (type === 'finition') {
+    return productStates.value.drag.finitions[index]
+  }
+  return false
+}
+
+// Structure générique pour tous les produits
+const products = ref({
+  fonds: Array(3).fill(null).map(() => ({ nom: '', image: null as string | null })) as FondProduct[],
+  premiereCoucheDouceur: Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] })) as MultiImageProduct[],
+  secondeCoucheDouceur: Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] })) as MultiImageProduct[],
+  toucheFinale: Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] })) as MultiImageProduct[]
 })
 
-// Data for product configurations
-const fonds = ref([
-  { nom: '', image: null as string | null },
-  { nom: '', image: null as string | null },
-  { nom: '', image: null as string | null }
-])
+/**
+ * COMPUTED PROPERTIES DES PRODUITS
+ * ================================
+ * 
+ * Ces computed properties maintiennent la compatibilité avec le code existant
+ * tout en utilisant la nouvelle structure centralisée 'products'.
+ * 
+ * Chaque computed property agit comme un proxy vers la structure générique,
+ * permettant une migration progressive sans casser le code existant.
+ */
+const fonds = computed({
+  get: () => products.value.fonds,
+  set: (value) => { products.value.fonds = value }
+})
+const premiereCoucheDouceur = computed({
+  get: () => products.value.premiereCoucheDouceur,
+  set: (value) => { products.value.premiereCoucheDouceur = value }
+})
+const secondeCoucheDouceur = computed({
+  get: () => products.value.secondeCoucheDouceur,
+  set: (value) => { products.value.secondeCoucheDouceur = value }
+})
+const toucheFinale = computed({
+  get: () => products.value.toucheFinale,
+  set: (value) => { products.value.toucheFinale = value }
+})
 
-const premiereCoucheDouceur = ref([
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-])
-
-const secondeCoucheDouceur = ref([
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-])
-
-const toucheFinale = ref([
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-  { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-])
-
-// Computed properties
 const activeUsers = computed(() => users.value.filter(user => !user.deleted).length)
 const deletedUsers = computed(() => users.value.filter(user => user.deleted).length)
 
-// Computed properties pour les produits de configuration
-const fondsConfigured = computed(() => fonds.value.filter(f => f.nom && f.image).length)
-const premiereCoucheConfigured = computed(() => premiereCoucheDouceur.value.filter(d => d.nom && d.images.every((img: any) => img)).length)
-const secondeCoucheConfigured = computed(() => secondeCoucheDouceur.value.filter(d => d.nom && d.images.every((img: any) => img)).length)
-const toucheFinaleConfigured = computed(() => toucheFinale.value.filter(f => f.nom && f.images.every((img: any) => img)).length)
+// Helper pour calculer les produits configurés
+const getConfiguredCount = (type: keyof typeof PRODUCT_TYPES) => {
+  const productArray = getProductArray(type)
+  
+  if (type === 'fond') {
+    return (productArray as FondProduct[]).filter(f => f.nom && f.image).length
+  } else {
+    return (productArray as MultiImageProduct[]).filter(d => d.nom && d.images.every((img) => img)).length
+  }
+}
+
+const fondsConfigured = computed(() => getConfiguredCount('fond'))
+const premiereCoucheConfigured = computed(() => getConfiguredCount('premiere'))
+const secondeCoucheConfigured = computed(() => getConfiguredCount('seconde'))
+const toucheFinaleConfigured = computed(() => getConfiguredCount('finition'))
 
 const totalProducts = computed(() => {
   return fondsConfigured.value + premiereCoucheConfigured.value + secondeCoucheConfigured.value + toucheFinaleConfigured.value
 })
 
 const totalPending = computed(() => {
-  const totalPossible = 4 + 4 + 4 + 4 // fonds + 3 couches
+  const totalPossible = 4 + 4 + 4 + 4
   return totalPossible - totalProducts.value
 })
 
-// Progress bars pour chaque étape
-const fondsProgress = computed(() => (fondsConfigured.value / 3) * 100)
-const premiereCoucheProgress = computed(() => (premiereCoucheConfigured.value / 4) * 100)
-const secondeCoucheProgress = computed(() => (secondeCoucheConfigured.value / 4) * 100)
-const toucheFinaleProgress = computed(() => (toucheFinaleConfigured.value / 4) * 100)
+// Helper pour calculer la progression
+const getProgress = (type: keyof typeof PRODUCT_TYPES) => {
+  const configured = getConfiguredCount(type)
+  const total = type === 'fond' ? 3 : 4
+  return (configured / total) * 100
+}
 
-// Vérifier s'il y a des produits déverrouillés (modifications en cours)
+const fondsProgress = computed(() => getProgress('fond'))
+const premiereCoucheProgress = computed(() => getProgress('premiere'))
+const secondeCoucheProgress = computed(() => getProgress('seconde'))
+const toucheFinaleProgress = computed(() => getProgress('finition'))
+
+// Helper pour vérifier s'il y a des produits déverrouillés
 const hasUnlockedProducts = computed(() => {
-  return lockedProducts.value.fonds.some(locked => !locked) ||
-         lockedProducts.value.premiereDouceur.some(locked => !locked) ||
-         lockedProducts.value.secondeDouceur.some(locked => !locked) ||
-         lockedProducts.value.finitions.some(locked => !locked)
+  return Object.values(productStates.value.locked).some(array => array.some(locked => !locked))
 })
 
-const modalTitle = computed(() => {
-  switch (editingType.value) {
-    case 'fond': return 'Configurer le fond'
-            case 'douceur': return 'Configurer le produit de douceur'
-        case 'finition': return 'Configurer le produit de finition'
-    default: return 'Configuration'
+/**
+ * COMPUTED PROPERTIES DE COMPATIBILITÉ
+ * ====================================
+ * 
+ * Ces computed properties maintiennent la compatibilité avec le template existant
+ * tout en utilisant la nouvelle architecture générique en arrière-plan.
+ */
+const lockedProducts = computed({
+  get: () => ({
+    fonds: productStates.value.locked.fonds,
+    premiereDouceur: productStates.value.locked.premiereDouceur,
+    secondeDouceur: productStates.value.locked.secondeDouceur,
+    finitions: productStates.value.locked.finitions
+  }),
+  set: (value) => {
+    productStates.value.locked.fonds = value.fonds
+    productStates.value.locked.premiereDouceur = value.premiereDouceur
+    productStates.value.locked.secondeDouceur = value.secondeDouceur
+    productStates.value.locked.finitions = value.finitions
   }
 })
 
+const dragStates = computed({
+  get: () => ({
+    fonds: productStates.value.drag.fonds,
+    premiereDouceur: productStates.value.drag.premiereDouceur,
+    secondeDouceur: productStates.value.drag.secondeDouceur,
+    finitions: productStates.value.drag.finitions
+  }),
+  set: (value) => {
+    productStates.value.drag.fonds = value.fonds
+    productStates.value.drag.premiereDouceur = value.premiereDouceur
+    productStates.value.drag.secondeDouceur = value.secondeDouceur
+    productStates.value.drag.finitions = value.finitions
+  }
+})
+
+// Helper pour le titre de la modal
+const modalTitle = computed(() => {
+  const titles = {
+    fond: 'Configurer le fond',
+    douceur: 'Configurer le produit de douceur',
+    finition: 'Configurer le produit de finition'
+  }
+  return titles[editingType.value as keyof typeof titles] || 'Configuration'
+})
+
+// Helper pour vérifier si on peut sauvegarder
 const canSave = computed(() => {
   if (!editingProduct.value) return false
   
-  switch (editingType.value) {
-    case 'fond':
-      return editingProduct.value.nom && editingProduct.value.image
-    case 'douceur':
-    case 'finition':
-      return editingProduct.value.nom && editingProduct.value.images.every((img: any) => img)
-    default:
-      return false
+  const validators = {
+    fond: () => editingProduct.value.nom && editingProduct.value.image,
+    douceur: () => editingProduct.value.nom && editingProduct.value.images.every((img: any) => img),
+    finition: () => editingProduct.value.nom && editingProduct.value.images.every((img: any) => img)
   }
+  
+  const validator = validators[editingType.value as keyof typeof validators]
+  return validator ? validator() : false
 })
 
 
 
-// Filtrage des utilisateurs par recherche
 const filteredUsers = computed(() => {
   if (!searchQuery.value) return users.value
   
@@ -909,70 +1062,36 @@ const filteredUsers = computed(() => {
   )
 })
 
-// Fonctions pour la configuration des produits
 const toggleProductsSection = () => {
   isProductsSectionOpen.value = !isProductsSectionOpen.value
 }
 
-// Fonctions de verrouillage/déverrouillage
+// Fonction générique pour gérer les états de verrouillage
 const toggleLock = async (type: string, index: number) => {
+  const productType = PRODUCT_TYPES[type as keyof typeof PRODUCT_TYPES]
+  if (!productType) return
+  
   try {
-    let configType: string = ''
-    let newLockedState: boolean = false
+    // Mettre à jour l'état local
+    const currentState = getProductState(type as keyof typeof PRODUCT_TYPES, 'locked')[index]
+    const newLockedState = !currentState
+    setProductState(type as keyof typeof PRODUCT_TYPES, 'locked', index, newLockedState)
     
-    if (type === 'fond') {
-      lockedProducts.value.fonds[index] = !lockedProducts.value.fonds[index]
-      configType = 'fonds'
-      newLockedState = lockedProducts.value.fonds[index]
-    } else if (type === 'premiere') {
-      lockedProducts.value.premiereDouceur[index] = !lockedProducts.value.premiereDouceur[index]
-      configType = 'premiere_couche_douceur'
-      newLockedState = lockedProducts.value.premiereDouceur[index]
-    } else if (type === 'seconde') {
-      lockedProducts.value.secondeDouceur[index] = !lockedProducts.value.secondeDouceur[index]
-      configType = 'seconde_couche_douceur'
-      newLockedState = lockedProducts.value.secondeDouceur[index]
-    } else if (type === 'finition') {
-      lockedProducts.value.finitions[index] = !lockedProducts.value.finitions[index]
-      configType = 'touche_finale'
-      newLockedState = lockedProducts.value.finitions[index]
-    }
-    
-    // Sauvegarder l'état de verrouillage dans Supabase
-    if (configType) {
-      await productConfigService.updateProductLock(configType, index, newLockedState)
-      console.log(`✅ État de verrouillage mis à jour pour ${configType} index ${index}: ${newLockedState}`)
-    }
+    // Mettre à jour dans Supabase
+    await productConfigService.updateProductLock(productType.configType, index, newLockedState)
+    console.log(`✅ État de verrouillage mis à jour pour ${productType.configType} index ${index}: ${newLockedState}`)
   } catch (error) {
     console.error('❌ Erreur lors de la mise à jour du verrouillage:', error)
-    // Annuler le changement en cas d'erreur
-    if (type === 'fond') {
-      lockedProducts.value.fonds[index] = !lockedProducts.value.fonds[index]
-    } else if (type === 'premiere') {
-      lockedProducts.value.premiereDouceur[index] = !lockedProducts.value.premiereDouceur[index]
-    } else if (type === 'seconde') {
-      lockedProducts.value.secondeDouceur[index] = !lockedProducts.value.secondeDouceur[index]
-    } else if (type === 'finition') {
-      lockedProducts.value.finitions[index] = !lockedProducts.value.finitions[index]
-    }
+    // Restaurer l'état en cas d'erreur
+    const currentState = getProductState(type as keyof typeof PRODUCT_TYPES, 'locked')[index]
+    setProductState(type as keyof typeof PRODUCT_TYPES, 'locked', index, !currentState)
   }
 }
 
-// Fonctions de validation (sauvegarde + re-verrouillage)
+// Fonction générique pour valider les produits
 const validateProduct = async (type: string, index: number) => {
   try {
-    // Sauvegarder le produit
-    if (type === 'fond') {
-      await saveFond(index)
-    } else if (type === 'premiere') {
-      await saveDouceur(index, 'premiere')
-    } else if (type === 'seconde') {
-      await saveDouceur(index, 'seconde')
-    } else if (type === 'finition') {
-      await saveFinition(index)
-    }
-    
-    // Re-verrouiller le produit (sauvegarde automatique dans Supabase)
+    await saveProduct(type as keyof typeof PRODUCT_TYPES, index)
     await toggleLock(type, index)
     
     console.log('✅ Produit validé et verrouillé')
@@ -981,171 +1100,124 @@ const validateProduct = async (type: string, index: number) => {
   }
 }
 
-// Fonctions de suppression d'images individuelles
+// Fonction générique pour supprimer des images
 const removeImage = async (type: string, index: number, imageIndex?: number) => {
+  const productType = PRODUCT_TYPES[type as keyof typeof PRODUCT_TYPES]
+  if (!productType) return
+  
   if (type === 'fond') {
     if (confirm('Supprimer cette image ?')) {
-      const currentImage = fonds.value[index].image
+      const productArray = getProductArray('fond')
+      const currentImage = (productArray[index] as FondProduct).image
       if (currentImage) {
-        // Supprimer de Supabase Storage
         await productConfigService.deleteImage(currentImage)
       }
-      fonds.value[index].image = null
-      await saveFond(index)
+      (productArray[index] as FondProduct).image = null
+      await saveProduct('fond', index)
     }
   } else {
     if (confirm(`Supprimer l'image ${imageIndex! + 1} ?`)) {
-      const array = type === 'premiere' ? premiereCoucheDouceur : 
-                    type === 'seconde' ? secondeCoucheDouceur : toucheFinale
-      const currentImage = array.value[index].images[imageIndex!]
+      const productArray = getProductArray(type as keyof typeof PRODUCT_TYPES)
+      const currentImage = (productArray[index] as MultiImageProduct).images[imageIndex!]
       if (currentImage) {
-        // Supprimer de Supabase Storage
         await productConfigService.deleteImage(currentImage)
       }
-      array.value[index].images[imageIndex!] = null
+      (productArray[index] as MultiImageProduct).images[imageIndex!] = null
       
-      if (type === 'premiere') {
-        await saveDouceur(index, 'premiere')
-      } else if (type === 'seconde') {
-        await saveDouceur(index, 'seconde')
-      } else {
-        await saveFinition(index)
-      }
+      await saveProduct(type as keyof typeof PRODUCT_TYPES, index)
     }
   }
 }
 
-// Fonctions CRUD pour les fonds
-// Fonctions de sauvegarde pour les fonds
-const saveFond = async (index: number) => {
+// Fonction générique de sauvegarde pour tous les types de produits
+const saveProduct = async (type: keyof typeof PRODUCT_TYPES, index: number) => {
   try {
-    const fond = fonds.value[index]
+    const productType = PRODUCT_TYPES[type]
+    const productArray = getProductArray(type)
+    const product = productArray[index]
+    
+    let images: string[] = []
+    if (type === 'fond') {
+      images = (product as FondProduct).image ? [(product as FondProduct).image!] : []
+    } else {
+      images = (product as MultiImageProduct).images.filter((img): img is string => img !== null)
+    }
+    
     const config: ProductConfig = {
-      config_type: 'fonds',
+      config_type: productType.configType,
       product_index: index,
-      nom: fond.nom,
-      images: fond.image ? [fond.image] : []
+      nom: product.nom,
+      images
     }
     
     await productConfigService.upsertProductConfig(config)
-    console.log('✅ Fond sauvegardé dans Supabase')
-  } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde du fond:', error)
-  }
-}
-
-// Fonctions de sauvegarde pour les douceurs
-const saveDouceur = async (index: number, type: 'premiere' | 'seconde') => {
-  try {
-    const array = type === 'premiere' ? premiereCoucheDouceur : secondeCoucheDouceur
-    const douceur = array.value[index]
-    const configType = type === 'premiere' ? 'premiere_couche_douceur' : 'seconde_couche_douceur'
     
-    const config: ProductConfig = {
-      config_type: configType,
-      product_index: index,
-      nom: douceur.nom,
-      images: douceur.images.filter((img): img is string => img !== null)
+    // Logs spécifiques pour maintenir la compatibilité
+    if (type === 'fond') {
+      console.log('✅ Fond sauvegardé dans Supabase')
+    } else if (type === 'premiere' || type === 'seconde') {
+      console.log(`✅ Douceur ${type} sauvegardée dans Supabase`)
+    } else {
+      console.log('✅ Finition sauvegardée dans Supabase')
     }
-    
-    await productConfigService.upsertProductConfig(config)
-    console.log(`✅ Douceur ${type} sauvegardée dans Supabase`)
   } catch (error) {
-    console.error(`❌ Erreur lors de la sauvegarde de la douceur ${type}:`, error)
+    console.error(`❌ Erreur lors de la sauvegarde du produit ${type}:`, error)
   }
 }
 
-// Fonctions de sauvegarde pour les finitions
-const saveFinition = async (index: number) => {
-  try {
-    const finition = toucheFinale.value[index]
-    const config: ProductConfig = {
-      config_type: 'touche_finale',
-      product_index: index,
-      nom: finition.nom,
-      images: finition.images.filter((img): img is string => img !== null)
-    }
-    
-    await productConfigService.upsertProductConfig(config)
-    console.log('✅ Finition sauvegardée dans Supabase')
-  } catch (error) {
-    console.error('❌ Erreur lors de la sauvegarde de la finition:', error)
-  }
-}
+// Fonctions de compatibilité pour maintenir les appels existants
+const saveFond = async (index: number) => saveProduct('fond', index)
+const saveDouceur = async (index: number, type: 'premiere' | 'seconde') => saveProduct(type, index)
+const saveFinition = async (index: number) => saveProduct('finition', index)
 
-
-
-// Fonction pour reset complet
+// Fonction générique pour remettre à zéro tous les produits
 const resetAllProducts = async () => {
   if (confirm('Êtes-vous sûr de vouloir remettre à zéro tous les produits ? Cette action est irréversible.')) {
     try {
-      // Supprimer toutes les images de Supabase Storage
+      // Supprimer toutes les images
       for (let i = 0; i < 3; i++) {
-        if (fonds.value[i]?.image) {
-          await productConfigService.deleteImage(fonds.value[i].image!)
+        if (products.value.fonds[i]?.image) {
+          await productConfigService.deleteImage(products.value.fonds[i].image!)
         }
       }
       
       for (let i = 0; i < 4; i++) {
-        if (premiereCoucheDouceur.value[i]?.images) {
-          for (const image of premiereCoucheDouceur.value[i].images) {
-            if (image) {
-              await productConfigService.deleteImage(image)
-            }
+        // Supprimer les images des douceurs
+        if (products.value.premiereCoucheDouceur[i]?.images) {
+          for (const image of products.value.premiereCoucheDouceur[i].images) {
+            if (image) await productConfigService.deleteImage(image)
           }
         }
-        if (secondeCoucheDouceur.value[i]?.images) {
-          for (const image of secondeCoucheDouceur.value[i].images) {
-            if (image) {
-              await productConfigService.deleteImage(image)
-            }
+        if (products.value.secondeCoucheDouceur[i]?.images) {
+          for (const image of products.value.secondeCoucheDouceur[i].images) {
+            if (image) await productConfigService.deleteImage(image)
           }
         }
-        if (toucheFinale.value[i]?.images) {
-          for (const image of toucheFinale.value[i].images) {
-            if (image) {
-              await productConfigService.deleteImage(image)
-            }
+        if (products.value.toucheFinale[i]?.images) {
+          for (const image of products.value.toucheFinale[i].images) {
+            if (image) await productConfigService.deleteImage(image)
           }
         }
       }
       
-      // Réinitialiser les arrays
-      fonds.value = [
-        { nom: '', image: null as string | null },
-        { nom: '', image: null as string | null },
-        { nom: '', image: null as string | null }
-      ]
+      // Réinitialiser tous les arrays
+      const resetArrays = () => {
+        products.value.fonds = Array(3).fill(null).map(() => ({ nom: '', image: null as string | null }))
+        products.value.premiereCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+        products.value.secondeCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+        products.value.toucheFinale = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+      }
       
-      premiereCoucheDouceur.value = [
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-      ]
+      resetArrays()
       
-      secondeCoucheDouceur.value = [
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-      ]
-      
-      toucheFinale.value = [
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] },
-        { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-      ]
-      
-      // Sauvegarder la configuration vide dans Supabase
+      // Sauvegarder tous les produits
       for (let i = 0; i < 3; i++) {
-        await saveFond(i)
+        await saveProduct('fond', i)
       }
       for (let i = 0; i < 4; i++) {
-        await saveDouceur(i, 'premiere')
-        await saveDouceur(i, 'seconde')
-        await saveFinition(i)
+        await saveProduct('premiere', i)
+        await saveProduct('seconde', i)
+        await saveProduct('finition', i)
       }
       
       console.log('✅ Tous les produits ont été remis à zéro')
@@ -1156,41 +1228,35 @@ const resetAllProducts = async () => {
   }
 }
 
+// Fonction générique pour sauvegarder la configuration des produits
 const saveProductConfig = async () => {
   if (!canSave.value) return
 
-  isSaving.value = true
-
   try {
-    // Sauvegarder dans localStorage pour l'instant
+    const productType = PRODUCT_TYPES[editingType.value as keyof typeof PRODUCT_TYPES]
+    if (!productType) return
+    
+    // Mettre à jour le produit dans l'array approprié
     if (editingType.value === 'fond') {
-      const fondIndex = fonds.value.findIndex(f => f === editingProduct.value)
+      const productArray = getProductArray('fond') as FondProduct[]
+      const fondIndex = productArray.findIndex(f => f === editingProduct.value)
       if (fondIndex !== -1) {
-        fonds.value[fondIndex] = { ...editingProduct.value }
+        productArray[fondIndex] = { ...editingProduct.value }
       }
-    } else if (editingType.value === 'douceur') {
-      let douceurIndex = premiereCoucheDouceur.value.findIndex(d => d === editingProduct.value)
-      if (douceurIndex !== -1) {
-        premiereCoucheDouceur.value[douceurIndex] = { ...editingProduct.value }
-      } else {
-        douceurIndex = secondeCoucheDouceur.value.findIndex(d => d === editingProduct.value)
-        if (douceurIndex !== -1) {
-          secondeCoucheDouceur.value[douceurIndex] = { ...editingProduct.value }
-        }
-      }
-    } else if (editingType.value === 'finition') {
-      const finitionIndex = toucheFinale.value.findIndex(f => f === editingProduct.value)
-      if (finitionIndex !== -1) {
-        toucheFinale.value[finitionIndex] = { ...editingProduct.value }
+    } else {
+      const productArray = getProductArray(editingType.value as keyof typeof PRODUCT_TYPES) as MultiImageProduct[]
+      const productIndex = productArray.findIndex(p => p === editingProduct.value)
+      if (productIndex !== -1) {
+        productArray[productIndex] = { ...editingProduct.value }
       }
     }
 
     // Sauvegarder dans localStorage
     localStorage.setItem('amande_product_config', JSON.stringify({
-      fonds: fonds.value,
-      premiereCoucheDouceur: premiereCoucheDouceur.value,
-      secondeCoucheDouceur: secondeCoucheDouceur.value,
-      toucheFinale: toucheFinale.value
+      fonds: products.value.fonds,
+      premiereCoucheDouceur: products.value.premiereCoucheDouceur,
+      secondeCoucheDouceur: products.value.secondeCoucheDouceur,
+      toucheFinale: products.value.toucheFinale
     }))
 
     console.log('✅ Configuration sauvegardée avec succès')
@@ -1199,8 +1265,6 @@ const saveProductConfig = async () => {
   } catch (error) {
     console.error('❌ Erreur lors de la sauvegarde de la configuration:', error)
     alert('Erreur lors de la sauvegarde de la configuration')
-  } finally {
-    isSaving.value = false
   }
 }
 
@@ -1215,84 +1279,79 @@ const loadProductConfig = async () => {
     isLoadingProducts.value = true
     console.log('🔄 Chargement de la configuration depuis Supabase...')
     
-    // Charger depuis Supabase
     const configs = await productConfigService.getAllProductConfig()
     console.log('📦 Configuration chargée:', configs)
     
-    // Réinitialiser les arrays
-    fonds.value = []
-    premiereCoucheDouceur.value = []
-    secondeCoucheDouceur.value = []
-    toucheFinale.value = []
+    products.value.fonds = []
+    products.value.premiereCoucheDouceur = []
+    products.value.secondeCoucheDouceur = []
+    products.value.toucheFinale = []
     
-    // Réinitialiser l'état de verrouillage
-    lockedProducts.value.fonds = [true, true, true]
-    lockedProducts.value.premiereDouceur = [true, true, true, true]
-    lockedProducts.value.secondeDouceur = [true, true, true, true]
-    lockedProducts.value.finitions = [true, true, true, true]
+    productStates.value.locked.fonds = [true, true, true]
+    productStates.value.locked.premiereDouceur = [true, true, true, true]
+    productStates.value.locked.secondeDouceur = [true, true, true, true]
+    productStates.value.locked.finitions = [true, true, true, true]
     
-    // Organiser les configurations par type
-    configs.forEach(config => {
+    // Helper pour charger un produit
+    const loadProduct = (config: any) => {
       switch (config.config_type) {
         case 'fonds':
-          fonds.value[config.product_index] = {
+          products.value.fonds[config.product_index] = {
             nom: config.nom || '',
             image: config.images && config.images.length > 0 ? config.images[0] : null
           }
-          // Charger l'état de verrouillage
           if (config.locked !== undefined) {
-            lockedProducts.value.fonds[config.product_index] = config.locked
+            productStates.value.locked.fonds[config.product_index] = config.locked
           } else {
-            lockedProducts.value.fonds[config.product_index] = true // Verrouillé par défaut
+            productStates.value.locked.fonds[config.product_index] = true
           }
           break
         case 'premiere_couche_douceur':
-          premiereCoucheDouceur.value[config.product_index] = {
+          products.value.premiereCoucheDouceur[config.product_index] = {
             nom: config.nom || '',
             images: config.images && config.images.length > 0 ? config.images : [null, null, null]
           }
-          // Charger l'état de verrouillage
           if (config.locked !== undefined) {
-            lockedProducts.value.premiereDouceur[config.product_index] = config.locked
+            productStates.value.locked.premiereDouceur[config.product_index] = config.locked
           } else {
-            lockedProducts.value.premiereDouceur[config.product_index] = true // Verrouillé par défaut
+            productStates.value.locked.premiereDouceur[config.product_index] = true
           }
           break
         case 'seconde_couche_douceur':
-          secondeCoucheDouceur.value[config.product_index] = {
+          products.value.secondeCoucheDouceur[config.product_index] = {
             nom: config.nom || '',
             images: config.images && config.images.length > 0 ? config.images : [null, null, null]
           }
-          // Charger l'état de verrouillage
           if (config.locked !== undefined) {
-            lockedProducts.value.secondeDouceur[config.product_index] = config.locked
+            productStates.value.locked.secondeDouceur[config.product_index] = config.locked
           } else {
-            lockedProducts.value.secondeDouceur[config.product_index] = true // Verrouillé par défaut
+            productStates.value.locked.secondeDouceur[config.product_index] = true
           }
           break
         case 'touche_finale':
-          toucheFinale.value[config.product_index] = {
+          products.value.toucheFinale[config.product_index] = {
             nom: config.nom || '',
             images: config.images && config.images.length > 0 ? config.images : [null, null, null]
           }
-          // Charger l'état de verrouillage
           if (config.locked !== undefined) {
-            lockedProducts.value.finitions[config.product_index] = config.locked
+            productStates.value.locked.finitions[config.product_index] = config.locked
           } else {
-            lockedProducts.value.finitions[config.product_index] = true // Verrouillé par défaut
+            productStates.value.locked.finitions[config.product_index] = true
           }
           break
       }
-    })
+    }
     
-    // S'assurer que tous les indices sont définis
+    // Charger chaque configuration
+    configs.forEach(loadProduct)
+    
     for (let i = 0; i < 3; i++) {
-      if (!fonds.value[i]) fonds.value[i] = { nom: '', image: null }
+      if (!products.value.fonds[i]) products.value.fonds[i] = { nom: '', image: null }
     }
     for (let i = 0; i < 4; i++) {
-      if (!premiereCoucheDouceur.value[i]) premiereCoucheDouceur.value[i] = { nom: '', images: [null, null, null] }
-      if (!secondeCoucheDouceur.value[i]) secondeCoucheDouceur.value[i] = { nom: '', images: [null, null, null] }
-      if (!toucheFinale.value[i]) toucheFinale.value[i] = { nom: '', images: [null, null, null] }
+      if (!products.value.premiereCoucheDouceur[i]) products.value.premiereCoucheDouceur[i] = { nom: '', images: [null, null, null] }
+      if (!products.value.secondeCoucheDouceur[i]) products.value.secondeCoucheDouceur[i] = { nom: '', images: [null, null, null] }
+      if (!products.value.toucheFinale[i]) products.value.toucheFinale[i] = { nom: '', images: [null, null, null] }
     }
     
     console.log('✅ Configuration chargée avec succès')
@@ -1304,7 +1363,6 @@ const loadProductConfig = async () => {
 }
 
 onMounted(async () => {
-  // Vérifier si l'utilisateur est connecté et admin
   if (!authStore.user || !authStore.isAdmin) {
     console.log('❌ Accès refusé: utilisateur non connecté ou non admin')
     router.push('/')
@@ -1313,25 +1371,22 @@ onMounted(async () => {
   
   console.log('✅ Accès admin autorisé')
   await loadUsers()
-  await loadProductConfig() // Charger la configuration depuis Supabase au chargement
+  await loadProductConfig()
   
-  // Auto-refresh toutes les 30 secondes
-  setInterval(async () => {
+  const intervalId = setInterval(async () => {
     await loadUsers()
-    await loadProductConfig() // Recharger la configuration au refresh
+    await loadProductConfig()
   }, 30000)
   
-  // Écouter les modifications de profil pour rafraîchir le dashboard
   const handleProfileUpdate = () => {
     loadUsers()
   }
   
-  // Ajouter un listener pour les modifications de profil
   window.addEventListener('profile-updated', handleProfileUpdate)
   
-  // Cleanup
   onUnmounted(() => {
     window.removeEventListener('profile-updated', handleProfileUpdate)
+    clearInterval(intervalId)
   })
 })
 
@@ -1368,7 +1423,6 @@ const deleteUser = async (id: string) => {
       alert('Erreur lors de la désactivation')
       console.error('Erreur lors de la désactivation:', error)
     } else {
-      // Recharger la liste après désactivation
       await loadUsers()
     }
   }
@@ -1404,9 +1458,7 @@ const toggleUsersSection = () => {
   isUsersSectionOpen.value = !isUsersSectionOpen.value
 }
 
-// Fonctions pour l'upload d'images
 const triggerFileUpload = (index: number, type: string) => {
-  // Utiliser nextTick pour s'assurer que le DOM est mis à jour
   nextTick(() => {
     const inputId = `fileInput-${index}-${type}`
     const input = document.getElementById(inputId) as HTMLInputElement
@@ -1418,44 +1470,27 @@ const triggerFileUpload = (index: number, type: string) => {
   })
 }
 
+// Fonction générique pour gérer les états de drag & drop
+const updateDragState = (type: string, index: number, value: boolean) => {
+  const productType = PRODUCT_TYPES[type as keyof typeof PRODUCT_TYPES]
+  if (productType) {
+    setProductState(type as keyof typeof PRODUCT_TYPES, 'drag', index, value)
+  }
+}
+
 const handleDragEnter = (event: DragEvent, index: number, type: string) => {
   event.preventDefault()
-  if (type === 'fond') {
-    dragStates.value.fonds[index] = true
-  } else if (type === 'premiere') {
-    dragStates.value.premiereDouceur[index] = true
-  } else if (type === 'seconde') {
-    dragStates.value.secondeDouceur[index] = true
-  } else if (type === 'finition') {
-    dragStates.value.finitions[index] = true
-  }
+  updateDragState(type, index, true)
 }
 
 const handleDragLeave = (event: DragEvent, index: number, type: string) => {
   event.preventDefault()
-  if (type === 'fond') {
-    dragStates.value.fonds[index] = false
-  } else if (type === 'premiere') {
-    dragStates.value.premiereDouceur[index] = false
-  } else if (type === 'seconde') {
-    dragStates.value.secondeDouceur[index] = false
-  } else if (type === 'finition') {
-    dragStates.value.finitions[index] = false
-  }
+  updateDragState(type, index, false)
 }
 
 const handleFileDrop = (event: DragEvent, index: number, type: string) => {
   event.preventDefault()
-  // Réinitialiser l'état de drag
-  if (type === 'fond') {
-    dragStates.value.fonds[index] = false
-  } else if (type === 'premiere') {
-    dragStates.value.premiereDouceur[index] = false
-  } else if (type === 'seconde') {
-    dragStates.value.secondeDouceur[index] = false
-  } else if (type === 'finition') {
-    dragStates.value.finitions[index] = false
-  }
+  updateDragState(type, index, false)
   
   const files = event.dataTransfer?.files
   if (files) {
@@ -1472,49 +1507,42 @@ const handleFileSelect = (event: Event, index: number, type: string) => {
   }
 }
 
+// Fonction générique pour gérer l'upload des fichiers
 const handleFiles = async (files: FileList, index: number, type: string) => {
   const fileArray = Array.from(files)
+  const productType = PRODUCT_TYPES[type as keyof typeof PRODUCT_TYPES]
+  if (!productType) return
   
   try {
     isUploadingImages.value = true
     
     if (type === 'fond') {
-      // Pour les fonds, prendre seulement la première image
       if (fileArray.length > 0) {
         const file = fileArray[0]
-        // Upload vers Supabase Storage
         const imageUrl = await productConfigService.uploadImage(file, 'fonds', index)
         if (imageUrl) {
-          fonds.value[index].image = imageUrl
-          await saveFond(index)
+          const productArray = getProductArray('fond') as FondProduct[]
+          productArray[index].image = imageUrl
+          await saveProduct('fond', index)
         } else {
           alert('Erreur lors de l\'upload de l\'image')
         }
       }
     } else {
-      // Pour les autres types, prendre jusqu'à 3 images
       const maxImages = Math.min(fileArray.length, 3)
-      const array = type === 'premiere' ? premiereCoucheDouceur : 
-                    type === 'seconde' ? secondeCoucheDouceur : toucheFinale
+      const productArray = getProductArray(type as keyof typeof PRODUCT_TYPES) as MultiImageProduct[]
       
       for (let i = 0; i < maxImages; i++) {
         const file = fileArray[i]
-        // Upload vers Supabase Storage
-        const imageUrl = await productConfigService.uploadImage(file, type === 'premiere' ? 'premiere_couche_douceur' : type === 'seconde' ? 'seconde_couche_douceur' : 'touche_finale', index, i)
+        const imageUrl = await productConfigService.uploadImage(file, productType.configType, index, i)
         if (imageUrl) {
-          array.value[index].images[i] = imageUrl
+          productArray[index].images[i] = imageUrl
         } else {
           alert(`Erreur lors de l'upload de l'image ${i + 1}`)
         }
       }
       
-      if (type === 'premiere') {
-        await saveDouceur(index, 'premiere')
-      } else if (type === 'seconde') {
-        await saveDouceur(index, 'seconde')
-      } else {
-        await saveFinition(index)
-      }
+      await saveProduct(type as keyof typeof PRODUCT_TYPES, index)
     }
   } catch (error) {
     console.error('Erreur lors du traitement des fichiers:', error)
@@ -1524,48 +1552,39 @@ const handleFiles = async (files: FileList, index: number, type: string) => {
   }
 }
 
-const resetFond = async (index: number) => {
+// Fonction générique de reset pour tous les types de produits
+const resetProduct = async (type: keyof typeof PRODUCT_TYPES, index: number) => {
   if (confirm('Remettre à zéro ce produit ?')) {
-    const currentImage = fonds.value[index].image
-    if (currentImage) {
-      // Supprimer de Supabase Storage
-      await productConfigService.deleteImage(currentImage)
-    }
-    fonds.value[index] = { nom: '', image: null as string | null }
-    await saveFond(index)
-  }
-}
-
-const resetDouceur = async (index: number, type: 'premiere' | 'seconde') => {
-  if (confirm('Remettre à zéro ce produit ?')) {
-    const array = type === 'premiere' ? premiereCoucheDouceur : secondeCoucheDouceur
-    const currentImages = array.value[index].images
-    // Supprimer toutes les images de Supabase Storage
-    for (const image of currentImages) {
-      if (image) {
-        await productConfigService.deleteImage(image)
+    const productType = PRODUCT_TYPES[type]
+    const productArray = getProductArray(type)
+    
+    if (type === 'fond') {
+      const currentImage = (productArray[index] as FondProduct).image
+      if (currentImage) {
+        await productConfigService.deleteImage(currentImage)
       }
-    }
-    array.value[index] = { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-    await saveDouceur(index, type)
-  }
-}
-
-const resetFinition = async (index: number) => {
-  if (confirm('Remettre à zéro ce produit ?')) {
-    const currentImages = toucheFinale.value[index].images
-    // Supprimer toutes les images de Supabase Storage
-    for (const image of currentImages) {
-      if (image) {
-        await productConfigService.deleteImage(image)
+      productArray[index] = { nom: '', image: null as string | null }
+    } else {
+      const currentImages = (productArray[index] as MultiImageProduct).images
+      for (const image of currentImages) {
+        if (image) {
+          await productConfigService.deleteImage(image)
+        }
       }
+      productArray[index] = { nom: '', images: [null, null, null] }
     }
-    toucheFinale.value[index] = { nom: '', images: [null as string | null, null as string | null, null as string | null] }
-    await saveFinition(index)
+    
+    await saveProduct(type, index)
   }
 }
 
-// Fonction pour initialiser la configuration Supabase
+// Fonctions de compatibilité pour maintenir les appels existants
+const resetFond = async (index: number) => resetProduct('fond', index)
+
+const resetDouceur = async (index: number, type: 'premiere' | 'seconde') => resetProduct(type, index)
+
+const resetFinition = async (index: number) => resetProduct('finition', index)
+
 const initializeSupabaseConfig = async () => {
   try {
     isLoadingProducts.value = true
@@ -1573,7 +1592,6 @@ const initializeSupabaseConfig = async () => {
     
     if (success) {
       alert('Configuration Supabase initialisée avec succès !')
-      // Recharger les données
       await loadProductConfig()
     } else {
       alert('Erreur lors de l\'initialisation de la configuration Supabase')
@@ -1586,28 +1604,11 @@ const initializeSupabaseConfig = async () => {
   }
 }
 
-// Fonction pour tester le verrouillage
-const testLocking = async () => {
-  try {
-    isLoadingProducts.value = true
-    const success = await productConfigService.testLocking()
-    if (success) {
-      alert('Le système de verrouillage fonctionne correctement !')
-    } else {
-      alert('Erreur lors du test du verrouillage.')
-    }
-  } catch (error) {
-    console.error('Erreur lors du test du verrouillage:', error)
-    alert('Erreur lors du test du verrouillage.')
-  } finally {
-    isLoadingProducts.value = false
-  }
-}
+
 
 </script>
 
 <style scoped>
-/* Variables CSS pour les espacements */
 :root {
   --spacing-xs: 0.5rem;
   --spacing-sm: 0.75rem;
@@ -1617,14 +1618,12 @@ const testLocking = async () => {
   --spacing-xxl: 3rem;
 }
 
-/* Styles du dashboard admin */
 .admin-dashboard {
   min-height: 100vh;
   background: #f5f5f5;
   font-family: var(--font-family, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
 }
 
-/* Header du Dashboard */
 .dashboard-header {
   background: var(--white);
   padding: var(--spacing-xl) var(--spacing-xxl);
@@ -1655,7 +1654,6 @@ const testLocking = async () => {
   opacity: 0.8;
 }
 
-/* Barre d'actions */
 .action-bar {
   display: flex;
   gap: var(--spacing-md);
@@ -1878,7 +1876,6 @@ const testLocking = async () => {
   opacity: 0.8;
 }
 
-/* Tableau des utilisateurs */
 .table-container {
   overflow-x: auto;
 }
@@ -2131,7 +2128,6 @@ const testLocking = async () => {
     justify-content: space-between;
   }
   
-  /* Transformation du tableau en cartes sur mobile */
   .users-table {
     display: block;
   }
@@ -2210,7 +2206,6 @@ const testLocking = async () => {
   }
 }
 
-/* Styles pour la gestion des produits */
 .products-table {
   width: 100%;
   border-collapse: collapse;
@@ -2314,7 +2309,6 @@ const testLocking = async () => {
   transform: translateY(-1px);
 }
 
-/* Modal de produit */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -2651,7 +2645,6 @@ const testLocking = async () => {
   }
 }
 
-/* Assurer que le contenu principal a un padding-bottom suffisant */
 .dashboard-content {
   padding-bottom: var(--spacing-xxl);
   min-height: calc(100vh - 100px);
@@ -2659,7 +2652,6 @@ const testLocking = async () => {
   z-index: 1;
 }
 
-/* Styles for product configurations */
 .product-step-section {
   margin-bottom: var(--spacing-xxl);
   padding: var(--spacing-lg);
@@ -2727,7 +2719,6 @@ const testLocking = async () => {
   text-align: right;
 }
 
-/* Barre d'actions des produits */
 .products-action-bar {
   display: flex;
   justify-content: space-between;
@@ -3312,7 +3303,6 @@ const testLocking = async () => {
   color: #adb5bd;
 }
 
-/* Amélioration de l'affichage des 3 images pour les étapes 2-4 */
 .selected-images-preview {
   margin-top: var(--spacing-lg);
   padding: var(--spacing-md);
@@ -3385,7 +3375,6 @@ const testLocking = async () => {
   z-index: 9999;
 }
 
-/* Style pour le bouton reset */
 .reset-btn {
   background: #6c757d !important;
   color: white !important;
@@ -3402,7 +3391,6 @@ const testLocking = async () => {
   opacity: 0.6;
 }
 
-/* Styles pour le système de verrouillage */
 .edit-btn {
   background: #383961 !important;
   color: white !important;
