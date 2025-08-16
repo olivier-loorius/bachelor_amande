@@ -36,10 +36,10 @@
                 "
               >
                 <img
-                  :src="fond.image || '/placeholder-fond.svg'"
+                  :src="fond.image"
                   :alt="fond.nom"
                     style="width:100%;height:100%;object-fit:cover;border-radius:5px !important;box-sizing:border-box;display:block;margin:0;background:none;border:none;padding:0;"
-                  @error="(event) => handleImageError(event, '/placeholder-fond.svg')"
+                  @error="handleImageError"
                 />
                 <div
                   v-if="selectedFond?.id === fond.id"
@@ -87,10 +87,10 @@
                     "
                   >
                     <img
-                      :src="fonds[fondIndex].image || '/placeholder-fond.svg'"
+                      :src="fonds[fondIndex].image"
                       :alt="fonds[fondIndex].nom"
                       style="width:100%;height:100%;object-fit:cover;border-radius:5px !important;box-sizing:border-box;display:block;margin:0;background:none;border:none;padding:0;"
-                      @error="(event) => handleImageError(event, '/placeholder-fond.svg')"
+                      @error="handleImageError"
                     />
                     <div
                       v-if="selectedFond?.id === fonds[fondIndex].id"
@@ -141,7 +141,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="garniture-img-mobile" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="garniture-img-mobile" @error="handleImageError" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -167,7 +167,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-              <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
+              <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="handleImageError" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -223,7 +223,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" class="garniture-img-mobile" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" class="garniture-img-mobile" @error="handleImageError" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -249,7 +249,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture2)" :alt="selectedGarniture2?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="handleImageError" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -305,7 +305,7 @@
                 </div>
               </div>
               <div class="garniture-img-mobile-wrapper">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" class="garniture-img-mobile" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" class="garniture-img-mobile" @error="handleImageError" />
                 <div v-else class="garniture-img-placeholder garniture-img-mobile">Aucun fond sélectionné</div>
               </div>
             </div>
@@ -331,7 +331,7 @@
               </div>
             </div>
             <div style="height: 312px; flex: 1; display: flex; align-items: stretch;">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture3)" :alt="selectedGarniture3?.nom || selectedFond.nom" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block;" @error="handleImageError" />
               <div v-else style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #b0b0b0; font-size: 1rem; border: 1px dashed #e0e0e0; border-radius: 8px; background: #fafafa;">Aucun fond sélectionné</div>
             </div>
           </div>
@@ -409,7 +409,7 @@
             </div>
             </div>
               <div class="composer-step5-img">
-                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="composer-step5-img-el" @error="(event) => handleImageError(event, '/placeholder-garniture.svg')" />
+                <img v-if="selectedFond" :src="getGarnitureImage(selectedFond, selectedGarniture1)" :alt="selectedGarniture1?.nom || selectedFond.nom" class="composer-step5-img-el" @error="handleImageError" />
                 <div v-else class="garniture-img-placeholder composer-step5-img-el">Aucun fond sélectionné</div>
           </div>
             </div>
@@ -609,11 +609,50 @@ const peutValider = computed(() => {
     return !!selectedFond.value && !!selectedGarniture1.value && !!selectedGarniture2.value && !!selectedGarniture3.value && !!selectedFinition.value && quantite.value > 0
 })
 
-// Fonction helper pour gérer les erreurs d'images
-const handleImageError = (event: Event, placeholder: string = '/placeholder-fond.svg') => {
+// Fonction helper simple pour gérer les erreurs d'images
+// Utilise un placeholder CSS simple au lieu de fichiers SVG
+const handleImageError = (event: Event) => {
   const target = event.target as HTMLImageElement
   if (target) {
-    target.src = placeholder
+    // Créer un placeholder CSS simple
+    target.style.background = '#f8f9fa'
+    target.style.border = '1px solid #e0e0e0'
+    target.style.borderRadius = '8px'
+    target.style.display = 'flex'
+    target.style.alignItems = 'center'
+    target.style.justifyContent = 'center'
+    target.style.color = '#999'
+    target.style.fontSize = '14px'
+    target.style.fontFamily = 'Arial, sans-serif'
+    target.style.textAlign = 'center'
+    target.style.padding = '20px'
+    target.style.boxSizing = 'border-box'
+    
+    // Masquer l'image et afficher un texte
+    target.style.backgroundImage = 'none'
+    target.style.backgroundSize = 'cover'
+    target.style.backgroundPosition = 'center'
+    target.style.backgroundRepeat = 'no-repeat'
+    
+    // Ajouter un pseudo-élément pour le texte
+    const placeholderText = document.createElement('div')
+    placeholderText.textContent = 'Image non disponible'
+    placeholderText.style.position = 'absolute'
+    placeholderText.style.top = '50%'
+    placeholderText.style.left = '50%'
+    placeholderText.style.transform = 'translate(-50%, -50%)'
+    placeholderText.style.color = '#999'
+    placeholderText.style.fontSize = '12px'
+    placeholderText.style.fontFamily = 'Arial, sans-serif'
+    placeholderText.style.textAlign = 'center'
+    placeholderText.style.pointerEvents = 'none'
+    
+    // Ajouter le texte au conteneur parent
+    const parent = target.parentElement
+    if (parent) {
+      parent.style.position = 'relative'
+      parent.appendChild(placeholderText)
+    }
   }
 }
 
@@ -835,12 +874,10 @@ function deselectGarniture1() {
 }
 
   function getGarnitureImage(fond: { id: number, nom: string, image?: string } | null, garniture: { id: number, nom: string } | null) {
-  if (!fond) return '/placeholder-fond.svg';
-  if (!garniture) return fond.image || '/placeholder-fond.svg';
-  // Logique simplifiée - retourner l'image du fond ou un placeholder
-  // Logique simplifiée - retourner l'image du fond ou un placeholder
-  // Logique simplifiée - retourner l'image du fond ou un placeholder
-  return fond.image || '/placeholder-fond.svg';
+  if (!fond) return '';
+  if (!garniture) return fond.image || '';
+  // Logique simplifiée - retourner l'image du fond ou une chaîne vide
+  return fond.image || '';
 }
 
 function handleClickOutsideFond(event: MouseEvent) {

@@ -3,7 +3,7 @@
         <div class="section-header accordion-header" @click="toggleUsersSection">
             <div class="header-left">
                 <h2 class="section-title">
-                    <span class="title-icon">👤</span>
+                    <span class="title-icon"><i class="fas fa-users"></i></span>
                     <span class="title-text">Gestion des Utilisateurs</span>
                 </h2>
                     <div class="section-stats">
@@ -22,9 +22,7 @@
         <div class="accordion-content" :class="{ 'open': isUsersSectionOpen }">
             <div class="search-container">
                 <div class="search-input-wrapper">
-                    <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                    </svg>
+                    <i class="fas fa-search search-icon"></i>
                     <input
                         :value="searchQuery"
                         type="text"
@@ -38,9 +36,7 @@
                         class="clear-search-btn"
                         title="Effacer la recherche"
                     >
-                    <svg class="clear-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
+                    <i class="fas fa-times clear-icon"></i>
                     </button>
                 </div>
                 <div v-if="searchQuery" class="search-results">
@@ -61,7 +57,7 @@
                     <tbody>
                         <tr v-if="filteredUsers.length === 0 && !isLoading" class="empty-state">
                             <td colspan="5">
-                                <div class="empty-message">🔍<p>{{ searchQuery ? 'Aucun utilisateur trouvé pour "' + searchQuery + '"' : 'Aucun utilisateur trouvé' }}</p>
+                                <div class="empty-message"><i class="fas fa-search"></i><p>{{ searchQuery ? 'Aucun utilisateur trouvé pour "' + searchQuery + '"' : 'Aucun utilisateur trouvé' }}</p>
                                 </div>
                             </td>
                         </tr>
@@ -78,7 +74,7 @@
                             </span>
                             <span v-if="user.deleted" class="deleted-badge">Compte désactivé</span>
                  <span v-else-if="user.updated_at && user.updated_at !== user.created_at" class="modified-badge">
-                   ✏️ Modifié
+                   <i class="fas fa-edit"></i> Modifié
                  </span>
                </td>
               
@@ -94,11 +90,9 @@
                    class="role-icon admin-icon"
                    title="Administrateur"
                  >
-                   👑
+                   <i class="fas fa-crown"></i>
                  </span>
-                 <span v-else class="role-icon user-icon" title="Utilisateur">
-                   👤
-                 </span>
+                 <span v-else class="role-icon user-icon" title="Utilisateur"><i class="fas fa-user"></i></span>
                </td>
               
               <td class="user-date" data-label="Créé le">
@@ -115,14 +109,14 @@
                      class="action-btn delete-btn"
                      title="Désactiver cet utilisateur"
                    >
-                     <span class="btn-icon">🗑️</span>
+                     <span class="btn-icon"><i class="fas fa-trash"></i></span>
                      <span class="btn-text">Désactiver</span>
                    </button>
                                     <span v-else-if="user.deleted" class="deleted-status">
                    Désactivé
                  </span>
                    <span v-else-if="user.role === 'admin'" class="admin-protected">
-                     <span class="status-icon">🛡️</span>
+                     <span class="status-icon"><i class="fas fa-shield-alt"></i></span>
                      Protégé
                    </span>
                  </div>
@@ -148,8 +142,8 @@
                  {{ user.name }}
                </h3>
                <span class="user-role">
-                 <span v-if="user.role === 'admin'" class="role-icon admin-icon" title="Administrateur">👑</span>
-                 <span v-else class="role-icon user-icon" title="Utilisateur">👤</span>
+                 <span v-if="user.role === 'admin'" class="role-icon admin-icon" title="Administrateur"><i class="fas fa-crown"></i></span>
+                 <span v-else class="role-icon user-icon" title="Utilisateur"><i class="fas fa-user"></i></span>
                  {{ user.role === 'admin' ? 'Administrateur' : 'Utilisateur' }}
                </span>
              </div>
@@ -167,7 +161,7 @@
              
              <div class="user-status">
                <span v-if="user.deleted" class="deleted-badge">Compte désactivé</span>
-               <span v-else-if="user.updated_at && user.updated_at !== user.created_at" class="modified-badge">✏️ Modifié</span>
+               <span v-else-if="user.updated_at && user.updated_at !== user.created_at" class="modified-badge"><i class="fas fa-edit"></i> Modifié</span>
              </div>
            </div>
            
@@ -178,12 +172,12 @@
                class="action-btn delete-btn"
                title="Désactiver cet utilisateur"
              >
-               <span class="btn-icon">🗑️</span>
+               <span class="btn-icon"><i class="fas fa-trash"></i></span>
                <span class="btn-text">Désactiver</span>
              </button>
              <span v-else-if="user.deleted" class="deleted-status">Désactivé</span>
              <span v-else-if="user.role === 'admin'" class="admin-protected">
-               <span class="status-icon">🛡️</span>
+               <span class="status-icon"><i class="fas fa-shield-alt"></i></span>
                Protégé
              </span>
            </div>
@@ -192,7 +186,7 @@
          <!-- État vide pour les vignettes -->
          <div v-if="filteredUsers.length === 0 && !isLoading" class="empty-cards">
            <div class="empty-message">
-             🔍
+             <i class="fas fa-search"></i>
              <p>{{ searchQuery ? 'Aucun utilisateur trouvé pour "' + searchQuery + '"' : 'Aucun utilisateur trouvé' }}</p>
            </div>
          </div>
@@ -279,29 +273,34 @@ $admin-danger: #dc3545;
     background: rgba($admin-primary, 0.05);
   }
   
-     h2 {
-     margin: 0 0 1rem 0;
+   h2 {
+    margin: 0 0 1rem 0;
+    color: $admin-primary;
+    font-family: var(--font-family-title);
+    font-weight: 600;
+    font-size: 2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  
+  .title-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    
+   i {
      color: $admin-primary;
-     font-family: 'Open Sans', sans-serif;
-     font-weight: 600;
-     font-size: 2rem;
-     display: flex;
-     align-items: baseline;
-     gap: 0.75rem;
-   }
-   
-   .title-icon {
      font-size: 2.2rem;
-     line-height: 1;
-     display: flex;
-     align-items: center;
    }
-   
-   .title-text {
-     font-weight: 700;
-     color: $admin-primary;
-     line-height: 1.2;
-   }
+ }
+  
+  .title-text {
+    font-weight: 700;
+    color: $admin-primary;
+    line-height: 1.2;
+  }
 }
 
 /* Icône accordéon */
@@ -330,12 +329,12 @@ $admin-danger: #dc3545;
 
 /* Contenu accordéon - ouverture/fermeture */
 .accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: max-height 0.3s ease !important;
   
   &.open {
-    max-height: 2000px; /* Hauteur suffisante pour le contenu */
+    max-height: 2000px !important; /* Hauteur suffisante pour le contenu */
   }
 }
 
@@ -354,8 +353,9 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Tableau des utilisateurs - utilise vos styles existants */
-.users-table-container {
+/* Tableau des utilisateurs */
+.table-container {
+  padding: 1.5rem;
   overflow-x: auto;
 }
 
@@ -367,27 +367,29 @@ $admin-danger: #dc3545;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   
-     th, td {
-     padding: 1rem;
-     text-align: left;
-     border-bottom: 1px solid #e9ecef;
-   }
-   
-   th:nth-child(1), td:nth-child(1) { width: 25%; } /* Nom */
-   th:nth-child(2), td:nth-child(2) { width: 30%; } /* Email */
-   th:nth-child(3), td:nth-child(3) { width: 10%; } /* Rôle */
-   th:nth-child(4), td:nth-child(4) { width: 20%; } /* Créé le */
-   th:nth-child(5), td:nth-child(5) { width: 15%; } /* Actions */
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  th:nth-child(1), td:nth-child(1) { width: 25%; } /* Nom */
+  th:nth-child(2), td:nth-child(2) { width: 30%; } /* Email */
+  th:nth-child(3), td:nth-child(3) { width: 10%; } /* Rôle */
+  th:nth-child(4), td:nth-child(4) { width: 20%; } /* Créé le */
+  th:nth-child(5), td:nth-child(5) { width: 15%; } /* Actions */
   
   th {
     background: $admin-primary;
     color: white;
+    font-family: var(--font-family-title);
     font-weight: 600;
     font-size: 0.9rem;
   }
   
   td {
     color: $admin-text-dark;
+    font-family: var(--font-family-text);
     font-size: 0.9rem;
   }
   
@@ -395,10 +397,10 @@ $admin-danger: #dc3545;
     background: #f8f9fa;
   }
   
-     tr.deleted {
-     opacity: 0.6;
-     background: #f8f9fa;
-   }
+  tr.deleted {
+    opacity: 0.6;
+    background: #f8f9fa;
+  }
 }
 
 /* Texte barré pour utilisateurs supprimés */
@@ -472,6 +474,7 @@ $admin-danger: #dc3545;
 }
 
 .action-btn {
+  font-family: var(--font-family-text);
   background: $admin-danger;
   color: white;
   border: none;
@@ -496,6 +499,13 @@ $admin-danger: #dc3545;
   
   .btn-icon {
     font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    i {
+      font-size: 1rem;
+    }
   }
   
   .btn-text {
@@ -504,6 +514,7 @@ $admin-danger: #dc3545;
 }
 
 .deleted-status, .admin-protected {
+  font-family: var(--font-family-text);
   padding: 0.5rem;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -528,6 +539,7 @@ $admin-danger: #dc3545;
   align-items: center;
   
   .stat-item {
+    font-family: var(--font-family-text);
     font-size: 0.9rem;
     color: $admin-text-light;
     
@@ -574,6 +586,28 @@ $admin-danger: #dc3545;
   height: 18px;
   opacity: 0.8;
   flex-shrink: 0;
+  
+  i {
+    font-size: 18px;
+  }
+}
+
+/* Icône de suppression */
+.clear-icon {
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #495057;
+  }
+  
+  i {
+    font-size: 16px;
+  }
 }
 
 /* Résultats de recherche */
@@ -585,7 +619,7 @@ $admin-danger: #dc3545;
   border-left: 3px solid $admin-primary;
   
   .results-text {
-    font-family: 'Open Sans', sans-serif;
+    font-family: var(--font-family-text);
     font-size: 0.9rem;
     font-weight: 500;
     color: $admin-primary;
@@ -867,5 +901,32 @@ $admin-danger: #dc3545;
   .search-input-wrapper {
     padding: 0.5rem 0.7rem;
   }
+}
+
+/* Icônes de rôle */
+.role-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  
+  &.admin-icon {
+    background: $admin-secondary;
+    color: $admin-primary;
+  }
+  
+  &.user-icon {
+    background: rgba($admin-primary, 0.1);
+    color: $admin-primary;
+  }
+}
+
+/* ICÔNES FONTAWESOME - SEULEMENT ÇA ! */
+.fas {
+  display: inline-block !important;
+  font-family: "Font Awesome 5 Free" !important;
+  font-weight: 900 !important;
 }
 </style>

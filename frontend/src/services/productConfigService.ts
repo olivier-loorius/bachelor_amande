@@ -114,6 +114,10 @@ export const productConfigService = {
   // Créer ou mettre à jour une configuration de produit
   async upsertProductConfig(config: ProductConfig): Promise<ProductConfig | null> {
     try {
+      console.log('🚀 upsertProductConfig appelé avec:', config)
+      console.log('📊 Type de config.images:', typeof config.images, Array.isArray(config.images))
+      console.log('📊 Contenu de config.images:', config.images)
+      
       const { data, error } = await supabase
         .from('product_config')
         .upsert(config, {
@@ -123,13 +127,15 @@ export const productConfigService = {
         .single()
 
       if (error) {
-        console.error('Erreur lors de la sauvegarde de la configuration:', error)
+        console.error('❌ Erreur lors de la sauvegarde de la configuration:', error)
+        console.error('❌ Détails de l\'erreur:', error.details, error.hint)
         return null
       }
 
+      console.log('✅ Configuration sauvegardée avec succès:', data)
       return data
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde de la configuration:', error)
+      console.error('❌ Exception lors de la sauvegarde de la configuration:', error)
       return null
     }
   },
