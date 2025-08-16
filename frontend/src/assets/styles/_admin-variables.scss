@@ -29,6 +29,14 @@ $admin-border-light: #dee2e6;  // Bordure claire
 $admin-border-medium: #ced4da; // Bordure moyenne
 $admin-border-dark: #adb5bd;   // Bordure sombre
 
+// Couleurs pour les composants
+$color-primary: $admin-primary;
+$color-success: $admin-success;
+$color-warning: $admin-warning;
+$color-danger: $admin-danger;
+$color-text-secondary: $admin-text-light;
+$color-border: $admin-border-light;
+
 // Ombres
 $admin-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
 $admin-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);

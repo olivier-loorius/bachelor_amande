@@ -1,243 +1,252 @@
 import { supabase } from './supabaseService'
 
-// Interface pour la configuration des produits
-export interface ProductConfig {
-  id?: string
-  config_type: 'fonds' | 'premiere_couche_douceur' | 'seconde_couche_douceur' | 'touche_finale'
-  product_index: number
+// Types pour la nouvelle structure robuste
+export interface Product {
+  id: string
   nom: string
+  locked: boolean
+  step: 'fonds' | 'premiereCoucheDouceur' | 'secondeCoucheDouceur' | 'toucheFinale'
   images: string[]
-  locked?: boolean
-  created_by?: string
   created_at?: string
-  updated_at?: string
 }
 
-// Service pour la configuration des produits
+export interface ProductWithImages {
+  id: string
+  nom: string
+  locked: boolean
+  step: string
+  created_at: string
+  images: string[]
+}
+
+// Service refactorisé pour la nouvelle structure
 export const productConfigService = {
-  // Upload d'une image vers Supabase Storage
-  async uploadImage(file: File, configType: string, productIndex: number, imageIndex?: number): Promise<string | null> {
-    try {
-      // Créer un nom de fichier unique
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${configType}_${productIndex}_${imageIndex || 0}_${Date.now()}.${fileExt}`
-      
-      // Upload vers le bucket 'product-images'
-      const { data, error } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-
-      if (error) {
-        console.error('Erreur lors de l\'upload de l\'image:', error)
-        return null
-      }
-
-      // Récupérer l'URL publique de l'image
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName)
-
-      return publicUrl
-    } catch (error) {
-      console.error('Erreur lors de l\'upload de l\'image:', error)
-      return null
-    }
-  },
-
-  // Supprimer une image de Supabase Storage
-  async deleteImage(imageUrl: string): Promise<boolean> {
-    try {
-      // Extraire le nom du fichier de l'URL
-      const fileName = imageUrl.split('/').pop()?.split('?')[0]
-      if (!fileName) return false
-
-      const { error } = await supabase.storage
-        .from('product-images')
-        .remove([fileName])
-
-      if (error) {
-        console.error('Erreur lors de la suppression de l\'image:', error)
-        return false
-      }
-
-      return true
-    } catch (error) {
-      console.error('Erreur lors de la suppression de l\'image:', error)
-      return false
-    }
-  },
-
-  // Récupérer toute la configuration des produits
-  async getAllProductConfig(): Promise<ProductConfig[]> {
+  // Récupérer tous les produits avec leurs images
+  async getAllProducts(): Promise<Product[]> {
     try {
       const { data, error } = await supabase
-        .from('product_config')
+        .from('products_with_images')
         .select('*')
-        .order('config_type, product_index')
+        .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Erreur lors de la récupération de la configuration:', error)
-        return []
-      }
+      if (error) throw error
 
-      return data || []
+      // Transformer les données pour correspondre à l'interface Product
+      return (data || []).map(item => ({
+        id: item.id,
+        nom: item.nom,
+        locked: item.locked,
+        step: item.step as Product['step'],
+        images: item.images || []
+      }))
     } catch (error) {
-      console.error('Erreur lors de la récupération de la configuration:', error)
+      console.error('❌ Erreur récupération produits:', error)
       return []
     }
   },
 
-  // Récupérer la configuration par type
-  async getProductConfigByType(configType: ProductConfig['config_type']): Promise<ProductConfig[]> {
+  // Récupérer les produits par étape
+  async getProductsByStep(step: Product['step']): Promise<Product[]> {
     try {
       const { data, error } = await supabase
-        .from('product_config')
+        .from('products_with_images')
         .select('*')
-        .eq('config_type', configType)
-        .order('product_index')
+        .eq('step', step)
+        .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error(`Erreur lors de la récupération de la configuration ${configType}:`, error)
-        return []
-      }
+      if (error) throw error
 
-      return data || []
+      return (data || []).map(item => ({
+        id: item.id,
+        nom: item.nom,
+        locked: item.locked,
+        step: item.step as Product['step'],
+        images: item.images || []
+      }))
     } catch (error) {
-      console.error(`Erreur lors de la récupération de la configuration ${configType}:`, error)
+      console.error(`❌ Erreur récupération produits ${step}:`, error)
       return []
     }
   },
 
-  // Créer ou mettre à jour une configuration de produit
-  async upsertProductConfig(config: ProductConfig): Promise<ProductConfig | null> {
+  // Créer ou mettre à jour un produit avec ses images
+  async upsertProduct(product: Omit<Product, 'id' | 'created_at'>): Promise<string | null> {
     try {
-      console.log('🚀 upsertProductConfig appelé avec:', config)
-      console.log('📊 Type de config.images:', typeof config.images, Array.isArray(config.images))
-      console.log('📊 Contenu de config.images:', config.images)
-      
+      const { nom, locked, step, images } = product
+
+      // Utiliser la fonction SQL helper pour insérer/mettre à jour
       const { data, error } = await supabase
-        .from('product_config')
-        .upsert(config, {
-          onConflict: 'config_type,product_index'
+        .rpc('insert_product_with_images', {
+          p_nom: nom,
+          p_step: step,
+          p_images: images,
+          p_locked: locked
         })
-        .select()
-        .single()
 
-      if (error) {
-        console.error('❌ Erreur lors de la sauvegarde de la configuration:', error)
-        console.error('❌ Détails de l\'erreur:', error.details, error.hint)
-        return null
-      }
+      if (error) throw error
 
-      console.log('✅ Configuration sauvegardée avec succès:', data)
+      console.log('✅ Produit sauvegardé avec succès')
       return data
     } catch (error) {
-      console.error('❌ Exception lors de la sauvegarde de la configuration:', error)
+      console.error('❌ Erreur sauvegarde produit:', error)
       return null
     }
   },
 
-  // Supprimer une configuration de produit
-  async deleteProductConfig(configType: string, productIndex: number): Promise<boolean> {
+  // Mettre à jour un produit existant
+  async updateProduct(productId: string, updates: Partial<Product>): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('product_config')
-        .delete()
-        .eq('config_type', configType)
-        .eq('product_index', productIndex)
+      const { nom, locked, step, images } = updates
 
-      if (error) {
-        console.error('Erreur lors de la suppression de la configuration:', error)
-        return false
+      if (nom !== undefined || locked !== undefined || step !== undefined) {
+        // Mettre à jour les propriétés du produit
+        const { error: productError } = await supabase
+          .from('products')
+          .update({ 
+            nom: nom || undefined, 
+            locked: locked !== undefined ? locked : undefined,
+            step: step || undefined 
+          })
+          .eq('id', productId)
+
+        if (productError) throw productError
       }
 
+      // Mettre à jour les images si fournies
+      if (images !== undefined) {
+        // Supprimer les anciennes images
+        const { error: deleteError } = await supabase
+          .from('product_images')
+          .delete()
+          .eq('product_id', productId)
+
+        if (deleteError) throw deleteError
+
+        // Insérer les nouvelles images
+        if (images.length > 0) {
+          const imageRecords = images
+            .filter(url => url && url !== '')
+            .map((url, index) => ({
+              product_id: productId,
+              url,
+              image_index: index
+            }))
+
+          if (imageRecords.length > 0) {
+            const { error: insertError } = await supabase
+              .from('product_images')
+              .insert(imageRecords)
+
+            if (insertError) throw insertError
+          }
+        }
+      }
+
+      console.log('✅ Produit mis à jour avec succès')
       return true
     } catch (error) {
-      console.error('Erreur lors de la suppression de la configuration:', error)
+      console.error('❌ Erreur mise à jour produit:', error)
       return false
     }
   },
 
-  // Mettre à jour l'état de verrouillage d'un produit
-  async updateProductLock(configType: string, productIndex: number, locked: boolean): Promise<boolean> {
+  // Supprimer un produit et ses images
+  async deleteProduct(productId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('product_config')
-        .update({ locked })
-        .eq('config_type', configType)
-        .eq('product_index', productIndex)
-
-      if (error) {
-        console.error('Erreur lors de la mise à jour du verrouillage:', error)
-        return false
-      }
-
-      return true
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour du verrouillage:', error)
-      return false
-    }
-  },
-
-  // Initialiser la configuration par défaut (vide)
-  async initializeDefaultConfig(): Promise<boolean> {
-    try {
-      console.log('🔄 Initialisation de la configuration par défaut...')
+      console.log('🗑️ Suppression du produit:', productId)
       
-      const defaultConfigs: Omit<ProductConfig, 'id' | 'created_at' | 'updated_at'>[] = [
-        { config_type: 'fonds', product_index: 0, nom: '', images: [], locked: true },
-        { config_type: 'fonds', product_index: 1, nom: '', images: [], locked: true },
-        { config_type: 'fonds', product_index: 2, nom: '', images: [], locked: true },
+      // Récupérer d'abord le produit pour avoir ses images
+      const product = await this.getProductById(productId)
+      
+      if (product && product.images.length > 0) {
+        console.log('🗑️ Suppression des images du storage:', product.images)
         
-        { config_type: 'premiere_couche_douceur', product_index: 0, nom: '', images: [], locked: true },
-        { config_type: 'premiere_couche_douceur', product_index: 1, nom: '', images: [], locked: true },
-        { config_type: 'premiere_couche_douceur', product_index: 2, nom: '', images: [], locked: true },
-        { config_type: 'premiere_couche_douceur', product_index: 3, nom: '', images: [], locked: true },
-        
-        { config_type: 'seconde_couche_douceur', product_index: 0, nom: '', images: [], locked: true },
-        { config_type: 'seconde_couche_douceur', product_index: 1, nom: '', images: [], locked: true },
-        { config_type: 'seconde_couche_douceur', product_index: 2, nom: '', images: [], locked: true },
-        { config_type: 'seconde_couche_douceur', product_index: 3, nom: '', images: [], locked: true },
-        
-        { config_type: 'touche_finale', product_index: 0, nom: '', images: [], locked: true },
-        { config_type: 'touche_finale', product_index: 1, nom: '', images: [], locked: true },
-        { config_type: 'touche_finale', product_index: 2, nom: '', images: [], locked: true },
-        { config_type: 'touche_finale', product_index: 3, nom: '', images: [], locked: true }
-      ]
-
-      const { error } = await supabase
-        .from('product_config')
-        .insert(defaultConfigs)
-
-      if (error) {
-        console.error('Erreur lors de l\'initialisation de la configuration:', error)
-        return false
+        // Supprimer les images du storage
+        for (const imageUrl of product.images) {
+          try {
+            // Extraire le chemin du fichier de l'URL
+            const urlParts = imageUrl.split('/')
+            const fileName = urlParts[urlParts.length - 1]
+            const filePath = `products/${fileName}`
+            
+            console.log('🗑️ Suppression du fichier:', filePath)
+            
+            const { error: storageError } = await supabase.storage
+              .from('product-images')
+              .remove([filePath])
+            
+            if (storageError) {
+              console.warn('⚠️ Erreur suppression fichier storage:', storageError)
+            } else {
+              console.log('✅ Fichier supprimé du storage:', filePath)
+            }
+          } catch (storageError) {
+            console.warn('⚠️ Erreur lors de la suppression du fichier:', storageError)
+          }
+        }
       }
+      
+      // La suppression en cascade supprimera automatiquement les images de la table product_images
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId)
 
+      if (error) throw error
+
+      console.log('✅ Produit supprimé avec succès de Supabase')
       return true
     } catch (error) {
-      console.error('Erreur lors de l\'initialisation de la configuration:', error)
+      console.error('❌ Erreur suppression produit:', error)
       return false
     }
   },
 
-  // Fonction de test pour le système de verrouillage
-  async testLocking(): Promise<boolean> {
+  // Upload d'image (fonction existante conservée)
+  async uploadImage(file: File, productType: string, productIndex: number, imageIndex: number): Promise<string | null> {
     try {
-      // Tester la mise à jour du verrouillage d'un produit
-      const success = await this.updateProductLock('fonds', 0, true)
-      if (success) {
-        // Remettre à l'état initial
-        await this.updateProductLock('fonds', 0, false)
-        return true
-      }
-      return false
+      const fileName = `${productType}_${productIndex}_${imageIndex}_${Date.now()}.jpg`
+      const filePath = `products/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+
+      console.log('✅ Image uploadée:', publicUrl)
+      return publicUrl
     } catch (error) {
-      console.error('Erreur lors du test du verrouillage:', error)
-      return false
+      console.error('❌ Erreur upload image:', error)
+      return null
+    }
+  },
+
+  // Récupérer un produit par ID
+  async getProductById(productId: string): Promise<Product | null> {
+    try {
+      const { data, error } = await supabase
+        .from('products_with_images')
+        .select('*')
+        .eq('id', productId)
+        .single()
+
+      if (error) throw error
+
+      return {
+        id: data.id,
+        nom: data.nom,
+        locked: data.locked,
+        step: data.step as Product['step'],
+        images: data.images || []
+      }
+    } catch (error) {
+      console.error('❌ Erreur récupération produit:', error)
+      return null
     }
   }
 }

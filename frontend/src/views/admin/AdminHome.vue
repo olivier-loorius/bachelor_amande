@@ -10,10 +10,16 @@
            </h1>
            <p class="header-subtitle">Bienvenue <strong>{{ authStore.user?.name || 'Administrateur' }}</strong> dans votre espace d'administration</p>
         </div>
+        <div class="header-actions">
+          <button class="admin-clear-btn" @click="clearAllData" title="Vider toutes les données">
+            <i class="fas fa-trash-alt"></i>
+            Vider tout
+          </button>
                  <button class="admin-logout-btn" @click="handleLogout">
           <i class="fas fa-sign-out-alt"></i>
           Déconnexion
         </button>
+        </div>
       </div>
     </header>
 
@@ -22,11 +28,16 @@
 
     <!-- Section Produits -->
     <AccordionSection 
-      :fonds="fonds"
-      :premiereCoucheDouceur="premiereCoucheDouceur"
-      :secondeCoucheDouceur="secondeCoucheDouceur"
-      :toucheFinale="toucheFinale"
-      :lockedProducts="lockedProducts"
+      :fonds="products.fonds"
+      :premiereCoucheDouceur="products.premiereCoucheDouceur"
+      :secondeCoucheDouceur="products.secondeCoucheDouceur"
+      :toucheFinale="products.toucheFinale"
+      :lockedProducts="{
+        fonds: products.fonds.map(p => p.locked),
+        premiereCoucheDouceur: products.premiereCoucheDouceur.map(p => p.locked),
+        secondeCoucheDouceur: products.secondeCoucheDouceur.map(p => p.locked),
+        toucheFinale: products.toucheFinale.map(p => p.locked)
+      }"
       :totalProducts="totalProducts"
       :totalPending="totalPending"
       :isProductsSectionOpen="isProductsSectionOpen"
@@ -64,18 +75,52 @@ const handleLogout = () => {
   authStore.logout(router)
 }
 
-// État des produits
-const fonds = ref(Array(3).fill(null).map(() => ({ nom: '', image: null })))
-const premiereCoucheDouceur = ref(Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] })))
-const secondeCoucheDouceur = ref(Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] })))
-const toucheFinale = ref(Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] })))
+// Types et interfaces
+interface Product {
+  id: string | number
+  nom: string
+  images: string[]  // toujours un tableau, même avec 1 seule image
+  locked: boolean
+  step: 'fonds' | 'premiereCoucheDouceur' | 'secondeCoucheDouceur' | 'toucheFinale'
+}
 
-// État des verrous
-const lockedProducts = ref({
-  fonds: Array(3).fill(true),
-  premiereCoucheDouceur: Array(4).fill(true),
-  secondeCoucheDouceur: Array(4).fill(true),
-  toucheFinale: Array(4).fill(true)
+interface ProductsByStep {
+  fonds: Product[]
+  premiereCoucheDouceur: Product[]
+  secondeCoucheDouceur: Product[]
+  toucheFinale: Product[]
+}
+
+// État des produits avec modèle unique
+const products = ref<ProductsByStep>({
+  fonds: Array(3).fill(null).map((_, i) => ({ 
+    id: i, 
+    nom: '', 
+    images: [], 
+    locked: true,
+    step: 'fonds'
+  })),
+  premiereCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
+    id: i, 
+    nom: '', 
+    images: [], 
+    locked: true,
+    step: 'premiereCoucheDouceur'
+  })),
+  secondeCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
+    id: i, 
+    nom: '', 
+    images: [], 
+    locked: true,
+    step: 'secondeCoucheDouceur'
+  })),
+  toucheFinale: Array(4).fill(null).map((_, i) => ({ 
+    id: i, 
+    nom: '', 
+    images: [], 
+    locked: true,
+    step: 'toucheFinale'
+  }))
 })
 
 // État de l'accordéon
@@ -86,43 +131,57 @@ const totalProducts = computed(() => 15) // 3 + 4 + 4 + 4
 const totalPending = computed(() => 0) // À implémenter si nécessaire
 
 const fondsProgress = computed(() => {
-  const configured = fonds.value.filter(p => p.nom && p.image).length
-  return { current: configured, total: 3 }
+  const configured = products.value.fonds.filter(p => p.nom && p.images.length > 0).length
+  return (configured / 3) * 100 // Pourcentage pour 3 produits max
 })
 
 const premiereCoucheProgress = computed(() => {
-  const configured = premiereCoucheDouceur.value.filter(p => p.nom && p.images.some(img => img)).length
-  return { current: configured, total: 4 }
+  const configured = products.value.premiereCoucheDouceur.filter(p => p.nom && p.images.length > 0).length
+  return (configured / 4) * 100 // Pourcentage pour 4 produits max
 })
 
 const secondeCoucheProgress = computed(() => {
-  const configured = secondeCoucheDouceur.value.filter(p => p.nom && p.images.some(img => img)).length
-  return { current: configured, total: 4 }
+  const configured = products.value.secondeCoucheDouceur.filter(p => p.nom && p.images.length > 0).length
+  return (configured / 4) * 100 // Pourcentage pour 4 produits max
 })
 
 const toucheFinaleProgress = computed(() => {
-  const configured = toucheFinale.value.filter(p => p.nom && p.images.some(img => img)).length
-  return { current: configured, total: 4 }
+  const configured = products.value.toucheFinale.filter(p => p.nom && p.images.length > 0).length
+  return (configured / 4) * 100 // Pourcentage pour 4 produits max
 })
 
-const fondsConfigured = computed(() => fonds.value.filter(p => p.nom && p.image).length)
-const premiereCoucheConfigured = computed(() => premiereCoucheDouceur.value.filter(p => p.nom && p.images.some(img => img)).length)
-const secondeCoucheConfigured = computed(() => secondeCoucheDouceur.value.filter(p => p.nom && p.images.some(img => img)).length)
-const toucheFinaleConfigured = computed(() => toucheFinale.value.filter(p => p.nom && p.images.some(img => img)).length)
+const fondsConfigured = computed(() => products.value.fonds.filter(p => p.nom && p.images.length > 0).length)
+const premiereCoucheConfigured = computed(() => products.value.premiereCoucheDouceur.filter(p => p.nom && p.images.length > 0).length)
+const secondeCoucheConfigured = computed(() => products.value.secondeCoucheDouceur.filter(p => p.nom && p.images.length > 0).length)
+const toucheFinaleConfigured = computed(() => products.value.toucheFinale.filter(p => p.nom && p.images.length > 0).length)
 
 // Fonctions de gestion
 const handleUpload = async ({ productIndex, imageIndex, file }: any) => {
   try {
     const { productType, actualIndex } = getProductInfo(productIndex)
-    const imageUrl = await productConfigService.uploadImage(file)
+    const imageUrl = await productConfigService.uploadImage(file, productType, actualIndex, imageIndex)
     
     if (productType === 'fonds') {
-      fonds.value[actualIndex].image = imageUrl
-    } else {
-      if (!premiereCoucheDouceur.value[actualIndex].images) {
-        premiereCoucheDouceur.value[actualIndex].images = [null, null, null]
+      // S'assurer que l'array images existe et a la bonne taille
+      if (!products.value.fonds[actualIndex].images) {
+        products.value.fonds[actualIndex].images = []
       }
-      premiereCoucheDouceur.value[actualIndex].images[imageIndex] = imageUrl
+      products.value.fonds[actualIndex].images[imageIndex] = imageUrl || ''
+    } else if (productType === 'premiereCoucheDouceur') {
+      if (!products.value.premiereCoucheDouceur[actualIndex].images) {
+        products.value.premiereCoucheDouceur[actualIndex].images = []
+      }
+      products.value.premiereCoucheDouceur[actualIndex].images[imageIndex] = imageUrl || ''
+    } else if (productType === 'secondeCoucheDouceur') {
+      if (!products.value.secondeCoucheDouceur[actualIndex].images) {
+        products.value.secondeCoucheDouceur[actualIndex].images = []
+      }
+      products.value.secondeCoucheDouceur[actualIndex].images[imageIndex] = imageUrl || ''
+    } else if (productType === 'toucheFinale') {
+      if (!products.value.toucheFinale[actualIndex].images) {
+        products.value.toucheFinale[actualIndex].images = []
+      }
+      products.value.toucheFinale[actualIndex].images[imageIndex] = imageUrl || ''
     }
     
     console.log('✅ Image uploadée:', imageUrl)
@@ -136,9 +195,13 @@ const handleRemove = async ({ productIndex, imageIndex }: any) => {
     const { productType, actualIndex } = getProductInfo(productIndex)
     
     if (productType === 'fonds') {
-      fonds.value[actualIndex].image = null
-    } else {
-      premiereCoucheDouceur.value[actualIndex].images[imageIndex] = null
+      products.value.fonds[actualIndex].images[imageIndex] = ''
+    } else if (productType === 'premiereCoucheDouceur') {
+      products.value.premiereCoucheDouceur[actualIndex].images[imageIndex] = ''
+    } else if (productType === 'secondeCoucheDouceur') {
+      products.value.secondeCoucheDouceur[actualIndex].images[imageIndex] = ''
+    } else if (productType === 'toucheFinale') {
+      products.value.toucheFinale[actualIndex].images[imageIndex] = ''
     }
     
     console.log('✅ Image supprimée')
@@ -164,34 +227,74 @@ const handleReset = async (productIndex: number) => {
   try {
     const { productType, actualIndex } = getProductInfo(productIndex)
     
-    if (productType === 'fonds') {
-      fonds.value[actualIndex] = { nom: '', image: null }
-    } else {
-      premiereCoucheDouceur.value[actualIndex] = { nom: '', images: [null, null, null] }
+    // Récupérer le produit actuel pour avoir son ID
+    const currentProduct = products.value[productType as keyof ProductsByStep][actualIndex]
+    
+    // Si le produit a un ID (existe en base), le supprimer
+    if (currentProduct.id && typeof currentProduct.id === 'string') {
+      console.log('🗑️ Suppression du produit de Supabase:', currentProduct.id)
+      const success = await productConfigService.deleteProduct(currentProduct.id)
+      
+      if (success) {
+        console.log('✅ Produit supprimé de Supabase')
+      } else {
+        console.error('❌ Échec de la suppression de Supabase')
+      }
     }
     
-    console.log('✅ Produit remis à zéro')
+    // Remettre à zéro dans la mémoire locale
+    if (productType === 'fonds') {
+      products.value.fonds[actualIndex] = { id: actualIndex, nom: '', images: [], locked: true, step: 'fonds' }
+    } else if (productType === 'premiereCoucheDouceur') {
+      products.value.premiereCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], locked: true, step: 'premiereCoucheDouceur' }
+    } else if (productType === 'secondeCoucheDouceur') {
+      products.value.secondeCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], locked: true, step: 'secondeCoucheDouceur' }
+    } else if (productType === 'toucheFinale') {
+      products.value.toucheFinale[actualIndex] = { id: actualIndex, nom: '', images: [], locked: true, step: 'toucheFinale' }
+    }
+    
+    console.log('✅ Produit remis à zéro (local + Supabase)')
   } catch (error) {
     console.error('❌ Erreur reset:', error)
   }
 }
 
 const handleToggleLock = async (productIndex: number) => {
+  console.log('🔓 handleToggleLock appelé avec productIndex:', productIndex)
+  
   try {
     const { productType, actualIndex } = getProductInfo(productIndex)
-    const currentLocked = lockedProducts.value[productType][actualIndex]
+    console.log('🔍 Type et index:', { productType, actualIndex })
     
-    // Déverrouiller tous les autres produits du même type
-    lockedProducts.value[productType].forEach((_, index) => {
-      if (index !== actualIndex) {
-        lockedProducts.value[productType][index] = true
-      }
+    // Vérifier que le produit existe
+    if (!products.value[productType as keyof ProductsByStep] || !products.value[productType as keyof ProductsByStep][actualIndex]) {
+      console.error('❌ Produit non trouvé:', { productType, actualIndex })
+      return
+    }
+    
+    const currentProduct = products.value[productType as keyof ProductsByStep][actualIndex]
+    const currentLocked = currentProduct.locked
+    
+    console.log('🔍 AVANT toggle - Produit actuel:', {
+      type: productType,
+      index: actualIndex,
+      nom: currentProduct.nom,
+      locked: currentProduct.locked
     })
     
-    // Basculer le verrou du produit actuel
-    lockedProducts.value[productType][actualIndex] = !currentLocked
+    // Toggle simple et indépendant - UNIQUEMENT cette vignette
+    currentProduct.locked = !currentLocked
     
-    console.log('✅ Verrou basculé:', !currentLocked)
+    console.log(`✅ Vignette ${productType}[${actualIndex}] ${currentLocked ? 'déverrouillée' : 'verrouillée'}`)
+    
+    // Debug pour vérifier qu'aucune autre vignette n'est affectée
+    console.log('🔍 État APRÈS toggle:', {
+      fonds: products.value.fonds.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked })),
+      premiereCouche: products.value.premiereCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked })),
+      secondeCouche: products.value.secondeCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked })),
+      toucheFinale: products.value.toucheFinale.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked }))
+    })
+    
   } catch (error) {
     console.error('❌ Erreur toggle lock:', error)
   }
@@ -203,82 +306,213 @@ const toggleProductsSection = () => {
 
 // Helper pour déterminer le type de produit et l'index local
 const getProductInfo = (productIndex: number) => {
+  console.log('🔍 getProductInfo appelé avec productIndex:', productIndex)
+  
   if (productIndex < 3) {
-    return { productType: 'fonds', actualIndex: productIndex }
+    // Étape 1: Fonds (indices 0, 1, 2)
+    const actualIndex = productIndex
+    console.log('📍 Fonds - Index global:', productIndex, 'Index local:', actualIndex)
+    return { productType: 'fonds', actualIndex }
   } else if (productIndex < 7) {
-    return { productType: 'premiereCoucheDouceur', actualIndex: productIndex - 3 }
+    // Étape 2: Première Couche (indices 3, 4, 5, 6)
+    const actualIndex = productIndex - 3
+    console.log('📍 1ère Couche - Index global:', productIndex, 'Index local:', actualIndex)
+    return { productType: 'premiereCoucheDouceur', actualIndex }
   } else if (productIndex < 11) {
-    return { productType: 'secondeCoucheDouceur', actualIndex: productIndex - 7 }
+    // Étape 3: Seconde Couche (indices 7, 8, 9, 10)
+    const actualIndex = productIndex - 7
+    console.log('📍 2ème Couche - Index global:', productIndex, 'Index local:', actualIndex)
+    return { productType: 'secondeCoucheDouceur', actualIndex }
   } else {
-    return { productType: 'toucheFinale', actualIndex: productIndex - 11 }
+    // Étape 4: Touche Finale (indices 11, 12, 13, 14)
+    const actualIndex = productIndex - 11
+    console.log('📍 Touche Finale - Index global:', productIndex, 'Index local:', actualIndex)
+    return { productType: 'toucheFinale', actualIndex }
   }
 }
 
 // Sauvegarder un produit
 const saveProduct = async (productType: string, actualIndex: number) => {
-  let productData
-  let configType
-  
-  switch (productType) {
-    case 'fonds':
-      productData = fonds.value[actualIndex]
-      configType = 'fonds'
-      break
-    case 'premiereCoucheDouceur':
-      productData = premiereCoucheDouceur.value[actualIndex]
-      configType = 'premiere_couche_douceur'
-      break
-    case 'secondeCoucheDouceur':
-      productData = secondeCoucheDouceur.value[actualIndex]
-      configType = 'seconde_couche_douceur'
-      break
-    case 'toucheFinale':
-      productData = toucheFinale.value[actualIndex]
-      configType = 'touche_finale'
-      break
-  }
-  
-  const config = {
-    config_type: configType,
-    product_index: actualIndex,
-    nom: productData.nom,
-    images: productType === 'fonds' ? productData.image : productData.images
-  }
-  
-  const result = await productConfigService.upsertProductConfig(config)
-  if (!result) {
-    throw new Error('Échec de la sauvegarde')
+  try {
+    let productData: Product | undefined
+    
+    switch (productType) {
+      case 'fonds':
+        productData = products.value.fonds[actualIndex]
+        break
+      case 'premiereCoucheDouceur':
+        productData = products.value.premiereCoucheDouceur[actualIndex]
+        break
+      case 'secondeCoucheDouceur':
+        productData = products.value.secondeCoucheDouceur[actualIndex]
+        break
+      case 'toucheFinale':
+        productData = products.value.toucheFinale[actualIndex]
+        break
+    }
+    
+    if (!productData) {
+      throw new Error('Produit non trouvé')
+    }
+    
+    // Utiliser le nouveau service
+    const result = await productConfigService.upsertProduct({
+      nom: productData.nom,
+      images: productData.images,
+      locked: productData.locked,
+      step: productType as Product['step']
+    })
+    
+    if (!result) {
+      throw new Error('Échec de la sauvegarde')
+    }
+    
+    console.log('✅ Produit sauvegardé avec succès')
+  } catch (error) {
+    console.error('❌ Erreur sauvegarde produit:', error)
+    throw error
   }
 }
 
 // Charger la configuration au montage
 onMounted(async () => {
   try {
-    const configs = await productConfigService.getAllProductConfig()
-    console.log('🔍 Configurations chargées:', configs)
+    // Charger tous les produits depuis la nouvelle structure
+    const allProducts = await productConfigService.getAllProducts()
+    console.log('🔍 Produits chargés:', allProducts)
     
-    configs.forEach(config => {
-      const { config_type, product_index, nom, images } = config
+    // Organiser les produits par étape
+    allProducts.forEach(product => {
+      const { step, nom, images, locked } = product
       
-      switch (config_type) {
+      switch (step) {
         case 'fonds':
-          fonds.value[product_index] = { nom, image: images }
+          // Trouver le premier slot disponible
+          const fondsIndex = products.value.fonds.findIndex(p => !p.nom && p.images.length === 0)
+          if (fondsIndex !== -1) {
+            products.value.fonds[fondsIndex] = { 
+              id: product.id, 
+              nom, 
+              images: images || [], 
+              locked,
+              step: 'fonds'
+            }
+          }
           break
-        case 'premiere_couche_douceur':
-          premiereCoucheDouceur.value[product_index] = { nom, images }
+        case 'premiereCoucheDouceur':
+          const premiereIndex = products.value.premiereCoucheDouceur.findIndex(p => !p.nom && p.images.length === 0)
+          if (premiereIndex !== -1) {
+            products.value.premiereCoucheDouceur[premiereIndex] = { 
+              id: product.id, 
+              nom, 
+              images: images || [], 
+              locked,
+              step: 'premiereCoucheDouceur'
+            }
+          }
           break
-        case 'seconde_couche_douceur':
-          secondeCoucheDouceur.value[product_index] = { nom, images }
+        case 'secondeCoucheDouceur':
+          const secondeIndex = products.value.secondeCoucheDouceur.findIndex(p => !p.nom && p.images.length === 0)
+          if (secondeIndex !== -1) {
+            products.value.secondeCoucheDouceur[secondeIndex] = { 
+              id: product.id, 
+              nom, 
+              images: images || [], 
+              locked,
+              step: 'secondeCoucheDouceur'
+            }
+          }
           break
-        case 'touche_finale':
-          toucheFinale.value[product_index] = { nom, images }
+        case 'toucheFinale':
+          const toucheIndex = products.value.toucheFinale.findIndex(p => !p.nom && p.images.length === 0)
+          if (toucheIndex !== -1) {
+            products.value.toucheFinale[toucheIndex] = { 
+              id: product.id, 
+              nom, 
+              images: images || [], 
+              locked,
+              step: 'toucheFinale'
+            }
+          }
           break
       }
     })
   } catch (error) {
-    console.error('❌ Erreur chargement config:', error)
+    console.error('❌ Erreur chargement produits:', error)
   }
 })
+
+// Debug: vérifier l'indépendance des vignettes
+const debugVignettes = () => {
+  console.log('🔍 DEBUG - État actuel des vignettes:')
+  console.log('📊 Fonds:', products.value.fonds.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked, images: p.images.length })))
+  console.log('📊 1ère Couche:', products.value.premiereCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked, images: p.images.length })))
+  console.log('📊 2ème Couche:', products.value.secondeCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked, images: p.images.length })))
+  console.log('📊 Touche Finale:', products.value.toucheFinale.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked, images: p.images.length })))
+}
+
+// Debug: vérifier la nouvelle structure
+onMounted(() => {
+  console.log('🔍 Nouvelle structure des produits:', products.value)
+  console.log('🔍 Fonds:', products.value.fonds)
+  console.log('🔍 1ère Couche:', products.value.premiereCoucheDouceur)
+  
+  // Debug initial
+  debugVignettes()
+})
+
+// Vider complètement toutes les données
+const clearAllData = async () => {
+  try {
+    console.log('🗑️ Suppression de toutes les données...')
+    
+    // Récupérer tous les produits existants
+    const allProducts = await productConfigService.getAllProducts()
+    
+    // Supprimer chaque produit
+    for (const product of allProducts) {
+      if (product.id && typeof product.id === 'string') {
+        await productConfigService.deleteProduct(product.id)
+      }
+    }
+    
+    // Remettre à zéro la mémoire locale
+    products.value = {
+      fonds: Array(3).fill(null).map((_, i) => ({ 
+        id: i, 
+        nom: '', 
+        images: [], 
+        locked: true,
+        step: 'fonds'
+      })),
+      premiereCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
+        id: i, 
+        nom: '', 
+        images: [], 
+        locked: true,
+        step: 'premiereCoucheDouceur'
+      })),
+      secondeCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
+        id: i, 
+        nom: '', 
+        images: [], 
+        locked: true,
+        step: 'secondeCoucheDouceur'
+      })),
+      toucheFinale: Array(4).fill(null).map((_, i) => ({ 
+        id: i, 
+        nom: '', 
+        images: [], 
+        locked: true,
+        step: 'toucheFinale'
+      }))
+    }
+    
+    console.log('✅ Toutes les données ont été supprimées')
+  } catch (error) {
+    console.error('❌ Erreur lors de la suppression:', error)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -332,7 +566,28 @@ onMounted(async () => {
   margin: 0;
 }
 
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
 
+.admin-clear-btn {
+  font-family: var(--font-family-text);
+  background: $admin-danger;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+}
 
 .admin-logout-btn {
   font-family: var(--font-family-text);
@@ -384,7 +639,13 @@ onMounted(async () => {
     text-align: center;
   }
   
-  .admin-logout-btn {
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .admin-clear-btn, .admin-logout-btn {
     width: 100%;
     justify-content: center;
     padding: 0.8rem 1rem;

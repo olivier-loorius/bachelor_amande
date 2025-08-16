@@ -55,15 +55,15 @@ export const useProductStore = defineStore('products', () => {
   const productStates = ref({
     locked: {
       fonds: Array(3).fill(true),
-      premiereDouceur: Array(4).fill(true),
-      secondeDouceur: Array(4).fill(true),
-      finitions: Array(4).fill(true)
+      premiereCoucheDouceur: Array(4).fill(true),
+      secondeCoucheDouceur: Array(4).fill(true),
+      toucheFinale: Array(4).fill(true)
     },
     drag: {
       fonds: Array(3).fill(false),
-      premiereDouceur: Array(4).fill(false),
-      secondeDouceur: Array(4).fill(false),
-      finitions: Array(4).fill(false)
+      premiereCoucheDouceur: Array(4).fill(false),
+      secondeCoucheDouceur: Array(4).fill(false),
+      toucheFinale: Array(4).fill(false)
     }
   })
 
@@ -96,30 +96,30 @@ export const useProductStore = defineStore('products', () => {
   const lockedProducts = computed({
     get: () => ({
       fonds: productStates.value.locked.fonds,
-      premiereDouceur: productStates.value.locked.premiereDouceur,
-      secondeDouceur: productStates.value.locked.secondeDouceur,
-      finitions: productStates.value.locked.finitions
+      premiereCoucheDouceur: productStates.value.locked.premiereCoucheDouceur,
+      secondeCoucheDouceur: productStates.value.locked.secondeCoucheDouceur,
+      toucheFinale: productStates.value.locked.toucheFinale
     }),
     set: (value) => {
       productStates.value.locked.fonds = value.fonds
-      productStates.value.locked.premiereDouceur = value.premiereDouceur
-      productStates.value.locked.secondeDouceur = value.secondeDouceur
-      productStates.value.locked.finitions = value.finitions
+      productStates.value.locked.premiereCoucheDouceur = value.premiereCoucheDouceur
+      productStates.value.locked.secondeCoucheDouceur = value.secondeCoucheDouceur
+      productStates.value.locked.toucheFinale = value.toucheFinale
     }
   })
 
   const dragStates = computed({
     get: () => ({
       fonds: productStates.value.drag.fonds,
-      premiereDouceur: productStates.value.drag.premiereDouceur,
-      secondeDouceur: productStates.value.drag.secondeDouceur,
-      finitions: productStates.value.drag.finitions
+      premiereCoucheDouceur: productStates.value.drag.premiereCoucheDouceur,
+      secondeCoucheDouceur: productStates.value.drag.secondeCoucheDouceur,
+      toucheFinale: productStates.value.drag.toucheFinale
     }),
     set: (value) => {
       productStates.value.drag.fonds = value.fonds
-      productStates.value.drag.premiereDouceur = value.premiereDouceur
-      productStates.value.drag.secondeDouceur = value.secondeDouceur
-      productStates.value.drag.finitions = value.finitions
+      productStates.value.drag.premiereCoucheDouceur = value.premiereCoucheDouceur
+      productStates.value.drag.secondeCoucheDouceur = value.secondeCoucheDouceur
+      productStates.value.drag.toucheFinale = value.toucheFinale
     }
   })
 
@@ -129,16 +129,16 @@ export const useProductStore = defineStore('products', () => {
   }
 
   const getProductState = (type: keyof typeof PRODUCT_TYPES, stateType: 'locked' | 'drag') => {
-    const arrayKey = PRODUCT_TYPES[type].array === 'premiereCoucheDouceur' ? 'premiereDouceur' :
-                     PRODUCT_TYPES[type].array === 'secondeCoucheDouceur' ? 'secondeDouceur' :
-                     PRODUCT_TYPES[type].array === 'toucheFinale' ? 'finitions' : 'fonds'
+    const arrayKey = PRODUCT_TYPES[type].array === 'premiereCoucheDouceur' ? 'premiereCoucheDouceur' :
+                     PRODUCT_TYPES[type].array === 'secondeCoucheDouceur' ? 'secondeCoucheDouceur' :
+                     PRODUCT_TYPES[type].array === 'toucheFinale' ? 'toucheFinale' : 'fonds'
     return productStates.value[stateType][arrayKey as keyof typeof productStates.value.locked]
   }
 
   const setProductState = (type: keyof typeof PRODUCT_TYPES, stateType: 'locked' | 'drag', index: number, value: boolean) => {
-    const arrayKey = PRODUCT_TYPES[type].array === 'premiereCoucheDouceur' ? 'premiereDouceur' :
-                     PRODUCT_TYPES[type].array === 'secondeCoucheDouceur' ? 'secondeDouceur' :
-                     PRODUCT_TYPES[type].array === 'toucheFinale' ? 'finitions' : 'fonds'
+    const arrayKey = PRODUCT_TYPES[type].array === 'premiereCoucheDouceur' ? 'premiereCoucheDouceur' :
+                     PRODUCT_TYPES[type].array === 'secondeCoucheDouceur' ? 'secondeCoucheDouceur' :
+                     PRODUCT_TYPES[type].array === 'toucheFinale' ? 'toucheFinale' : 'fonds'
     productStates.value[stateType][arrayKey as keyof typeof productStates.value.locked][index] = value
   }
 
@@ -150,11 +150,11 @@ export const useProductStore = defineStore('products', () => {
     if (type === 'fond') {
       return productStates.value.locked.fonds[index]
     } else if (type === 'premiere') {
-      return productStates.value.locked.premiereDouceur[index]
+      return productStates.value.locked.premiereCoucheDouceur[index]
     } else if (type === 'seconde') {
-      return productStates.value.locked.secondeDouceur[index]
+      return productStates.value.locked.secondeCoucheDouceur[index]
     } else if (type === 'finition') {
-      return productStates.value.locked.finitions[index]
+      return productStates.value.locked.toucheFinale[index]
     }
     return true
   }
@@ -166,11 +166,11 @@ export const useProductStore = defineStore('products', () => {
     if (type === 'fond') {
       return productStates.value.drag.fonds[index]
     } else if (type === 'premiere') {
-      return productStates.value.drag.premiereDouceur[index]
+      return productStates.value.drag.premiereCoucheDouceur[index]
     } else if (type === 'seconde') {
-      return productStates.value.drag.secondeDouceur[index]
+      return productStates.value.drag.secondeCoucheDouceur[index]
     } else if (type === 'finition') {
-      return productStates.value.drag.finitions[index]
+      return productStates.value.drag.toucheFinale[index]
     }
     return false
   }
@@ -386,9 +386,9 @@ export const useProductStore = defineStore('products', () => {
       products.value.toucheFinale = []
       
       productStates.value.locked.fonds = [true, true, true]
-      productStates.value.locked.premiereDouceur = [true, true, true, true]
-      productStates.value.locked.secondeDouceur = [true, true, true, true]
-      productStates.value.locked.finitions = [true, true, true, true]
+      productStates.value.locked.premiereCoucheDouceur = [true, true, true, true]
+      productStates.value.locked.secondeCoucheDouceur = [true, true, true, true]
+      productStates.value.locked.toucheFinale = [true, true, true, true]
       
       const loadProduct = (config: any) => {
         const productType = Object.values(PRODUCT_TYPES).find(pt => pt.configType === config.config_type)
@@ -415,23 +415,23 @@ export const useProductStore = defineStore('products', () => {
           if (productType.array === 'premiereCoucheDouceur') {
             products.value.premiereCoucheDouceur[config.product_index] = product
             if (config.locked !== undefined) {
-              productStates.value.locked.premiereDouceur[config.product_index] = config.locked
+              productStates.value.locked.premiereCoucheDouceur[config.product_index] = config.locked
             } else {
-              productStates.value.locked.premiereDouceur[config.product_index] = true
+              productStates.value.locked.premiereCoucheDouceur[config.product_index] = true
             }
           } else if (productType.array === 'secondeCoucheDouceur') {
             products.value.secondeCoucheDouceur[config.product_index] = product
             if (config.locked !== undefined) {
-              productStates.value.locked.secondeDouceur[config.product_index] = config.locked
+              productStates.value.locked.secondeCoucheDouceur[config.product_index] = config.locked
             } else {
-              productStates.value.locked.secondeDouceur[config.product_index] = true
+              productStates.value.locked.secondeCoucheDouceur[config.product_index] = true
             }
           } else if (productType.array === 'toucheFinale') {
             products.value.toucheFinale[config.product_index] = product
             if (config.locked !== undefined) {
-              productStates.value.locked.finitions[config.product_index] = config.locked
+              productStates.value.locked.toucheFinale[config.product_index] = config.locked
             } else {
-              productStates.value.locked.finitions[config.product_index] = true
+              productStates.value.locked.toucheFinale[config.product_index] = true
             }
           }
         }
@@ -457,14 +457,11 @@ export const useProductStore = defineStore('products', () => {
   const resetAllProducts = async () => {
     if (confirm('Remettre à zéro tous les produits ?')) {
       try {
-        const resetArrays = () => {
-          products.value.fonds = Array(3).fill(null).map(() => ({ nom: '', image: null as string | null }))
-          products.value.premiereCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
-          products.value.secondeCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
-          products.value.toucheFinale = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
-        }
-        
-        resetArrays()
+        // Réinitialiser les produits
+        products.value.fonds = Array(3).fill(null).map(() => ({ nom: '', image: null as string | null }))
+        products.value.premiereCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+        products.value.secondeCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+        products.value.toucheFinale = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
         
         for (let i = 0; i < 3; i++) {
           if (products.value.fonds[i]?.image) {

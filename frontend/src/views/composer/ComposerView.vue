@@ -525,55 +525,60 @@ const productConfig = ref<ProductConfig[]>([])
 // Computed properties pour organiser les données
 const fonds = computed(() => {
   return productConfig.value
-    .filter(p => p.config_type === 'fonds')
-    .sort((a, b) => a.product_index - b.product_index)
-    .map(p => ({
-      id: p.product_index + 1,
-      nom: p.nom || 'Fond à configurer',
+    .filter(p => p.step === 'fonds')
+    .slice(0, 3) // Limiter à 3 fonds maximum
+    .sort((a, b) => (a.id as number) - (b.id as number))
+    .map((p, index) => ({
+      id: index + 1, // ID séquentiel simple : 1, 2, 3
+      nom: p.nom || `Fond ${index + 1}`,
       image: p.images && p.images.length > 0 ? p.images[0] : null
     }))
 })
 
 const garnitures1 = computed(() => {
   return productConfig.value
-    .filter(p => p.config_type === 'premiere_couche_douceur')
-    .sort((a, b) => a.product_index - b.product_index)
-    .map(p => ({
-      id: p.product_index + 1,
-      nom: p.nom || 'Garniture à configurer',
+    .filter(p => p.step === 'premiereCoucheDouceur')
+    .slice(0, 4) // Limiter à 4 garnitures maximum
+    .sort((a, b) => (a.id as number) - (b.id as number))
+    .map((p, index) => ({
+      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
+      nom: p.nom || `Garniture ${index + 1}`,
       image: p.images && p.images.length > 0 ? p.images[0] : null
     }))
 })
 
 const garnitures2 = computed(() => {
   return productConfig.value
-    .filter(p => p.config_type === 'seconde_couche_douceur')
-    .sort((a, b) => a.product_index - b.product_index)
-    .map(p => ({
-      id: p.product_index + 1,
-      nom: p.nom || 'Garniture à configurer',
-      image: p.images && p.images.length > 0 ? p.images[0] : null
+    .filter(p => p.step === 'secondeCoucheDouceur')
+    .slice(0, 4) // Limiter à 4 garnitures maximum
+    .sort((a, b) => (a.id as number) - (b.id as number))
+    .map((p, index) => ({
+      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
+      nom: p.nom || `Garniture ${index + 1}`,
+      image: p.images && p.images.length > 0 ? p.images[0] : null // Toujours première image
     }))
 })
 
 const garnitures3 = computed(() => {
   return productConfig.value
-    .filter(p => p.config_type === 'touche_finale')
-    .sort((a, b) => a.product_index - b.product_index)
-    .map(p => ({
-      id: p.product_index + 1,
-      nom: p.nom || 'Garniture à configurer',
-      image: p.images && p.images.length > 0 ? p.images[0] : null
+    .filter(p => p.step === 'toucheFinale') // CORRECTION : utiliser toucheFinale
+    .slice(0, 4) // Limiter à 4 garnitures maximum
+    .sort((a, b) => (a.id as number) - (b.id as number))
+    .map((p, index) => ({
+      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
+      nom: p.nom || `Garniture ${index + 1}`,
+      image: p.images && p.images.length > 0 ? p.images[0] : null // Toujours première image
     }))
 })
 
 const finitions = computed(() => {
   return productConfig.value
-    .filter(p => p.config_type === 'touche_finale')
-    .sort((a, b) => a.product_index - b.product_index)
-    .map(p => ({
-      id: p.product_index + 1,
-      nom: p.nom || 'Finition à configurer',
+    .filter(p => p.step === 'toucheFinale')
+    .slice(0, 4) // Limiter à 4 finitions maximum
+    .sort((a, b) => (a.id as number) - (b.id as number))
+    .map((p, index) => ({
+      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
+      nom: p.nom || `Finition ${index + 1}`,
       image: p.images && p.images.length > 0 ? p.images[0] : null
     }))
 })
@@ -660,7 +665,7 @@ const handleImageError = (event: Event) => {
 const loadProductConfiguration = async () => {
   try {
     console.log('🔄 Chargement de la configuration des produits...')
-    const config = await productConfigService.getAllProductConfig()
+    const config = await productConfigService.getAllProducts()
     productConfig.value = config
     console.log('✅ Configuration chargée:', config.length, 'produits')
   } catch (error) {
@@ -821,8 +826,8 @@ async function loadComposition(composition: Composition) {
   const fond = fonds.value.find(f => f.nom === composition.fond)
   const garniture1 = garnitures1.value.find(g => g.nom === composition.garniture1)
   const garniture2 = garnitures2.value.find(g => g.nom === composition.garniture2)
-  const garniture3 = garnitures3.value.find(g => g.nom === composition.garniture3)
-  const finition = finitions.value.find(f => f.nom === composition.garniture3)
+  const garniture3 = garnitures3.value.find(g => g.nom === composition.garniture3) // CORRECTION : utiliser garnitures3
+  const finition = finitions.value.find(f => f.nom === composition.finition)
   
   selectedFond.value = fond || null
   selectedGarniture1.value = garniture1 || null

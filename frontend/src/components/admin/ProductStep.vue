@@ -6,55 +6,55 @@
     <div class="product-grid">
       <div v-for="(product, i) in products" :key="i" class="product-card">
         <!-- Nom -->
-                 <input
-           type="text"
-           v-model="product.nom"
-           :placeholder="`Nom du produit ${i+1}`"
-           :disabled="locked && locked[i]"
-         />
+        <input
+          type="text"
+          v-model="product.nom"
+          :placeholder="`Nom du produit ${i+1}`"
+          :disabled="locked && locked[i]"
+        />
 
         <!-- Upload(s) -->
         <div class="upload-container">
-                     <ImageUpload
-             v-for="n in imagesCount"
-             :key="n"
-             :locked="locked && locked[i]"
-             :src="getImageSrc(product, n-1)"
-             :alt="`${product.nom || 'Produit'} - Image ${n}`"
-             @upload="$emit('upload', { productIndex: startIndex + i, imageIndex: n-1, file: $event })"
-             @remove="$emit('remove', { productIndex: startIndex + i, imageIndex: n-1 })"
-           />
+          <ImageUpload
+            v-for="n in imagesCount"
+            :key="n"
+            :locked="locked && locked[i]"
+            :src="getImageSrc(product, n-1)"
+            :alt="`${product.nom || 'Produit'} - Image ${n}`"
+            @upload="$emit('upload', { productIndex: startIndex + i, imageIndex: n-1, file: $event })"
+            @remove="$emit('remove', { productIndex: startIndex + i, imageIndex: n-1 })"
+          />
         </div>
 
         <!-- Actions -->
         <div class="actions">
           <!-- Bouton verrouiller/déverrouiller -->
-                     <button 
-             class="action-btn lock-btn" 
-             :class="{ 'unlocked': !(locked && locked[i]) }"
-             @click="$emit('toggleLock', startIndex + i)"
-             :title="(locked && locked[i]) ? 'Déverrouiller' : 'Verrouiller'"
-           >
-                         <i class="fas" :class="(locked && locked[i]) ? 'fa-lock' : 'fa-unlock'"></i>
+          <button 
+            class="action-btn lock-btn" 
+            :class="{ 'unlocked': !(locked && locked[i]) }"
+            @click="$emit('toggleLock', startIndex + i)"
+            :title="(locked && locked[i]) ? 'Déverrouiller' : 'Verrouiller'"
+          >
+            <i class="fas" :class="(locked && locked[i]) ? 'fa-lock' : 'fa-unlock'"></i>
           </button>
           
-                     <!-- Bouton save (visible seulement si déverrouillé) -->
-           <button 
-             v-if="!(locked && locked[i])"
-             class="action-btn save-btn" 
-             @click="$emit('save', startIndex + i)"
-             title="Sauvegarder"
-           >
+          <!-- Bouton save (visible seulement si déverrouillé) -->
+          <button 
+            v-if="!(locked && locked[i])"
+            class="action-btn save-btn" 
+            @click="$emit('save', startIndex + i)"
+            title="Sauvegarder"
+          >
             <i class="fas fa-save"></i>
           </button>
           
-                     <!-- Bouton reset (visible seulement si déverrouillé) -->
-           <button 
-             v-if="!(locked && locked[i])"
-             class="action-btn reset-btn" 
-             @click="$emit('reset', startIndex + i)"
-             title="Remettre à zéro"
-           >
+          <!-- Bouton reset (visible seulement si déverrouillé) -->
+          <button 
+            v-if="!(locked && locked[i])"
+            class="action-btn reset-btn" 
+            @click="$emit('reset', startIndex + i)"
+            title="Remettre à zéro"
+          >
             <i class="fas fa-undo"></i>
           </button>
         </div>
@@ -65,6 +65,7 @@
 
 <script setup lang="ts">
 import ImageUpload from './ImageUpload.vue'
+import { onMounted } from 'vue'
 
 const props = defineProps({
   step: Number,
@@ -84,15 +85,16 @@ const props = defineProps({
 
 defineEmits(['upload', 'remove', 'save', 'reset', 'toggleLock'])
 
-// Fonction helper pour gérer les deux structures d'images
+// Debug: vérifier le nombre de produits
+onMounted(() => {
+  console.log(`🔍 ProductStep ${props.step} - Nombre de produits:`, props.products?.length)
+  console.log(`🔍 ProductStep ${props.step} - Produits:`, props.products)
+})
+
+// Fonction helper pour gérer la structure uniforme d'images
 function getImageSrc(product: any, imageIndex: number) {
-  if (props.imagesCount === 1) {
-    // Fonds : structure { nom: '', image: null }
-    return product.image
-  } else {
-    // Autres étapes : structure { nom: '', images: [null, null, null] }
-    return product.images && product.images[imageIndex] ? product.images[imageIndex] : null
-  }
+  // Nouvelle structure uniforme : { nom: '', images: string[], locked: boolean }
+  return product.images && product.images[imageIndex] ? product.images[imageIndex] : null
 }
 </script>
 
@@ -108,7 +110,6 @@ function getImageSrc(product: any, imageIndex: number) {
   color: #383961;
   font-family: var(--font-family-title);
   font-size: 1.2rem;
-  font-weight: 600;
 }
 
 .product-step .desc {
@@ -147,7 +148,6 @@ function getImageSrc(product: any, imageIndex: number) {
   border-radius: 4px;
   font-family: var(--font-family-text);
   font-size: 0.9rem;
-  margin-bottom: 0.5rem;
 }
 
 .product-card input[type="text"]:disabled {

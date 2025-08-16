@@ -62,20 +62,20 @@
               <span class="progress-text">{{ premiereCoucheConfigured }}/4</span>
             </span>
           </summary>
-                     <ProductStep
-             :step="2"
-             title="Première Couche de Douceur"
-             description="Ajoutez jusqu'à 3 variantes de douceur"
-             :products="props.premiereCoucheDouceur"
-             :locked="props.lockedProducts.premiereDouceur"
-             :images-count="3"
-             :start-index="3"
-             @upload="handleUpload"
-             @remove="handleRemove"
-             @save="handleSave"
-             @reset="handleReset"
-             @toggleLock="handleToggleLock"
-           />
+          <ProductStep
+            :step="2"
+            title="Première Couche de Douceur"
+            description="Ajoutez jusqu'à 3 variantes de douceur"
+            :products="props.premiereCoucheDouceur"
+            :locked="props.lockedProducts.premiereCoucheDouceur"
+            :images-count="3"
+            :start-index="3"
+            @upload="handleUpload"
+            @remove="handleRemove"
+            @save="handleSave"
+            @reset="handleReset"
+            @toggleLock="handleToggleLock"
+          />
         </details>
 
         <!-- Étape 3 : Seconde Couche de Douceur (3 images) -->
@@ -90,20 +90,20 @@
               <span class="progress-text">{{ secondeCoucheConfigured }}/4</span>
             </span>
           </summary>
-                     <ProductStep
-             :step="3"
-             title="Seconde Couche de Douceur"
-             description="Ajoutez plusieurs déclinaisons de douceur"
-             :products="props.secondeCoucheDouceur"
-             :locked="props.lockedProducts.secondeDouceur"
-             :images-count="3"
-             :start-index="7"
-             @upload="handleUpload"
-             @remove="handleRemove"
-             @save="handleSave"
-             @reset="handleReset"
-             @toggleLock="handleToggleLock"
-           />
+          <ProductStep
+            :step="3"
+            title="Seconde Couche de Douceur"
+            description="Ajoutez plusieurs déclinaisons de douceur"
+            :products="props.secondeCoucheDouceur"
+            :locked="props.lockedProducts.secondeCoucheDouceur"
+            :images-count="3"
+            :start-index="7"
+            @upload="handleUpload"
+            @remove="handleRemove"
+            @save="handleSave"
+            @reset="handleReset"
+            @toggleLock="handleToggleLock"
+          />
         </details>
 
         <!-- Étape 4 : Touche Finale (3 images) -->
@@ -118,20 +118,20 @@
               <span class="progress-text">{{ toucheFinaleConfigured }}/4</span>
             </span>
           </summary>
-                     <ProductStep
-             :step="4"
-             title="Touche Finale"
-             description="Ajoutez différentes finitions"
-             :products="props.toucheFinale"
-             :locked="props.lockedProducts.finitions"
-             :images-count="3"
-             :start-index="11"
-             @upload="handleUpload"
-             @remove="handleRemove"
-             @save="handleSave"
-             @reset="handleReset"
-             @toggleLock="handleToggleLock"
-           />
+          <ProductStep
+            :step="4"
+            title="Touche Finale"
+            description="Ajoutez différentes finitions"
+            :products="props.toucheFinale"
+            :locked="props.lockedProducts.toucheFinale"
+            :images-count="3"
+            :start-index="11"
+            @upload="handleUpload"
+            @remove="handleRemove"
+            @save="handleSave"
+            @reset="handleReset"
+            @toggleLock="handleToggleLock"
+          />
         </details>
       </div>
     </div>
