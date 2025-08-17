@@ -74,19 +74,42 @@ export const productConfigService = {
     try {
       const { nom, locked, step, images } = product
 
-      // Utiliser la fonction SQL helper pour insérer/mettre à jour
-      const { data, error } = await supabase
-        .rpc('insert_product_with_images', {
-          p_nom: nom,
-          p_step: step,
-          p_images: images,
-          p_locked: locked
+      // ✅ CORRECTION : Vérifier si le produit existe déjà
+      const existingProducts = await this.getProductsByStep(step as Product['step'])
+      const existingProduct = existingProducts.find(p => p.nom === nom)
+
+      if (existingProduct) {
+        // ✅ Mettre à jour le produit existant
+        console.log('🔄 Produit existant trouvé, mise à jour...')
+        const success = await this.updateProduct(existingProduct.id, {
+          nom,
+          locked,
+          step: step as Product['step'],
+          images
         })
+        
+        if (success) {
+          console.log('✅ Produit mis à jour avec succès')
+          return existingProduct.id
+        } else {
+          throw new Error('Échec de la mise à jour')
+        }
+      } else {
+        // ✅ Créer un nouveau produit
+        console.log('🆕 Nouveau produit, création...')
+        const { data, error } = await supabase
+          .rpc('insert_product_with_images', {
+            p_nom: nom,
+            p_step: step,
+            p_images: images,
+            p_locked: locked
+          })
 
-      if (error) throw error
+        if (error) throw error
 
-      console.log('✅ Produit sauvegardé avec succès')
-      return data
+        console.log('✅ Nouveau produit créé avec succès')
+        return data
+      }
     } catch (error) {
       console.error('❌ Erreur sauvegarde produit:', error)
       return null
@@ -247,6 +270,56 @@ export const productConfigService = {
     } catch (error) {
       console.error('❌ Erreur récupération produit:', error)
       return null
+    }
+  },
+
+  // Nettoyer les produits dupliqués (garder seulement le plus récent de chaque nom)
+  async cleanDuplicateProducts(): Promise<boolean> {
+    try {
+      console.log('🧹 Nettoyage des produits dupliqués...')
+      
+      // Récupérer tous les produits
+      const allProducts = await this.getAllProducts()
+      
+      // Grouper par nom et étape
+      const groupedProducts = new Map<string, Product[]>()
+      
+      allProducts.forEach(product => {
+        const key = `${product.step}_${product.nom}`
+        if (!groupedProducts.has(key)) {
+          groupedProducts.set(key, [])
+        }
+        groupedProducts.get(key)!.push(product)
+      })
+      
+      // Supprimer les doublons (garder seulement le plus récent)
+      let deletedCount = 0
+      
+      for (const [key, products] of groupedProducts) {
+        if (products.length > 1) {
+          // Trier par created_at (le plus récent en premier)
+          products.sort((a, b) => {
+            const dateA = new Date(a.created_at || '1970-01-01')
+            const dateB = new Date(b.created_at || '1970-01-01')
+            return dateB.getTime() - dateA.getTime()
+          })
+          
+          // Supprimer tous sauf le premier (le plus récent)
+          const productsToDelete = products.slice(1)
+          
+          for (const productToDelete of productsToDelete) {
+            console.log(`🗑️ Suppression du doublon: ${productToDelete.nom} (${productToDelete.step})`)
+            await this.deleteProduct(productToDelete.id)
+            deletedCount++
+          }
+        }
+      }
+      
+      console.log(`✅ Nettoyage terminé: ${deletedCount} doublons supprimés`)
+      return true
+    } catch (error) {
+      console.error('❌ Erreur nettoyage doublons:', error)
+      return false
     }
   }
 }

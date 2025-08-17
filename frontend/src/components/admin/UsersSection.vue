@@ -1076,3 +1076,5 @@ $admin-danger: #dc3545;
   }
 }
 
+</style>
+

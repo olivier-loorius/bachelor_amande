@@ -620,6 +620,57 @@ const confirmDeleteAllProducts = async () => {
   showDeleteConfirm.value = false
   await clearAllProducts()
 }
+
+// Nettoyer les produits dupliqués
+const cleanDuplicateProducts = async () => {
+  try {
+    console.log('🧹 Nettoyage des produits dupliqués...')
+    const allProducts = await productConfigService.getAllProducts()
+    const uniqueProducts: Product[] = []
+    const seenIds = new Set<string>()
+
+    for (const product of allProducts) {
+      const { id, nom, images, step } = product
+      if (id && !seenIds.has(id)) {
+        uniqueProducts.push({
+          id: id,
+          nom: nom,
+          images: images || [],
+          locked: product.locked,
+          step: step as Product['step']
+        })
+        seenIds.add(id)
+      } else {
+        console.log(`🗑️ Suppression du produit dupliqué avec ID: ${id || 'Sans ID'}`)
+        if (id && typeof id === 'string') {
+          await productConfigService.deleteProduct(id)
+        }
+      }
+    }
+
+    console.log(`✅ ${uniqueProducts.length} produits uniques conservés.`)
+    console.log('ℹ️ Veuillez recharger la page pour voir les changements.')
+
+    // Mettre à jour la vue locale avec les produits uniques
+    products.value = {
+      fonds: uniqueProducts.filter(p => p.step === 'fonds'),
+      premiereCoucheDouceur: uniqueProducts.filter(p => p.step === 'premiereCoucheDouceur'),
+      secondeCoucheDouceur: uniqueProducts.filter(p => p.step === 'secondeCoucheDouceur'),
+      toucheFinale: uniqueProducts.filter(p => p.step === 'toucheFinale')
+    }
+
+    // Recharger les vignettes pour refléter les changements
+    onMounted(() => {
+      console.log('🔍 Nouvelle structure des produits après nettoyage:', products.value)
+      console.log('🔍 Fonds:', products.value.fonds)
+      console.log('🔍 1ère Couche:', products.value.premiereCoucheDouceur)
+      debugVignettes()
+    })
+
+  } catch (error) {
+    console.error('❌ Erreur lors du nettoyage des produits dupliqués:', error)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
