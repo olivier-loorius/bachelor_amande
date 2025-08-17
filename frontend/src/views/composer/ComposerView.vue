@@ -527,7 +527,6 @@ const fonds = computed(() => {
   return productConfig.value
     .filter(p => p.step === 'fonds')
     .slice(0, 3) // Limiter à 3 fonds maximum
-    .sort((a, b) => (a.id as number) - (b.id as number))
     .map((p, index) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3
       nom: p.nom || `Fond ${index + 1}`,
@@ -539,11 +538,11 @@ const garnitures1 = computed(() => {
   return productConfig.value
     .filter(p => p.step === 'premiereCoucheDouceur')
     .slice(0, 4) // Limiter à 4 garnitures maximum
-    .sort((a, b) => (a.id as number) - (b.id as number))
     .map((p, index) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
       nom: p.nom || `Garniture ${index + 1}`,
-      image: p.images && p.images.length > 0 ? p.images[0] : null
+      // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
+      image: p.images && p.images.length > 0 ? p.images[selectedFond.value ? (selectedFond.value.id - 1) % p.images.length : 0] : null
     }))
 })
 
@@ -551,23 +550,23 @@ const garnitures2 = computed(() => {
   return productConfig.value
     .filter(p => p.step === 'secondeCoucheDouceur')
     .slice(0, 4) // Limiter à 4 garnitures maximum
-    .sort((a, b) => (a.id as number) - (b.id as number))
     .map((p, index) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
       nom: p.nom || `Garniture ${index + 1}`,
-      image: p.images && p.images.length > 0 ? p.images[0] : null // Toujours première image
+      // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
+      image: p.images && p.images.length > 0 ? p.images[selectedFond.value ? (selectedFond.value.id - 1) % p.images.length : 0] : null
     }))
 })
 
 const garnitures3 = computed(() => {
   return productConfig.value
-    .filter(p => p.step === 'toucheFinale') // CORRECTION : utiliser toucheFinale
+    .filter(p => p.step === 'toucheFinale')
     .slice(0, 4) // Limiter à 4 garnitures maximum
-    .sort((a, b) => (a.id as number) - (b.id as number))
     .map((p, index) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
       nom: p.nom || `Garniture ${index + 1}`,
-      image: p.images && p.images.length > 0 ? p.images[0] : null // Toujours première image
+      // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
+      image: p.images && p.images.length > 0 ? p.images[selectedFond.value ? (selectedFond.value.id - 1) % p.images.length : 0] : null
     }))
 })
 
@@ -575,11 +574,11 @@ const finitions = computed(() => {
   return productConfig.value
     .filter(p => p.step === 'toucheFinale')
     .slice(0, 4) // Limiter à 4 finitions maximum
-    .sort((a, b) => (a.id as number) - (b.id as number))
     .map((p, index) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
       nom: p.nom || `Finition ${index + 1}`,
-      image: p.images && p.images.length > 0 ? p.images[0] : null
+      // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
+      image: p.images && p.images.length > 0 ? p.images[selectedFond.value ? (selectedFond.value.id - 1) % p.images.length : 0] : null
     }))
 })
 
@@ -878,10 +877,16 @@ function deselectGarniture1() {
   selectedGarniture1.value = null
 }
 
-  function getGarnitureImage(fond: { id: number, nom: string, image?: string } | null, garniture: { id: number, nom: string } | null) {
+  function getGarnitureImage(fond: { id: number, nom: string, image?: string } | null, garniture: { id: number, nom: string, image?: string } | null) {
   if (!fond) return '';
   if (!garniture) return fond.image || '';
-  // Logique simplifiée - retourner l'image du fond ou une chaîne vide
+  
+  // ✅ CORRECTION : Retourner l'image de la garniture si elle existe
+  if (garniture.image) {
+    return garniture.image;
+  }
+  
+  // Fallback : retourner l'image du fond
   return fond.image || '';
 }
 

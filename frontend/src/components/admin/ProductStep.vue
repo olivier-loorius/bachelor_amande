@@ -11,6 +11,7 @@
           v-model="product.nom"
           :placeholder="`Nom du produit ${i+1}`"
           :disabled="locked && locked[i]"
+          @input="(event) => $emit('nomChange', startIndex + i, (event.target as HTMLInputElement).value)"
         />
 
         <!-- Upload(s) -->
@@ -67,12 +68,25 @@
 import ImageUpload from './ImageUpload.vue'
 import { onMounted } from 'vue'
 
+// Interface pour typer les produits
+interface Product {
+  nom: string
+  images: string[]
+  locked: boolean
+}
+
 const props = defineProps({
   step: Number,
   title: String,
   description: String,
-  products: Array,
-  locked: Array,
+  products: {
+    type: Array as () => Product[],
+    required: true
+  },
+  locked: {
+    type: Array as () => boolean[],
+    required: true
+  },
   imagesCount: {
     type: Number,
     default: 3
@@ -83,7 +97,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['upload', 'remove', 'save', 'reset', 'toggleLock'])
+defineEmits(['upload', 'remove', 'save', 'reset', 'toggleLock', 'nomChange'])
 
 // Debug: vérifier le nombre de produits
 onMounted(() => {
@@ -92,7 +106,7 @@ onMounted(() => {
 })
 
 // Fonction helper pour gérer la structure uniforme d'images
-function getImageSrc(product: any, imageIndex: number) {
+function getImageSrc(product: Product, imageIndex: number) {
   // Nouvelle structure uniforme : { nom: '', images: string[], locked: boolean }
   return product.images && product.images[imageIndex] ? product.images[imageIndex] : null
 }

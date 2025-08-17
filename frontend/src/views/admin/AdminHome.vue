@@ -54,6 +54,7 @@
       @save="handleSave"
       @reset="handleReset"
       @toggleLock="handleToggleLock"
+      @nomChange="handleNomChange"
       @toggle="toggleProductsSection"
     />
   </div>
@@ -97,28 +98,28 @@ const products = ref<ProductsByStep>({
     id: i, 
     nom: '', 
     images: [], 
-    locked: true,
+    locked: false, // ✅ CORRECTION : vide = déverrouillé
     step: 'fonds'
   })),
   premiereCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
     id: i, 
     nom: '', 
     images: [], 
-    locked: true,
+    locked: false, // ✅ CORRECTION : vide = déverrouillé
     step: 'premiereCoucheDouceur'
   })),
   secondeCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
     id: i, 
     nom: '', 
     images: [], 
-    locked: true,
+    locked: false, // ✅ CORRECTION : vide = déverrouillé
     step: 'secondeCoucheDouceur'
   })),
   toucheFinale: Array(4).fill(null).map((_, i) => ({ 
     id: i, 
     nom: '', 
     images: [], 
-    locked: true,
+    locked: false, // ✅ CORRECTION : vide = déverrouillé
     step: 'toucheFinale'
   }))
 })
@@ -155,6 +156,17 @@ const premiereCoucheConfigured = computed(() => products.value.premiereCoucheDou
 const secondeCoucheConfigured = computed(() => products.value.secondeCoucheDouceur.filter(p => p.nom && p.images.length > 0).length)
 const toucheFinaleConfigured = computed(() => products.value.toucheFinale.filter(p => p.nom && p.images.length > 0).length)
 
+// Fonction pour gérer automatiquement le verrouillage basé sur l'état du produit
+const updateLockStatus = (productType: keyof ProductsByStep, actualIndex: number) => {
+  const product = products.value[productType][actualIndex]
+  const hasContent = product.nom && product.images.some(img => img && img.length > 0)
+  
+  // ✅ LOGIQUE CORRIGÉE : vide = déverrouillé, rempli = verrouillé
+  product.locked = hasContent
+  
+  console.log(`🔓 Vignette ${productType}[${actualIndex}] ${hasContent ? 'verrouillée' : 'déverrouillée'} (${product.nom || 'vide'})`)
+}
+
 // Fonctions de gestion
 const handleUpload = async ({ productIndex, imageIndex, file }: any) => {
   try {
@@ -184,6 +196,9 @@ const handleUpload = async ({ productIndex, imageIndex, file }: any) => {
       products.value.toucheFinale[actualIndex].images[imageIndex] = imageUrl || ''
     }
     
+    // ✅ Mettre à jour automatiquement le statut de verrouillage
+    updateLockStatus(productType, actualIndex)
+    
     console.log('✅ Image uploadée:', imageUrl)
   } catch (error) {
     console.error('❌ Erreur upload:', error)
@@ -204,6 +219,9 @@ const handleRemove = async ({ productIndex, imageIndex }: any) => {
       products.value.toucheFinale[actualIndex].images[imageIndex] = ''
     }
     
+    // ✅ Mettre à jour automatiquement le statut de verrouillage
+    updateLockStatus(productType, actualIndex)
+    
     console.log('✅ Image supprimée')
   } catch (error) {
     console.error('❌ Erreur suppression:', error)
@@ -215,9 +233,9 @@ const handleSave = async (productIndex: number) => {
     const { productType, actualIndex } = getProductInfo(productIndex)
     await saveProduct(productType, actualIndex)
     
-    // Verrouiller automatiquement après sauvegarde
-    await handleToggleLock(productIndex)
-    console.log('✅ Produit sauvegardé et verrouillé')
+    // ✅ Le verrouillage est maintenant géré automatiquement par updateLockStatus
+    // Pas besoin de forcer le verrouillage manuellement
+    console.log('✅ Produit sauvegardé avec verrouillage automatique')
   } catch (error) {
     console.error('❌ Erreur sauvegarde:', error)
   }
@@ -244,13 +262,13 @@ const handleReset = async (productIndex: number) => {
     
     // Remettre à zéro dans la mémoire locale
     if (productType === 'fonds') {
-      products.value.fonds[actualIndex] = { id: actualIndex, nom: '', images: [], locked: true, step: 'fonds' }
+      products.value.fonds[actualIndex] = { id: actualIndex, nom: '', images: [], locked: false, step: 'fonds' } // ✅ CORRECTION : reset = déverrouillé
     } else if (productType === 'premiereCoucheDouceur') {
-      products.value.premiereCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], locked: true, step: 'premiereCoucheDouceur' }
+      products.value.premiereCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], locked: false, step: 'premiereCoucheDouceur' } // ✅ CORRECTION : reset = déverrouillé
     } else if (productType === 'secondeCoucheDouceur') {
-      products.value.secondeCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], locked: true, step: 'secondeCoucheDouceur' }
+      products.value.secondeCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], locked: false, step: 'secondeCoucheDouceur' } // ✅ CORRECTION : reset = déverrouillé
     } else if (productType === 'toucheFinale') {
-      products.value.toucheFinale[actualIndex] = { id: actualIndex, nom: '', images: [], locked: true, step: 'toucheFinale' }
+      products.value.toucheFinale[actualIndex] = { id: actualIndex, nom: '', images: [], locked: false, step: 'toucheFinale' } // ✅ CORRECTION : reset = déverrouillé
     }
     
     console.log('✅ Produit remis à zéro (local + Supabase)')
@@ -302,6 +320,24 @@ const handleToggleLock = async (productIndex: number) => {
 
 const toggleProductsSection = () => {
   isProductsSectionOpen.value = !isProductsSectionOpen.value
+}
+
+// Fonction pour gérer le changement de nom et mettre à jour le verrouillage
+const handleNomChange = async (productIndex: number, newNom: string) => {
+  try {
+    const { productType, actualIndex } = getProductInfo(productIndex)
+    const product = products.value[productType as keyof ProductsByStep][actualIndex]
+    
+    // Mettre à jour le nom
+    product.nom = newNom
+    
+    // ✅ Mettre à jour automatiquement le statut de verrouillage
+    updateLockStatus(productType as keyof ProductsByStep, actualIndex)
+    
+    console.log(`✏️ Nom mis à jour pour ${productType}[${actualIndex}]: "${newNom}"`)
+  } catch (error) {
+    console.error('❌ Erreur changement nom:', error)
+  }
 }
 
 // Helper pour déterminer le type de produit et l'index local
@@ -397,6 +433,8 @@ onMounted(async () => {
               locked,
               step: 'fonds'
             }
+            // ✅ Mettre à jour le statut de verrouillage après chargement
+            updateLockStatus('fonds', fondsIndex)
           }
           break
         case 'premiereCoucheDouceur':
@@ -409,6 +447,8 @@ onMounted(async () => {
               locked,
               step: 'premiereCoucheDouceur'
             }
+            // ✅ Mettre à jour le statut de verrouillage après chargement
+            updateLockStatus('premiereCoucheDouceur', premiereIndex)
           }
           break
         case 'secondeCoucheDouceur':
@@ -421,6 +461,8 @@ onMounted(async () => {
               locked,
               step: 'secondeCoucheDouceur'
             }
+            // ✅ Mettre à jour le statut de verrouillage après chargement
+            updateLockStatus('secondeCoucheDouceur', secondeIndex)
           }
           break
         case 'toucheFinale':
@@ -433,6 +475,8 @@ onMounted(async () => {
               locked,
               step: 'toucheFinale'
             }
+            // ✅ Mettre à jour le statut de verrouillage après chargement
+            updateLockStatus('toucheFinale', toucheIndex)
           }
           break
       }
@@ -482,28 +526,28 @@ const clearAllData = async () => {
         id: i, 
         nom: '', 
         images: [], 
-        locked: true,
+        locked: false, // ✅ CORRECTION : vide = déverrouillé
         step: 'fonds'
       })),
       premiereCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
         id: i, 
         nom: '', 
         images: [], 
-        locked: true,
+        locked: false, // ✅ CORRECTION : vide = déverrouillé
         step: 'premiereCoucheDouceur'
       })),
       secondeCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
         id: i, 
         nom: '', 
         images: [], 
-        locked: true,
+        locked: false, // ✅ CORRECTION : vide = déverrouillé
         step: 'secondeCoucheDouceur'
       })),
       toucheFinale: Array(4).fill(null).map((_, i) => ({ 
         id: i, 
         nom: '', 
         images: [], 
-        locked: true,
+        locked: false, // ✅ CORRECTION : vide = déverrouillé
         step: 'toucheFinale'
       }))
     }
