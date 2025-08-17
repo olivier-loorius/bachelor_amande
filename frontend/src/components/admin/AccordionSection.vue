@@ -8,12 +8,22 @@
         </h2>
         <div class="section-stats">
           <span class="stat-item">
-            {{ totalProducts }} produits configurés
+            {{ totalProducts }}/15 produits configurés
           </span>
           <span class="stat-item pending-stat" v-if="totalPending > 0">
             {{ totalPending }} en attente
           </span>
         </div>
+      </div>
+      <div class="header-actions">
+        <button 
+          class="clear-all-products-btn" 
+          @click="showDeleteConfirmModal"
+          title="Supprimer tous les produits"
+        >
+          <i class="fas fa-trash-alt"></i>
+          Vider tous les produits
+        </button>
       </div>
       <div class="accordion-icon" :class="{ 'rotated': isProductsSectionOpen }">
         <span class="accordion-arrow">▼</span>
@@ -176,6 +186,7 @@ const emit = defineEmits<{
   reset: [index: number]
   toggle: []
   toggleLock: [index: number]
+  showDeleteConfirm: []
 }>()
 
 const toggleProductsSection = () => {
@@ -201,6 +212,10 @@ function handleReset(index: number) {
 
 function handleToggleLock(index: number) {
   emit('toggleLock', index)
+}
+
+function showDeleteConfirmModal() {
+  emit('showDeleteConfirm')
 }
 </script>
 
@@ -231,37 +246,44 @@ $admin-danger: #dc3545;
   background: rgba($admin-primary, 0.02);
   cursor: pointer;
   transition: background 0.2s ease;
+  position: relative;
   
   &:hover {
     background: rgba($admin-primary, 0.05);
   }
   
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+  
   h2 {
-    margin: 0 0 1rem 0;
+    margin: 0;
     color: $admin-primary;
     font-family: var(--font-family-title);
     font-weight: 600;
-    font-size: 2rem;
+    font-size: 1.5rem;
     display: flex;
     align-items: baseline;
     gap: 0.75rem;
   }
   
-     .title-icon {
-     font-size: 2.2rem;
-     line-height: 1;
-     display: flex;
-     align-items: center;
-     
-     i {
-       color: $admin-primary;
-       font-size: 2.2rem;
-       /* Force l'affichage des icônes FontAwesome */
-       display: inline-block !important;
-       font-family: "Font Awesome 5 Free" !important;
-       font-weight: 900 !important;
-     }
-   }
+  .title-icon {
+    font-size: 2.2rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    
+    i {
+      color: $admin-primary;
+      font-size: 2.2rem;
+      display: inline-block !important;
+      font-family: "Font Awesome 5 Free" !important;
+      font-weight: 900 !important;
+    }
+  }
   
   .title-text {
     font-weight: 700;
@@ -285,11 +307,46 @@ $admin-danger: #dc3545;
     }
   }
   
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-right: 2.5rem;
+  }
+
+  .clear-all-products-btn {
+    background-color: $admin-danger;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-family-text);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #c82333;
+    }
+
+    i {
+      font-size: 1rem;
+    }
+  }
+  
   .accordion-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
     transition: transform 0.3s ease;
     
     &.rotated {
-      transform: rotate(180deg);
+      transform: translateY(-50%) rotate(180deg);
     }
     
     .accordion-arrow {

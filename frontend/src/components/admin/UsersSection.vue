@@ -270,17 +270,25 @@ $admin-danger: #dc3545;
   background: rgba($admin-primary, 0.02);
   cursor: pointer;
   transition: background 0.2s ease;
+  position: relative;
   
   &:hover {
     background: rgba($admin-primary, 0.05);
   }
   
-   h2 {
-    margin: 0 0 1rem 0;
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+  
+  h2 {
+    margin: 0;
     color: $admin-primary;
     font-family: var(--font-family-title);
     font-weight: 600;
-    font-size: 2rem;
+    font-size: 1.5rem;
     display: flex;
     align-items: baseline;
     gap: 0.75rem;
@@ -292,40 +300,52 @@ $admin-danger: #dc3545;
     display: flex;
     align-items: center;
     
-   i {
-     color: $admin-primary;
-     font-size: 2.2rem;
-   }
- }
+    i {
+      color: $admin-primary;
+      font-size: 2.2rem;
+      display: inline-block !important;
+      font-family: "Font Awesome 5 Free" !important;
+      font-weight: 900 !important;
+    }
+  }
   
   .title-text {
     font-weight: 700;
     color: $admin-primary;
-    line-height: 1.2;
-  }
-}
-
-/* Icône accordéon */
-.accordion-icon {
-  transition: transform 0.3s ease;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  
-  &:hover {
-    background: rgba($admin-primary, 0.1);
   }
   
-  &.rotated {
-    transform: rotate(180deg);
+  .section-stats {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    
+    .stat-item {
+      font-family: var(--font-family-text);
+      color: $admin-text-light;
+      font-size: 0.9rem;
+      
+      &.deleted-stat {
+        color: $admin-danger;
+        font-weight: 500;
+      }
+    }
   }
   
-  .accordion-arrow {
-    font-size: 1.2rem;
-    color: $admin-primary;
-    font-weight: bold;
-    display: block;
+  .accordion-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
     transition: transform 0.3s ease;
+    
+    &.rotated {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    
+    .accordion-arrow {
+      font-size: 1.2rem;
+      color: $admin-primary;
+    }
   }
 }
 
@@ -931,4 +951,128 @@ $admin-danger: #dc3545;
   font-family: "Font Awesome 5 Free" !important;
   font-weight: 900 !important;
 }
-</style>
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    .section-stats {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+  
+  /* Barre de recherche adaptée mobile */
+  .search-container {
+    padding: 1rem;
+  }
+  
+  .search-input-wrapper {
+    max-width: 100%;
+    padding: 0.6rem 0.8rem;
+  }
+  
+  .search-input {
+    font-size: 0.85rem;
+  }
+  
+  .search-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 0.6rem;
+  }
+  
+  .clear-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Résultats de recherche plus compacts */
+  .search-results {
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.8rem;
+    
+    .results-text {
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Basculer vers les vignettes sur mobile */
+  .users-table {
+    display: none;
+  }
+  
+  .users-cards {
+    display: block;
+  }
+  
+  /* Optimisations des vignettes sur mobile */
+  .user-card {
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .card-header {
+    margin-bottom: 0.6rem;
+    
+    .user-info .user-name {
+      font-size: 1rem;
+    }
+    
+    .user-role {
+      font-size: 0.8rem;
+    }
+    
+    .user-date {
+      font-size: 0.75rem;
+    }
+  }
+  
+  .card-content {
+    margin-bottom: 0.8rem;
+    
+    .user-email {
+      font-size: 0.85rem;
+    }
+  }
+  
+  .card-actions .action-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Très petits écrans */
+  .section-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .title-icon {
+    font-size: 1.6rem;
+  }
+  
+  .section-stats {
+    gap: 0.5rem;
+    
+    .stat-item {
+      font-size: 0.75rem;
+    }
+  }
+  
+  .search-container {
+    padding: 0.75rem;
+  }
+  
+  .search-input-wrapper {
+    padding: 0.5rem 0.7rem;
+  }
+}
+

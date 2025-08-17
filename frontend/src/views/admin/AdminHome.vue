@@ -11,11 +11,7 @@
            <p class="header-subtitle">Bienvenue <strong>{{ authStore.user?.name || 'Administrateur' }}</strong> dans votre espace d'administration</p>
         </div>
         <div class="header-actions">
-          <button class="admin-clear-btn" @click="clearAllData" title="Vider toutes les données">
-            <i class="fas fa-trash-alt"></i>
-            Vider tout
-          </button>
-                 <button class="admin-logout-btn" @click="handleLogout">
+          <button class="admin-logout-btn" @click="handleLogout">
           <i class="fas fa-sign-out-alt"></i>
           Déconnexion
         </button>
@@ -56,7 +52,41 @@
       @toggleLock="handleToggleLock"
       @nomChange="handleNomChange"
       @toggle="toggleProductsSection"
+      @showDeleteConfirm="showDeleteConfirmModal"
     />
+    
+    <!-- Modal de confirmation pour suppression de tous les produits -->
+    <div v-if="showDeleteConfirm" class="delete-confirm-overlay">
+      <div class="delete-confirm-modal">
+        <div class="modal-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Attention !</h3>
+        </div>
+        <div class="modal-content">
+          <p class="modal-description">
+            Vous êtes sur le point de supprimer <strong>tous les produits</strong> de votre dashboard.
+          </p>
+          <div class="warning-box">
+            <i class="fas fa-info-circle"></i>
+            <span>Cette action est irréversible</span>
+          </div>
+          <div class="safe-box">
+            <i class="fas fa-shield-alt"></i>
+            <span>Vos utilisateurs ne seront pas affectés</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="cancel-btn" @click="cancelDelete">
+            <i class="fas fa-times"></i>
+            Annuler
+          </button>
+          <button class="confirm-btn" @click="confirmDeleteAllProducts">
+            <i class="fas fa-trash-alt"></i>
+            Supprimer tout
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -127,8 +157,19 @@ const products = ref<ProductsByStep>({
 // État de l'accordéon
 const isProductsSectionOpen = ref(true)
 
+// État de la modal de confirmation
+const showDeleteConfirm = ref(false)
+
 // Computed properties
-const totalProducts = computed(() => 15) // 3 + 4 + 4 + 4
+const totalProducts = computed(() => {
+  const fondsCount = products.value.fonds.filter(p => p.nom && p.images.some(img => img && img.length > 0)).length
+  const premiereCount = products.value.premiereCoucheDouceur.filter(p => p.nom && p.images.some(img => img && img.length > 0)).length
+  const secondeCount = products.value.secondeCoucheDouceur.filter(p => p.nom && p.images.some(img => img && img.length > 0)).length
+  const toucheCount = products.value.toucheFinale.filter(p => p.nom && p.images.some(img => img && img.length > 0)).length
+  
+  return fondsCount + premiereCount + secondeCount + toucheCount
+})
+
 const totalPending = computed(() => 0) // À implémenter si nécessaire
 
 const fondsProgress = computed(() => {
@@ -505,22 +546,30 @@ onMounted(() => {
   debugVignettes()
 })
 
-// Vider complètement toutes les données
-const clearAllData = async () => {
+// Vider complètement toutes les données des PRODUITS uniquement (sécurisé)
+const clearAllProducts = async () => {
   try {
-    console.log('🗑️ Suppression de toutes les données...')
+    console.log('🗑️ SÉCURISÉ - Suppression de TOUS les PRODUITS uniquement...')
+    console.log('✅ Les utilisateurs ne seront PAS supprimés')
     
-    // Récupérer tous les produits existants
+    // Récupérer tous les PRODUITS existants uniquement
     const allProducts = await productConfigService.getAllProducts()
+    console.log(`📊 ${allProducts.length} produits à supprimer`)
     
-    // Supprimer chaque produit
+    if (allProducts.length === 0) {
+      console.log('ℹ️ Aucun produit à supprimer')
+      return
+    }
+    
+    // Supprimer chaque PRODUIT uniquement
     for (const product of allProducts) {
       if (product.id && typeof product.id === 'string') {
+        console.log(`🗑️ Suppression du produit: ${product.nom || 'Sans nom'}`)
         await productConfigService.deleteProduct(product.id)
       }
     }
     
-    // Remettre à zéro la mémoire locale
+    // Remettre à zéro la mémoire locale des PRODUITS uniquement
     products.value = {
       fonds: Array(3).fill(null).map((_, i) => ({ 
         id: i, 
@@ -552,10 +601,24 @@ const clearAllData = async () => {
       }))
     }
     
-    console.log('✅ Toutes les données ont été supprimées')
+    console.log('✅ Tous les PRODUITS ont été supprimés (utilisateurs préservés)')
   } catch (error) {
-    console.error('❌ Erreur lors de la suppression:', error)
+    console.error('❌ Erreur lors de la suppression des produits:', error)
   }
+}
+
+// Fonctions pour la modal de confirmation
+const showDeleteConfirmModal = () => {
+  showDeleteConfirm.value = true
+}
+
+const cancelDelete = () => {
+  showDeleteConfirm.value = false
+}
+
+const confirmDeleteAllProducts = async () => {
+  showDeleteConfirm.value = false
+  await clearAllProducts()
 }
 </script>
 
@@ -615,24 +678,6 @@ const clearAllData = async () => {
   gap: 1rem;
 }
 
-.admin-clear-btn {
-  font-family: var(--font-family-text);
-  background: $admin-danger;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  
-  &:hover {
-    opacity: 0.9;
-  }
-}
-
 .admin-logout-btn {
   font-family: var(--font-family-text);
   background: $admin-danger;
@@ -689,7 +734,7 @@ const clearAllData = async () => {
     gap: 0.5rem;
   }
 
-  .admin-clear-btn, .admin-logout-btn {
+  .admin-logout-btn {
     width: 100%;
     justify-content: center;
     padding: 0.8rem 1rem;
@@ -697,4 +742,154 @@ const clearAllData = async () => {
   }
 }
 
+/* Styles pour la modal de confirmation */
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.delete-confirm-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  color: #dc3545;
+}
+
+.modal-header i {
+  font-size: 2rem;
+  color: #dc3545;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-family: var(--font-family-title);
+  font-size: 1.5rem;
+  color: #dc3545;
+}
+
+.modal-content {
+  margin-bottom: 1.5rem;
+}
+
+.modal-description {
+  margin: 0 0 1.5rem 0;
+  font-family: var(--font-family-text);
+  line-height: 1.5;
+  font-size: 1rem;
+  color: #2c3e50;
+}
+
+.warning-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: #fff5f5;
+  border-radius: 8px;
+  border: 1px solid #fed7d7;
+  color: #dc3545;
+  font-family: var(--font-family-text);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.warning-box i {
+  font-size: 1.2rem;
+  color: #dc3545;
+}
+
+.safe-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: #e3f2fd;
+  border-radius: 8px;
+  border: 1px solid #17a2b8;
+  color: #17a2b8;
+  font-family: var(--font-family-text);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.safe-box i {
+  font-size: 1.2rem;
+  color: #17a2b8;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.modal-actions button {
+  font-family: var(--font-family-text);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.confirm-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* Responsive pour la modal */
+@media (max-width: 768px) {
+  .delete-confirm-modal {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
 </style>
