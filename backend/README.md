@@ -1,175 +1,75 @@
-# 🚀 Backend Amande - API
+# Backend Amande – Fonctionnement & Utilité
 
-Backend API pour **Amande - L'art de la tartelette** - Gestion des utilisateurs et paniers.
+## À quoi sert ce backend ?
 
-## 📋 Fonctionnalités
+Ce backend gère toute la logique serveur pour l’application Amande :
 
-- **Gestion des utilisateurs** : CRUD complet avec Supabase
-- **Gestion des paniers** : Récupération des paniers utilisateur
-- **Authentification** : Intégration avec Supabase Auth
-- **API RESTful** : Endpoints standards et documentés
+- Il reçoit les requêtes du frontend (site web).
+- Il communique avec Supabase pour stocker et récupérer les données (utilisateurs, paniers).
+- Il sécurise les échanges et gère les erreurs.
 
-## 🛠️ Technologies
+## Comment ça marche avec le frontend ?
 
-- **Node.js** (>=18.0.0)
-- **Express.js** - Framework web
-- **Supabase** - Backend-as-a-Service
-- **CORS** - Gestion des origines
-- **dotenv** - Variables d'environnement
+- Le frontend (Vue.js) envoie des requêtes HTTP à ce backend (ex : création d’utilisateur, ajout au panier).
+- Le backend traite la demande, interroge Supabase si besoin, puis renvoie la réponse au frontend.
+- Les routes principales sont :
+  - `/api/users` pour les utilisateurs
+  - `/api/cart` pour les paniers
 
-## 🚀 Installation
+## Comment ça marche avec Supabase ?
 
-### Prérequis
-- Node.js >= 18.0.0
-- npm ou yarn
-- Compte Supabase
+- Supabase sert de base de données et d’authentification.
+- Le backend utilise les clés Supabase pour accéder aux données.
+- Toutes les opérations (CRUD) passent par Supabase.
 
-### 1. Installation des dépendances
-```bash
-cd backend
-npm install
-```
+## Technologies utilisées et pourquoi :
 
-### 2. Configuration des variables d'environnement
-Créez un fichier `.env` à la racine du projet :
+- **Node.js** : rapide, moderne, idéal pour les API.
+- **Express.js** : simplifie la création de routes et la gestion des requêtes.
+- **Supabase** : facilite la gestion des données et l’authentification sans serveur complexe.
+- **CORS** : autorise le frontend à communiquer avec le backend.
+- **dotenv** : permet de garder les clés et infos sensibles dans un fichier `.env`.
 
-```env
-# Supabase
-SUPABASE_URL=https://votre-projet.supabase.co
-SUPABASE_ANON_KEY=votre_cle_anonyme
-SUPABASE_SERVICE_ROLE_KEY=votre_cle_service
+## Fonctionnement général :
 
-# Serveur
-PORT=3001
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5174
-```
+1. Le serveur démarre et charge la configuration.
+2. Il expose des routes pour le frontend.
+3. Il vérifie la santé de l’API via `/health`.
+4. Il gère les erreurs et les routes inconnues.
+5. Il s’arrête proprement en cas de signal système.
 
-### 3. Démarrage
-```bash
-# Développement (avec nodemon)
-npm run dev
+## Pourquoi cette architecture ?
 
-# Production
-npm start
+- Séparation claire entre le frontend (Vue) et le backend (Express).
+- Sécurité : validation des données, gestion des tokens, CORS.
+- Facilité de maintenance et d’évolution.
+- Utilisation de Supabase pour éviter de gérer une base de données complexe soi-même.
 
-# Nettoyage complet
-npm run clean
-```
+## Exemple de flux :
 
-## 📡 API Endpoints
+1. Un utilisateur s’inscrit sur le site → le frontend envoie la requête à `/api/users`.
+2. Le backend valide les données, crée l’utilisateur dans Supabase, et renvoie la réponse.
+3. L’utilisateur ajoute un produit au panier → le frontend envoie la requête à `/api/cart`.
+4. Le backend enregistre le panier dans Supabase et confirme au frontend.
 
-### 🔐 Utilisateurs
-
-#### `GET /api/users`
-Récupère tous les utilisateurs.
-
-**Réponse :**
-```json
-{
-  "users": [...],
-  "count": 5,
-  "timestamp": "2024-01-01T12:00:00.000Z"
-}
-```
-
-#### `POST /api/users`
-Crée un nouvel utilisateur.
-
-**Body :**
-```json
-{
-  "email": "user@example.com",
-  "name": "Nom Utilisateur",
-  "role": "user"
-}
-```
-
-#### `POST /api/users/delete-account`
-Supprime un compte utilisateur (soft delete).
-
-**Headers :**
-```
-Authorization: Bearer <token>
-```
-
-### 🛒 Paniers
-
-#### `GET /api/cart`
-Récupère tous les paniers.
-
-#### `GET /api/cart/:userId`
-Récupère le panier d'un utilisateur spécifique.
-
-## 🔧 Scripts NPM
-
-- `npm start` - Démarre le serveur en production
-- `npm run dev` - Démarre le serveur en développement avec nodemon
-- `npm run clean` - Nettoie et réinstalle les dépendances
-- `npm run setup` - Configure l'environnement
-
-## 🚨 Gestion des Erreurs
-
-Le backend inclut une gestion d'erreurs robuste :
-
-- **Validation des données** : Vérification des entrées utilisateur
-- **Gestion des erreurs Supabase** : Traitement des erreurs de base de données
-- **Logs structurés** : Console avec emojis et informations détaillées
-- **Réponses d'erreur** : Messages d'erreur clairs et informatifs
-
-## 🔒 Sécurité
-
-- **CORS configuré** : Origines autorisées uniquement
-- **Validation des tokens** : Authentification requise pour les actions sensibles
-- **Limites de taille** : Limitation des requêtes à 10MB
-- **Gestion gracieuse** : Arrêt propre du serveur
-
-## 📊 Monitoring
-
-- **Route de santé** : `/health` pour vérifier l'état de l'API
-- **Logs détaillés** : Console avec informations de démarrage et d'erreur
-- **Gestion des signaux** : Arrêt gracieux sur SIGTERM/SIGINT
-
-## 🐛 Résolution des Problèmes
-
-### Erreur "Port déjà utilisé"
-```bash
-PORT=3002 npm start
-```
-
-### Erreur de connexion Supabase
-- Vérifiez vos variables d'environnement
-- Assurez-vous que votre projet Supabase est actif
-- Vérifiez vos clés d'API
-
-### Nettoyage complet
-```bash
-npm run clean
-```
-
-## 📝 Structure des Fichiers
+## Structure des fichiers :
 
 ```
 backend/
 ├── src/
-│   ├── server.js          # Serveur principal
-│   ├── routes/            # Routes API
-│   │   ├── users.js       # Gestion des utilisateurs
-│   │   └── cart.js        # Gestion des paniers
-│   └── config/            # Configuration
-│       └── supabase.js    # Configuration Supabase
-├── package.json           # Dépendances et scripts
-├── nodemon.json          # Configuration nodemon
-└── README.md             # Documentation
+│   ├── server.js        # Point d’entrée du serveur
+│   ├── routes/
+│   │   ├── users.js     # Routes utilisateurs
+│   │   └── cart.js      # Routes paniers
+│   └── config/
+│       └── supabase.js  # Connexion Supabase
+├── package.json         # Dépendances et scripts
+└── README.md            # Documentation
 ```
 
-## 🤝 Contribution
+## Pour démarrer :
 
-1. Respectez la structure existante
-2. Ajoutez des logs avec emojis
-3. Gérez les erreurs proprement
-4. Documentez les nouvelles fonctionnalités
-
-## 📄 Licence
-
-ISC - Voir `package.json` pour plus de détails.
+1. Installer Node.js et npm.
+2. Créer un fichier `.env` avec les clés Supabase et la config serveur.
+3. Installer les dépendances : `npm install`
+4. Lancer le serveur : `npm run dev` (développement) ou `npm start` (production).

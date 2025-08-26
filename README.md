@@ -31,6 +31,7 @@ bachelor_amande-1/
 ## 🚀 Démarrage rapide
 
 ### Frontend
+
 ```bash
 cd frontend
 npm install
@@ -38,6 +39,7 @@ npm run dev
 ```
 
 ### Backend
+
 ```bash
 cd backend
 npm install
@@ -80,9 +82,50 @@ npm run test
 npm run build
 ```
 
-## 📚 Documentation
+## �️ Gestion du Backend (installation, SQL, Supabase, lancement)
 
-- [Guide Frontend](./docs/frontend.md)
-- [Guide Backend](./docs/backend.md)
-- [API Documentation](./docs/api.md)
-- [Architecture](./docs/architecture.md)
+### 1. Installation du backend
+
+```bash
+cd backend
+npm install
+```
+
+### 2. Configuration Supabase
+
+- Crée un projet sur https://supabase.com
+- Récupère tes clés API (URL, ANON KEY, SERVICE ROLE KEY)
+- Crée un fichier `.env` dans `backend/` :
+  ```env
+  SUPABASE_URL=...
+  SUPABASE_ANON_KEY=...
+  SUPABASE_SERVICE_ROLE_KEY=...
+  PORT=3001
+  FRONTEND_URL=http://localhost:5174
+  NODE_ENV=development
+  ```
+
+### 3. Initialisation ou nettoyage de la base de données
+
+- Ouvre l’éditeur SQL Supabase
+- Copie le contenu du fichier `docs/sql/supabase-init.sql` (script unique)
+- Exécute le script pour créer toutes les tables et nettoyer l’ancienne base
+
+### 4. Lancement du backend
+
+```bash
+cd backend
+npm run dev   # pour le développement
+npm start     # pour la production
+```
+
+### 5. Vérification
+
+- Accède à `http://localhost:3001/health` pour vérifier que l’API fonctionne
+- Le backend est prêt à recevoir les requêtes du frontend
+
+### 6. Conseils
+
+- Un seul script SQL suffit pour tout réinitialiser
+- Les anciennes migrations SQL peuvent être supprimées
+- Documente bien tes variables d’environnement

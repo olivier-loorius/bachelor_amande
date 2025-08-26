@@ -1,3 +1,4 @@
+<!-- prettier-ignore -->
 <template>
   <div class="page-container">
     <main class="content-container composer-content">
@@ -460,7 +461,7 @@
           </div>
           <div class="composer-footer">
             <div class="composer-progress-bar">
-              <template v-for="step in 5">
+              <template v-for="step in 5" :key="step">
                 <span
                   class="progress-dot"
                   :class="{
@@ -687,7 +688,7 @@
           </div>
           <div class="composer-footer">
             <div class="composer-progress-bar">
-              <template v-for="step in 5">
+              <template v-for="step in 5" :key="step">
                 <span
                   class="progress-dot"
                   :class="{
@@ -914,7 +915,7 @@
           </div>
           <div class="composer-footer">
             <div class="composer-progress-bar">
-              <template v-for="step in 5">
+              <template v-for="step in 5" :key="step">
                 <span
                   class="progress-dot"
                   :class="{
@@ -1208,7 +1209,7 @@
           </div>
           <div class="composer-footer composer-footer-step5">
             <div class="composer-progress-bar">
-              <template v-for="step in 5">
+              <template v-for="step in 5" :key="step">
                 <span
                   class="progress-dot"
                   :class="{
@@ -1344,20 +1345,20 @@ const productConfig = ref<Product[]>([])
 // Computed properties pour organiser les données
 const fonds = computed(() => {
   return productConfig.value
-  .filter((p: Product) => p.step === 'fonds')
-  .slice(0, 3) // Limiter à 3 fonds maximum
-  .map((p: Product, index: number) => ({
+    .filter((p: Product) => p.step === 'fonds')
+    .slice(0, 3) // Limiter à 3 fonds maximum
+    .map((p: Product, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3
       nom: p.nom || `Fond ${index + 1}`,
-  image: p.images && p.images.length > 0 ? p.images[0] : undefined,
+      image: p.images && p.images.length > 0 ? p.images[0] : undefined,
     }))
 })
 
 const garnitures1 = computed(() => {
   return productConfig.value
-  .filter((p: Product) => p.step === 'premiereCoucheDouceur')
-  .slice(0, 4) // Limiter à 4 garnitures maximum
-  .map((p: Product, index: number) => ({
+    .filter((p: Product) => p.step === 'premiereCoucheDouceur')
+    .slice(0, 4) // Limiter à 4 garnitures maximum
+    .map((p: Product, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
       nom: p.nom || `Garniture ${index + 1}`,
       // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
@@ -1370,9 +1371,9 @@ const garnitures1 = computed(() => {
 
 const garnitures2 = computed(() => {
   return productConfig.value
-  .filter((p: Product) => p.step === 'secondeCoucheDouceur')
-  .slice(0, 4) // Limiter à 4 garnitures maximum
-  .map((p: Product, index: number) => ({
+    .filter((p: Product) => p.step === 'secondeCoucheDouceur')
+    .slice(0, 4) // Limiter à 4 garnitures maximum
+    .map((p: Product, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
       nom: p.nom || `Garniture ${index + 1}`,
       // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
@@ -1385,9 +1386,9 @@ const garnitures2 = computed(() => {
 
 const garnitures3 = computed(() => {
   return productConfig.value
-  .filter((p: Product) => p.step === 'toucheFinale')
-  .slice(0, 4) // Limiter à 4 garnitures maximum
-  .map((p: Product, index: number) => ({
+    .filter((p: Product) => p.step === 'toucheFinale')
+    .slice(0, 4) // Limiter à 4 garnitures maximum
+    .map((p: Product, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
       nom: p.nom || `Garniture ${index + 1}`,
       // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
@@ -1400,9 +1401,9 @@ const garnitures3 = computed(() => {
 
 const finitions = computed(() => {
   return productConfig.value
-  .filter((p: Product) => p.step === 'toucheFinale')
-  .slice(0, 4) // Limiter à 4 finitions maximum
-  .map((p: Product, index: number) => ({
+    .filter((p: Product) => p.step === 'toucheFinale')
+    .slice(0, 4) // Limiter à 4 finitions maximum
+    .map((p: Product, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
       nom: p.nom || `Finition ${index + 1}`,
       // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
@@ -1425,7 +1426,6 @@ function triggerQtyAnim() {
   void quantite.value
   animateQty.value = true
 }
-const hoveredGarniture1 = ref<number | null>(null)
 const showAddModal = ref(false)
 const showLoginPrompt = ref(false)
 const authStore = useAuthStore()
@@ -1661,10 +1661,18 @@ async function loadUserCompositions() {
 async function loadComposition(composition: Composition) {
   // Trouver les objets correspondants aux noms stockés
   const fond = fonds.value.find((f: { id: number; nom: string }) => f.nom === composition.fond)
-  const garniture1 = garnitures1.value.find((g: { id: number; nom: string }) => g.nom === composition.garniture1)
-  const garniture2 = garnitures2.value.find((g: { id: number; nom: string }) => g.nom === composition.garniture2)
-  const garniture3 = garnitures3.value.find((g: { id: number; nom: string }) => g.nom === composition.garniture3) // CORRECTION : utiliser garnitures3
-  const finition = finitions.value.find((f: { id: number; nom: string }) => f.nom === composition.finition)
+  const garniture1 = garnitures1.value.find(
+    (g: { id: number; nom: string }) => g.nom === composition.garniture1,
+  )
+  const garniture2 = garnitures2.value.find(
+    (g: { id: number; nom: string }) => g.nom === composition.garniture2,
+  )
+  const garniture3 = garnitures3.value.find(
+    (g: { id: number; nom: string }) => g.nom === composition.garniture3,
+  ) // CORRECTION : utiliser garnitures3
+  const finition = finitions.value.find(
+    (f: { id: number; nom: string }) => f.nom === composition.finition,
+  )
 
   selectedFond.value = fond || null
   selectedGarniture1.value = garniture1 || null
@@ -1764,15 +1772,7 @@ onBeforeUnmount(() => {
 
 const currentStep = ref(1)
 
-const stepDone = computed(() => {
-  if (!selectedFond.value) return 0
-  if (!selectedGarniture1.value) return 1
-  if (!selectedGarniture2.value) return 2
-  if (!selectedGarniture3.value) return 3
-  if (!selectedFinition.value) return 4
-  if (!quantite.value) return 5
-  return 6
-})
+// Suppression de stepDone inutilisé
 
 function goToNextStep() {
   if (currentStep.value < 6) {
@@ -1783,11 +1783,7 @@ function goToNextStep() {
     }, 50)
   }
 }
-function goToPrevStep() {
-  if (currentStep.value > 1) {
-    currentStep.value--
-  }
-}
+// Suppression de goToPrevStep inutilisé
 
 const fondIndex = ref(0)
 
@@ -2425,8 +2421,7 @@ const isMobile = computed(() => windowWidth.value <= 600)
     background-color: transparent;
   }
 }
-.composer-btn-panier {
-}
+/* Suppression de la règle vide .composer-btn-panier */
 .composer-btn-panier:disabled {
   background: #ccc;
   color: #888;
