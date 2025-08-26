@@ -1,6 +1,6 @@
 <template>
   <section class="dashboard-section accordion-section">
-    <div class="section-header accordion-header" @click="toggleProductsSection">
+  <div class="section-header accordion-header">
       <div class="header-left">
         <h2 class="section-title">
           <span class="title-icon"><i class="fas fa-cogs"></i></span>
@@ -33,8 +33,8 @@
     <div class="accordion-content" :class="{ 'open': isProductsSectionOpen }">
       <div class="products-accordion">
         <!-- Étape 1 : Fonds (1 image) -->
-        <details class="product-step-details">
-          <summary class="step-summary">
+        <div class="product-step-details">
+          <div class="step-summary">
             <span class="step-number">1</span>
             <span class="step-title">Fonds</span>
             <span class="step-progress">
@@ -43,26 +43,33 @@
               </div>
               <span class="progress-text">{{ fondsConfigured }}/3</span>
             </span>
-          </summary>
-          <ProductStep
-            :step="1"
-            title="Fonds"
-            description="Ajoutez ici une seule image de fond"
-            :products="props.fonds"
-            :locked="props.lockedProducts.fonds"
-            :images-count="1"
-            :start-index="0"
-            @upload="handleUpload"
-            @remove="handleRemove"
-            @save="handleSave"
-            @reset="handleReset"
-            @toggleLock="handleToggleLock"
-          />
-        </details>
+            <span class="step-chevron" @click.stop="toggleSection('fonds')" style="margin-left:auto;cursor:pointer;">
+              <i class="fas fa-chevron-down" :style="{ transform: openSections.fonds ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
+            </span>
+          </div>
+          <Transition name="slide-fade">
+            <div v-if="openSections.fonds">
+              <ProductStep
+                :step="1"
+                title="Fonds"
+                description="Ajoutez ici une seule image de fond"
+                :products="props.fonds"
+                :locked="props.lockedProducts.fonds"
+                :images-count="1"
+                :start-index="0"
+                @upload="handleUpload"
+                @remove="handleRemove"
+                @save="handleSave"
+                @reset="handleReset"
+                @toggleLock="handleToggleLock"
+              />
+            </div>
+          </Transition>
+        </div>
 
         <!-- Étape 2 : Première Couche de Douceur (3 images) -->
-        <details class="product-step-details">
-          <summary class="step-summary">
+        <div class="product-step-details">
+          <div class="step-summary">
             <span class="step-number">2</span>
             <span class="step-title">Première Couche de Douceur</span>
             <span class="step-progress">
@@ -71,26 +78,33 @@
               </div>
               <span class="progress-text">{{ premiereCoucheConfigured }}/4</span>
             </span>
-          </summary>
-          <ProductStep
-            :step="2"
-            title="Première Couche de Douceur"
-            description="Ajoutez jusqu'à 3 variantes de douceur"
-            :products="props.premiereCoucheDouceur"
-            :locked="props.lockedProducts.premiereCoucheDouceur"
-            :images-count="3"
-            :start-index="3"
-            @upload="handleUpload"
-            @remove="handleRemove"
-            @save="handleSave"
-            @reset="handleReset"
-            @toggleLock="handleToggleLock"
-          />
-        </details>
+            <span class="step-chevron" @click.stop="toggleSection('premiereCoucheDouceur')" style="margin-left:auto;cursor:pointer;">
+              <i class="fas fa-chevron-down" :style="{ transform: openSections.premiereCoucheDouceur ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
+            </span>
+          </div>
+          <Transition name="slide-fade">
+            <div v-if="openSections.premiereCoucheDouceur">
+              <ProductStep
+                :step="2"
+                title="Première Couche de Douceur"
+                description="Ajoutez jusqu'à 3 variantes de douceur"
+                :products="props.premiereCoucheDouceur"
+                :locked="props.lockedProducts.premiereCoucheDouceur"
+                :images-count="3"
+                :start-index="3"
+                @upload="handleUpload"
+                @remove="handleRemove"
+                @save="handleSave"
+                @reset="handleReset"
+                @toggleLock="handleToggleLock"
+              />
+            </div>
+          </Transition>
+        </div>
 
         <!-- Étape 3 : Seconde Couche de Douceur (3 images) -->
-        <details class="product-step-details">
-          <summary class="step-summary">
+        <div class="product-step-details">
+          <div class="step-summary">
             <span class="step-number">3</span>
             <span class="step-title">Seconde Couche de Douceur</span>
             <span class="step-progress">
@@ -99,26 +113,33 @@
               </div>
               <span class="progress-text">{{ secondeCoucheConfigured }}/4</span>
             </span>
-          </summary>
-          <ProductStep
-            :step="3"
-            title="Seconde Couche de Douceur"
-            description="Ajoutez plusieurs déclinaisons de douceur"
-            :products="props.secondeCoucheDouceur"
-            :locked="props.lockedProducts.secondeCoucheDouceur"
-            :images-count="3"
-            :start-index="7"
-            @upload="handleUpload"
-            @remove="handleRemove"
-            @save="handleSave"
-            @reset="handleReset"
-            @toggleLock="handleToggleLock"
-          />
-        </details>
+            <span class="step-chevron" @click.stop="toggleSection('secondeCoucheDouceur')" style="margin-left:auto;cursor:pointer;">
+              <i class="fas fa-chevron-down" :style="{ transform: openSections.secondeCoucheDouceur ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
+            </span>
+          </div>
+          <Transition name="slide-fade">
+            <div v-if="openSections.secondeCoucheDouceur">
+              <ProductStep
+                :step="3"
+                title="Seconde Couche de Douceur"
+                description="Ajoutez plusieurs déclinaisons de douceur"
+                :products="props.secondeCoucheDouceur"
+                :locked="props.lockedProducts.secondeCoucheDouceur"
+                :images-count="3"
+                :start-index="7"
+                @upload="handleUpload"
+                @remove="handleRemove"
+                @save="handleSave"
+                @reset="handleReset"
+                @toggleLock="handleToggleLock"
+              />
+            </div>
+          </Transition>
+        </div>
 
         <!-- Étape 4 : Touche Finale (3 images) -->
-        <details class="product-step-details">
-          <summary class="step-summary">
+        <div class="product-step-details">
+          <div class="step-summary">
             <span class="step-number">4</span>
             <span class="step-title">Touche Finale</span>
             <span class="step-progress">
@@ -127,31 +148,56 @@
               </div>
               <span class="progress-text">{{ toucheFinaleConfigured }}/4</span>
             </span>
-          </summary>
-          <ProductStep
-            :step="4"
-            title="Touche Finale"
-            description="Ajoutez différentes finitions"
-            :products="props.toucheFinale"
-            :locked="props.lockedProducts.toucheFinale"
-            :images-count="3"
-            :start-index="11"
-            @upload="handleUpload"
-            @remove="handleRemove"
-            @save="handleSave"
-            @reset="handleReset"
-            @toggleLock="handleToggleLock"
-          />
-        </details>
+            <span class="step-chevron" @click.stop="toggleSection('toucheFinale')" style="margin-left:auto;cursor:pointer;">
+              <i class="fas fa-chevron-down" :style="{ transform: openSections.toucheFinale ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
+            </span>
+          </div>
+          <Transition name="slide-fade">
+            <div v-if="openSections.toucheFinale">
+              <ProductStep
+                :step="4"
+                title="Touche Finale"
+                description="Ajoutez différentes finitions"
+                :products="props.toucheFinale"
+                :locked="props.lockedProducts.toucheFinale"
+                :images-count="3"
+                :start-index="11"
+                @upload="handleUpload"
+                @remove="handleRemove"
+                @save="handleSave"
+                @reset="handleReset"
+                @toggleLock="handleToggleLock"
+              />
+            </div>
+          </Transition>
+        </div>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import ProductStep from './ProductStep.vue'
 
-// Props reçues du composant parent
+const openSections = ref({
+  fonds: true,
+  premiereCoucheDouceur: false,
+  secondeCoucheDouceur: false,
+  toucheFinale: false
+})
+const toggleSection = (key: keyof typeof openSections.value) => {
+  if (!props.isProductsSectionOpen) {
+    emit('toggle')
+    // On attend le prochain tick pour ouvrir l'étape
+    setTimeout(() => {
+      openSections.value[key] = true
+    }, 0)
+  } else {
+    openSections.value[key] = !openSections.value[key]
+  }
+}
+
 const props = defineProps<{
   fonds: any[]
   premiereCoucheDouceur: any[]
@@ -171,49 +217,25 @@ const props = defineProps<{
   toucheFinaleConfigured: number
 }>()
 
-// Log temporaire pour déboguer
-console.log('🔍 AccordionSection - Props reçues:', {
-  fonds: props.fonds,
-  premiereCoucheDouceur: props.premiereCoucheDouceur,
-  lockedProducts: props.lockedProducts
-})
+const emit = defineEmits([
+  'upload', 'remove', 'save', 'reset', 'toggle', 'toggleLock', 'showDeleteConfirm'
+])
 
-// Émettre les événements vers le parent
-const emit = defineEmits<{
-  upload: [{ productIndex: number, imageIndex: number, file: File }]
-  remove: [{ productIndex: number, imageIndex: number }]
-  save: [index: number]
-  reset: [index: number]
-  toggle: []
-  toggleLock: [index: number]
-  showDeleteConfirm: []
-}>()
-
-const toggleProductsSection = () => {
-  emit('toggle')
-}
-
-// Fonctions pour gérer les événements
 function handleUpload({ productIndex, imageIndex, file }: { productIndex: number, imageIndex: number, file: File }) {
   emit('upload', { productIndex, imageIndex, file })
 }
-
 function handleRemove({ productIndex, imageIndex }: { productIndex: number, imageIndex: number }) {
   emit('remove', { productIndex, imageIndex })
 }
-
 function handleSave(index: number) {
   emit('save', index)
 }
-
 function handleReset(index: number) {
   emit('reset', index)
 }
-
 function handleToggleLock(index: number) {
   emit('toggleLock', index)
 }
-
 function showDeleteConfirmModal() {
   emit('showDeleteConfirm')
 }
@@ -387,6 +409,17 @@ $admin-danger: #dc3545;
     
     &:hover {
       background: rgba($admin-primary, 0.05);
+    }
+    .step-chevron {
+      font-size: 1.3rem;
+      color: $admin-primary;
+      transition: color 0.2s;
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+    }
+    .step-chevron:hover {
+      color: $admin-secondary;
     }
     
     .step-number {

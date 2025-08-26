@@ -197,15 +197,9 @@ const premiereCoucheConfigured = computed(() => products.value.premiereCoucheDou
 const secondeCoucheConfigured = computed(() => products.value.secondeCoucheDouceur.filter(p => p.nom && p.images.length > 0).length)
 const toucheFinaleConfigured = computed(() => products.value.toucheFinale.filter(p => p.nom && p.images.length > 0).length)
 
-// Fonction pour gérer automatiquement le verrouillage basé sur l'état du produit
+// Fonction simple : ne verrouille plus automatiquement
 const updateLockStatus = (productType: keyof ProductsByStep, actualIndex: number) => {
-  const product = products.value[productType][actualIndex]
-  const hasContent = product.nom && product.images.some(img => img && img.length > 0)
-  
-  // ✅ LOGIQUE CORRIGÉE : vide = déverrouillé, rempli = verrouillé
-  product.locked = hasContent
-  
-  console.log(`🔓 Vignette ${productType}[${actualIndex}] ${hasContent ? 'verrouillée' : 'déverrouillée'} (${product.nom || 'vide'})`)
+  // Ne fait rien, le verrouillage est géré dans handleSave
 }
 
 // Fonctions de gestion
@@ -273,10 +267,11 @@ const handleSave = async (productIndex: number) => {
   try {
     const { productType, actualIndex } = getProductInfo(productIndex)
     await saveProduct(productType, actualIndex)
-    
-    // ✅ Le verrouillage est maintenant géré automatiquement par updateLockStatus
-    // Pas besoin de forcer le verrouillage manuellement
-    console.log('✅ Produit sauvegardé avec verrouillage automatique')
+    // Verrouille la vignette seulement après sauvegarde
+    const product = products.value[productType][actualIndex]
+    const isFull = product.nom && product.images.some(img => img && img.length > 0)
+    if (isFull) product.locked = true
+    console.log('✅ Produit sauvegardé et verrouillé')
   } catch (error) {
     console.error('❌ Erreur sauvegarde:', error)
   }
@@ -361,6 +356,11 @@ const handleToggleLock = async (productIndex: number) => {
 
 const toggleProductsSection = () => {
   isProductsSectionOpen.value = !isProductsSectionOpen.value
+  // Recalcule le verrouillage de toutes les vignettes à chaque ouverture/fermeture
+  products.value.fonds.forEach((_, i) => updateLockStatus('fonds', i))
+  products.value.premiereCoucheDouceur.forEach((_, i) => updateLockStatus('premiereCoucheDouceur', i))
+  products.value.secondeCoucheDouceur.forEach((_, i) => updateLockStatus('secondeCoucheDouceur', i))
+  products.value.toucheFinale.forEach((_, i) => updateLockStatus('toucheFinale', i))
 }
 
 // Fonction pour gérer le changement de nom et mettre à jour le verrouillage

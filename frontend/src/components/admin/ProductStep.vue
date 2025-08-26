@@ -33,7 +33,7 @@
           <button 
             class="action-btn lock-btn" 
             :class="{ 'unlocked': !(locked && locked[i]) }"
-            @click="$emit('toggleLock', startIndex + i)"
+            @click="$emit('toggleLock', startIndex + i); if(locked && locked[i]) $emit('openStep')"
             :title="(locked && locked[i]) ? 'Déverrouiller' : 'Verrouiller'"
           >
             <i class="fas" :class="(locked && locked[i]) ? 'fa-lock' : 'fa-unlock'"></i>
@@ -97,7 +97,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['upload', 'remove', 'save', 'reset', 'toggleLock', 'nomChange'])
+defineEmits(['upload', 'remove', 'save', 'reset', 'toggleLock', 'nomChange', 'openStep'])
 
 // Debug: vérifier le nombre de produits
 onMounted(() => {

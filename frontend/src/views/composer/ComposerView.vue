@@ -47,6 +47,7 @@
                   box-sizing:border-box;`"
               >
                 <img
+                  v-if="fond.image"
                   :src="fond.image"
                   :alt="fond.nom"
                   style="
@@ -63,6 +64,9 @@
                   "
                   @error="handleImageError"
                 />
+                <div v-else class="fond-img-error" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#b00;font-size:1rem;background:#fff3f3;border-radius:5px;border:1px dashed #e0e0e0;">
+                  Image du fond manquante<br>Vérifiez le dashboard ou Supabase
+                </div>
                 <div
                   v-if="selectedFond?.id === fond.id"
                   style="

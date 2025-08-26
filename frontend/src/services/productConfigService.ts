@@ -27,7 +27,7 @@ export const productConfigService = {
       const { data, error } = await supabase
         .from('products_with_images')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: true }) // Correction ici
 
       if (error) throw error
 
@@ -52,7 +52,7 @@ export const productConfigService = {
         .from('products_with_images')
         .select('*')
         .eq('step', step)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: true }) // Correction ici
 
       if (error) throw error
 
