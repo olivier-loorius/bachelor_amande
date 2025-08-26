@@ -39,15 +39,15 @@
                  <i class="fas fa-user-edit"></i>
                  Modifier mon profil
                </button>
-               <button class="account-btn">
+               <button @click="redirectToConstruction('commandes')" class="account-btn">
                  <i class="fas fa-shopping-bag"></i>
                  Mes commandes
                </button>
-               <button class="account-btn">
+               <button @click="redirectToConstruction('favoris')" class="account-btn">
                  <i class="fas fa-heart"></i>
                  Mes favoris
                </button>
-               <button class="account-btn">
+               <button @click="redirectToConstruction('parametres')" class="account-btn">
                  <i class="fas fa-cog"></i>
                  Paramètres
                </button>
@@ -872,6 +872,20 @@ const handleRegister = async () => {
 
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768
+}
+
+// Fonction pour rediriger vers la page en construction avec fermeture automatique
+const redirectToConstruction = (section: string) => {
+  // Fermer le panneau de connexion
+  closeLogin()
+  
+  // Rediriger vers la page en construction
+  router.push('/en-construction')
+  
+  // Fermer automatiquement après 4 secondes et retourner à l'accueil
+  setTimeout(() => {
+    router.push('/')
+  }, 4000)
 }
 
 onMounted(() => {
