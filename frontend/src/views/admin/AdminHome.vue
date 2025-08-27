@@ -28,12 +28,12 @@
       :premiereCoucheDouceur="products.premiereCoucheDouceur"
       :secondeCoucheDouceur="products.secondeCoucheDouceur"
       :toucheFinale="products.toucheFinale"
-      :lockedProducts="{
-        fonds: products.fonds.map(p => p.locked),
-        premiereCoucheDouceur: products.premiereCoucheDouceur.map(p => p.locked),
-        secondeCoucheDouceur: products.secondeCoucheDouceur.map(p => p.locked),
-        toucheFinale: products.toucheFinale.map(p => p.locked)
-      }"
+             :lockedProducts="{
+         fonds: products.fonds.map(p => p.saved), // ← saved = true = verrouillée
+         premiereCoucheDouceur: products.premiereCoucheDouceur.map(p => p.saved),
+         secondeCoucheDouceur: products.secondeCoucheDouceur.map(p => p.saved),
+         toucheFinale: products.toucheFinale.map(p => p.saved)
+       }"
       :totalProducts="totalProducts"
       :totalPending="totalPending"
       :isProductsSectionOpen="isProductsSectionOpen"
@@ -49,8 +49,8 @@
       @remove="handleRemove"
       @save="handleSave"
       @reset="handleReset"
-      @toggleLock="handleToggleLock"
-      @nomChange="handleNomChange"
+             @toggleLock="handleToggleLock"
+       @nomChange="() => {}"
       @toggle="toggleProductsSection"
       @showDeleteConfirm="showDeleteConfirmModal"
     />
@@ -94,6 +94,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useProductStore } from '@/stores/useProductStore'
 
 import UsersSection from '@/components/admin/UsersSection.vue'
 import AccordionSection from '@/components/admin/AccordionSection.vue'
@@ -102,16 +103,19 @@ import { productConfigService } from '@/services/productConfigService'
 const authStore = useAuthStore()
 const router = useRouter()
 
+// Store des produits pour synchronisation avec ComposerView
+const productStore = useProductStore()
+
 const handleLogout = () => {
   authStore.logout(router)
 }
 
-// Types et interfaces
+// Types et interfaces - APPROCHE SIMPLE
 interface Product {
   id: string | number
   nom: string
   images: string[]  // toujours un tableau, même avec 1 seule image
-  locked: boolean
+  saved: boolean    // ← SEUL indicateur d'état : sauvegardé = fermé/verrouillé
   step: 'fonds' | 'premiereCoucheDouceur' | 'secondeCoucheDouceur' | 'toucheFinale'
 }
 
@@ -122,34 +126,34 @@ interface ProductsByStep {
   toucheFinale: Product[]
 }
 
-// État des produits avec modèle unique
+// État des produits - APPROCHE SIMPLE
 const products = ref<ProductsByStep>({
   fonds: Array(3).fill(null).map((_, i) => ({ 
     id: i, 
     nom: '', 
     images: [], 
-    locked: false, // ✅ CORRECTION : vide = déverrouillé
+    saved: false, // ← Vignette vide = pas sauvegardée = ouverte
     step: 'fonds'
   })),
   premiereCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
     id: i, 
     nom: '', 
     images: [], 
-    locked: false, // ✅ CORRECTION : vide = déverrouillé
+    saved: false, // ← Vignette vide = pas sauvegardée = ouverte
     step: 'premiereCoucheDouceur'
   })),
   secondeCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
     id: i, 
     nom: '', 
     images: [], 
-    locked: false, // ✅ CORRECTION : vide = déverrouillé
+    saved: false, // ← Vignette vide = pas sauvegardée = ouverte
     step: 'secondeCoucheDouceur'
   })),
   toucheFinale: Array(4).fill(null).map((_, i) => ({ 
     id: i, 
     nom: '', 
     images: [], 
-    locked: false, // ✅ CORRECTION : vide = déverrouillé
+    saved: false, // ← Vignette vide = pas sauvegardée = ouverte
     step: 'toucheFinale'
   }))
 })
@@ -197,10 +201,8 @@ const premiereCoucheConfigured = computed(() => products.value.premiereCoucheDou
 const secondeCoucheConfigured = computed(() => products.value.secondeCoucheDouceur.filter(p => p.nom && p.images.length > 0).length)
 const toucheFinaleConfigured = computed(() => products.value.toucheFinale.filter(p => p.nom && p.images.length > 0).length)
 
-// Fonction simple : ne verrouille plus automatiquement
-const updateLockStatus = (productType: keyof ProductsByStep, actualIndex: number) => {
-  // Ne fait rien, le verrouillage est géré dans handleSave
-}
+// ✅ APPROCHE SIMPLE : Plus besoin de logique complexe de verrouillage
+// Chaque vignette gère son propre état avec la propriété 'saved'
 
 // Fonctions de gestion
 const handleUpload = async ({ productIndex, imageIndex, file }: any) => {
@@ -214,27 +216,32 @@ const handleUpload = async ({ productIndex, imageIndex, file }: any) => {
         products.value.fonds[actualIndex].images = []
       }
       products.value.fonds[actualIndex].images[imageIndex] = imageUrl || ''
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.fonds[actualIndex].image = imageUrl || null
     } else if (productType === 'premiereCoucheDouceur') {
       if (!products.value.premiereCoucheDouceur[actualIndex].images) {
         products.value.premiereCoucheDouceur[actualIndex].images = []
       }
       products.value.premiereCoucheDouceur[actualIndex].images[imageIndex] = imageUrl || ''
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.premiereCoucheDouceur[actualIndex].images[imageIndex] = imageUrl || null
     } else if (productType === 'secondeCoucheDouceur') {
       if (!products.value.secondeCoucheDouceur[actualIndex].images) {
         products.value.secondeCoucheDouceur[actualIndex].images = []
       }
       products.value.secondeCoucheDouceur[actualIndex].images[imageIndex] = imageUrl || ''
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.secondeCoucheDouceur[actualIndex].images[imageIndex] = imageUrl || null
     } else if (productType === 'toucheFinale') {
       if (!products.value.toucheFinale[actualIndex].images) {
         products.value.toucheFinale[actualIndex].images = []
       }
       products.value.toucheFinale[actualIndex].images[imageIndex] = imageUrl || ''
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.toucheFinale[actualIndex].images[imageIndex] = imageUrl || null
     }
     
-    // ✅ Mettre à jour automatiquement le statut de verrouillage
-    updateLockStatus(productType, actualIndex)
-    
-    console.log('✅ Image uploadée:', imageUrl)
+    console.log('✅ Image uploadée et store synchronisé:', imageUrl)
   } catch (error) {
     console.error('❌ Erreur upload:', error)
   }
@@ -246,18 +253,23 @@ const handleRemove = async ({ productIndex, imageIndex }: any) => {
     
     if (productType === 'fonds') {
       products.value.fonds[actualIndex].images[imageIndex] = ''
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.fonds[actualIndex].image = null
     } else if (productType === 'premiereCoucheDouceur') {
       products.value.premiereCoucheDouceur[actualIndex].images[imageIndex] = ''
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.premiereCoucheDouceur[actualIndex].images[imageIndex] = null
     } else if (productType === 'secondeCoucheDouceur') {
       products.value.secondeCoucheDouceur[actualIndex].images[imageIndex] = ''
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.secondeCoucheDouceur[actualIndex].images[imageIndex] = null
     } else if (productType === 'toucheFinale') {
       products.value.toucheFinale[actualIndex].images[imageIndex] = ''
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.toucheFinale[actualIndex].images[imageIndex] = null
     }
     
-    // ✅ Mettre à jour automatiquement le statut de verrouillage
-    updateLockStatus(productType, actualIndex)
-    
-    console.log('✅ Image supprimée')
+    console.log('✅ Image supprimée et store synchronisé')
   } catch (error) {
     console.error('❌ Erreur suppression:', error)
   }
@@ -267,11 +279,24 @@ const handleSave = async (productIndex: number) => {
   try {
     const { productType, actualIndex } = getProductInfo(productIndex)
     await saveProduct(productType, actualIndex)
-    // Verrouille la vignette seulement après sauvegarde
+    
+    // ✅ APPROCHE VIGNETTE INDIVIDUELLE : Marquer comme sauvegardé
+    // La vignette reste accessible mais est marquée comme "complète"
     const product = products.value[productType][actualIndex]
-    const isFull = product.nom && product.images.some(img => img && img.length > 0)
-    if (isFull) product.locked = true
-    console.log('✅ Produit sauvegardé et verrouillé')
+    product.saved = true
+    
+    // Synchroniser avec le store des produits pour ComposerView
+    if (productType === 'fonds') {
+      productStore.fonds[actualIndex] = { nom: product.nom, image: product.images[0] || null }
+    } else if (productType === 'premiereCoucheDouceur') {
+      productStore.premiereCoucheDouceur[actualIndex] = { nom: product.nom, images: product.images }
+    } else if (productType === 'secondeCoucheDouceur') {
+      productStore.secondeCoucheDouceur[actualIndex] = { nom: product.nom, images: product.images }
+    } else if (productType === 'toucheFinale') {
+      productStore.toucheFinale[actualIndex] = { nom: product.nom, images: product.images }
+    }
+
+    console.log('✅ Produit sauvegardé → vignette marquée comme complète + store synchronisé')
   } catch (error) {
     console.error('❌ Erreur sauvegarde:', error)
   }
@@ -296,59 +321,45 @@ const handleReset = async (productIndex: number) => {
       }
     }
     
-    // Remettre à zéro dans la mémoire locale
+    // Remettre à zéro dans la mémoire locale - APPROCHE SIMPLE
     if (productType === 'fonds') {
-      products.value.fonds[actualIndex] = { id: actualIndex, nom: '', images: [], locked: false, step: 'fonds' } // ✅ CORRECTION : reset = déverrouillé
+      products.value.fonds[actualIndex] = { id: actualIndex, nom: '', images: [], saved: false, step: 'fonds' } // ← Reset = pas sauvegardé = ouvert
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.fonds[actualIndex] = { nom: '', image: null }
     } else if (productType === 'premiereCoucheDouceur') {
-      products.value.premiereCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], locked: false, step: 'premiereCoucheDouceur' } // ✅ CORRECTION : reset = déverrouillé
+      products.value.premiereCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], saved: false, step: 'premiereCoucheDouceur' } // ← Reset = pas sauvegardé = ouvert
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.premiereCoucheDouceur[actualIndex] = { nom: '', images: [null, null, null] }
     } else if (productType === 'secondeCoucheDouceur') {
-      products.value.secondeCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], locked: false, step: 'secondeCoucheDouceur' } // ✅ CORRECTION : reset = déverrouillé
+      products.value.secondeCoucheDouceur[actualIndex] = { id: actualIndex, nom: '', images: [], saved: false, step: 'secondeCoucheDouceur' } // ← Reset = pas sauvegardé = ouvert
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.secondeCoucheDouceur[actualIndex] = { nom: '', images: [null, null, null] }
     } else if (productType === 'toucheFinale') {
-      products.value.toucheFinale[actualIndex] = { id: actualIndex, nom: '', images: [], locked: false, step: 'toucheFinale' } // ✅ CORRECTION : reset = déverrouillé
+      products.value.toucheFinale[actualIndex] = { id: actualIndex, nom: '', images: [], saved: false, step: 'toucheFinale' } // ← Reset = pas sauvegardé = ouvert
+      // Synchroniser avec le store des produits pour ComposerView
+      productStore.toucheFinale[actualIndex] = { nom: '', images: [null, null, null] }
     }
     
-    console.log('✅ Produit remis à zéro (local + Supabase)')
+    console.log('✅ Produit remis à zéro (local + Supabase + store synchronisé)')
   } catch (error) {
     console.error('❌ Erreur reset:', error)
   }
 }
 
+// ✅ APPROCHE VIGNETTE INDIVIDUELLE : Permettre de déverrouiller pour modification
 const handleToggleLock = async (productIndex: number) => {
-  console.log('🔓 handleToggleLock appelé avec productIndex:', productIndex)
-  
   try {
     const { productType, actualIndex } = getProductInfo(productIndex)
-    console.log('🔍 Type et index:', { productType, actualIndex })
+    const product = products.value[productType][actualIndex]
     
-    // Vérifier que le produit existe
-    if (!products.value[productType as keyof ProductsByStep] || !products.value[productType as keyof ProductsByStep][actualIndex]) {
-      console.error('❌ Produit non trouvé:', { productType, actualIndex })
-      return
+    // Basculer l'état : sauvegardé ↔ modifiable
+    product.saved = !product.saved
+    
+    if (product.saved) {
+      console.log('🔒 Vignette verrouillée (sauvegardée)')
+    } else {
+      console.log('🔓 Vignette déverrouillée (modifiable)')
     }
-    
-    const currentProduct = products.value[productType as keyof ProductsByStep][actualIndex]
-    const currentLocked = currentProduct.locked
-    
-    console.log('🔍 AVANT toggle - Produit actuel:', {
-      type: productType,
-      index: actualIndex,
-      nom: currentProduct.nom,
-      locked: currentProduct.locked
-    })
-    
-    // Toggle simple et indépendant - UNIQUEMENT cette vignette
-    currentProduct.locked = !currentLocked
-    
-    console.log(`✅ Vignette ${productType}[${actualIndex}] ${currentLocked ? 'déverrouillée' : 'verrouillée'}`)
-    
-    // Debug pour vérifier qu'aucune autre vignette n'est affectée
-    console.log('🔍 État APRÈS toggle:', {
-      fonds: products.value.fonds.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked })),
-      premiereCouche: products.value.premiereCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked })),
-      secondeCouche: products.value.secondeCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked })),
-      toucheFinale: products.value.toucheFinale.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked }))
-    })
-    
   } catch (error) {
     console.error('❌ Erreur toggle lock:', error)
   }
@@ -356,30 +367,12 @@ const handleToggleLock = async (productIndex: number) => {
 
 const toggleProductsSection = () => {
   isProductsSectionOpen.value = !isProductsSectionOpen.value
-  // Recalcule le verrouillage de toutes les vignettes à chaque ouverture/fermeture
-  products.value.fonds.forEach((_, i) => updateLockStatus('fonds', i))
-  products.value.premiereCoucheDouceur.forEach((_, i) => updateLockStatus('premiereCoucheDouceur', i))
-  products.value.secondeCoucheDouceur.forEach((_, i) => updateLockStatus('secondeCoucheDouceur', i))
-  products.value.toucheFinale.forEach((_, i) => updateLockStatus('toucheFinale', i))
+  // ✅ APPROCHE SIMPLE : Plus besoin de logique complexe
+  // Chaque vignette gère son propre état avec 'saved'
 }
 
-// Fonction pour gérer le changement de nom et mettre à jour le verrouillage
-const handleNomChange = async (productIndex: number, newNom: string) => {
-  try {
-    const { productType, actualIndex } = getProductInfo(productIndex)
-    const product = products.value[productType as keyof ProductsByStep][actualIndex]
-    
-    // Mettre à jour le nom
-    product.nom = newNom
-    
-    // ✅ Mettre à jour automatiquement le statut de verrouillage
-    updateLockStatus(productType as keyof ProductsByStep, actualIndex)
-    
-    console.log(`✏️ Nom mis à jour pour ${productType}[${actualIndex}]: "${newNom}"`)
-  } catch (error) {
-    console.error('❌ Erreur changement nom:', error)
-  }
-}
+// ✅ APPROCHE SIMPLE : Plus besoin de gérer le nom séparément
+// Le nom est géré directement dans les composants ProductStep
 
 // Helper pour déterminer le type de produit et l'index local
 const getProductInfo = (productIndex: number) => {
@@ -472,10 +465,12 @@ onMounted(async () => {
               nom, 
               images: images || [], 
               locked,
+              saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
               step: 'fonds'
             }
-            // ✅ Mettre à jour le statut de verrouillage après chargement
-            updateLockStatus('fonds', fondsIndex)
+            // Synchroniser avec le store des produits pour ComposerView
+            productStore.fonds[fondsIndex] = { nom, image: images?.[0] || null }
+            // Les vignettes chargées depuis Supabase gardent leur statut locked
           }
           break
         case 'premiereCoucheDouceur':
@@ -486,10 +481,12 @@ onMounted(async () => {
               nom, 
               images: images || [], 
               locked,
+              saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
               step: 'premiereCoucheDouceur'
             }
-            // ✅ Mettre à jour le statut de verrouillage après chargement
-            updateLockStatus('premiereCoucheDouceur', premiereIndex)
+            // Synchroniser avec le store des produits pour ComposerView
+            productStore.premiereCoucheDouceur[premiereIndex] = { nom, images: images || [] }
+            // Les vignettes chargées depuis Supabase gardent leur statut locked
           }
           break
         case 'secondeCoucheDouceur':
@@ -500,10 +497,12 @@ onMounted(async () => {
               nom, 
               images: images || [], 
               locked,
+              saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
               step: 'secondeCoucheDouceur'
             }
-            // ✅ Mettre à jour le statut de verrouillage après chargement
-            updateLockStatus('secondeCoucheDouceur', secondeIndex)
+            // Synchroniser avec le store des produits pour ComposerView
+            productStore.secondeCoucheDouceur[secondeIndex] = { nom, images: images || [] }
+            // Les vignettes chargées depuis Supabase gardent leur statut locked
           }
           break
         case 'toucheFinale':
@@ -514,10 +513,12 @@ onMounted(async () => {
               nom, 
               images: images || [], 
               locked,
+              saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
               step: 'toucheFinale'
             }
-            // ✅ Mettre à jour le statut de verrouillage après chargement
-            updateLockStatus('toucheFinale', toucheIndex)
+            // Synchroniser avec le store des produits pour ComposerView
+            productStore.toucheFinale[toucheIndex] = { nom, images: images || [] }
+            // Les vignettes chargées depuis Supabase gardent leur statut locked
           }
           break
       }
@@ -527,13 +528,13 @@ onMounted(async () => {
   }
 })
 
-// Debug: vérifier l'indépendance des vignettes
+// Debug: vérifier l'état des vignettes - APPROCHE SIMPLE
 const debugVignettes = () => {
   console.log('🔍 DEBUG - État actuel des vignettes:')
-  console.log('📊 Fonds:', products.value.fonds.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked, images: p.images.length })))
-  console.log('📊 1ère Couche:', products.value.premiereCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked, images: p.images.length })))
-  console.log('📊 2ème Couche:', products.value.secondeCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked, images: p.images.length })))
-  console.log('📊 Touche Finale:', products.value.toucheFinale.map((p, i) => ({ index: i, nom: p.nom, locked: p.locked, images: p.images.length })))
+  console.log('📊 Fonds:', products.value.fonds.map((p, i) => ({ index: i, nom: p.nom, saved: p.saved, images: p.images.length })))
+  console.log('📊 1ère Couche:', products.value.premiereCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, saved: p.saved, images: p.images.length })))
+  console.log('📊 2ème Couche:', products.value.secondeCoucheDouceur.map((p, i) => ({ index: i, nom: p.nom, saved: p.saved, images: p.images.length })))
+  console.log('📊 Touche Finale:', products.value.toucheFinale.map((p, i) => ({ index: i, nom: p.nom, saved: p.saved, images: p.images.length })))
 }
 
 // Debug: vérifier la nouvelle structure
@@ -569,37 +570,43 @@ const clearAllProducts = async () => {
       }
     }
     
-    // Remettre à zéro la mémoire locale des PRODUITS uniquement
-    products.value = {
-      fonds: Array(3).fill(null).map((_, i) => ({ 
-        id: i, 
-        nom: '', 
-        images: [], 
-        locked: false, // ✅ CORRECTION : vide = déverrouillé
-        step: 'fonds'
-      })),
-      premiereCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
-        id: i, 
-        nom: '', 
-        images: [], 
-        locked: false, // ✅ CORRECTION : vide = déverrouillé
-        step: 'premiereCoucheDouceur'
-      })),
-      secondeCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
-        id: i, 
-        nom: '', 
-        images: [], 
-        locked: false, // ✅ CORRECTION : vide = déverrouillé
-        step: 'secondeCoucheDouceur'
-      })),
-      toucheFinale: Array(4).fill(null).map((_, i) => ({ 
-        id: i, 
-        nom: '', 
-        images: [], 
-        locked: false, // ✅ CORRECTION : vide = déverrouillé
-        step: 'toucheFinale'
-      }))
-    }
+         // Remettre à zéro la mémoire locale des PRODUITS uniquement - APPROCHE SIMPLE
+     products.value = {
+       fonds: Array(3).fill(null).map((_, i) => ({ 
+         id: i, 
+         nom: '', 
+         images: [], 
+         saved: false, // ← Reset = pas sauvegardé = ouvert
+         step: 'fonds'
+       })),
+       premiereCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
+         id: i, 
+         nom: '', 
+         images: [], 
+         saved: false, // ← Reset = pas sauvegardé = ouvert
+         step: 'premiereCoucheDouceur'
+       })),
+       secondeCoucheDouceur: Array(4).fill(null).map((_, i) => ({ 
+         id: i, 
+         nom: '', 
+         images: [], 
+         saved: false, // ← Reset = pas sauvegardé = ouvert
+         step: 'secondeCoucheDouceur'
+       })),
+       toucheFinale: Array(4).fill(null).map((_, i) => ({ 
+         id: i, 
+         nom: '', 
+         images: [], 
+         saved: false, // ← Reset = pas sauvegardé = ouvert
+         step: 'toucheFinale'
+       }))
+     }
+     
+     // Synchroniser avec le store des produits pour ComposerView
+     productStore.fonds = Array(3).fill(null).map(() => ({ nom: '', image: null }))
+     productStore.premiereCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+     productStore.secondeCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+     productStore.toucheFinale = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
     
     console.log('✅ Tous les PRODUITS ont été supprimés (utilisateurs préservés)')
   } catch (error) {
@@ -632,13 +639,13 @@ const cleanDuplicateProducts = async () => {
     for (const product of allProducts) {
       const { id, nom, images, step } = product
       if (id && !seenIds.has(id)) {
-        uniqueProducts.push({
-          id: id,
-          nom: nom,
-          images: images || [],
-          locked: product.locked,
-          step: step as Product['step']
-        })
+                 uniqueProducts.push({
+           id: id,
+           nom: nom,
+           images: images || [],
+           saved: true, // ← Produit chargé depuis Supabase = déjà sauvegardé
+           step: step as Product['step']
+         })
         seenIds.add(id)
       } else {
         console.log(`🗑️ Suppression du produit dupliqué avec ID: ${id || 'Sans ID'}`)
@@ -658,6 +665,12 @@ const cleanDuplicateProducts = async () => {
       secondeCoucheDouceur: uniqueProducts.filter(p => p.step === 'secondeCoucheDouceur'),
       toucheFinale: uniqueProducts.filter(p => p.step === 'toucheFinale')
     }
+    
+    // Synchroniser avec le store des produits pour ComposerView
+    productStore.fonds = products.value.fonds.map(p => ({ nom: p.nom, image: p.images[0] || null }))
+    productStore.premiereCoucheDouceur = products.value.premiereCoucheDouceur.map(p => ({ nom: p.nom, images: p.images }))
+    productStore.secondeCoucheDouceur = products.value.secondeCoucheDouceur.map(p => ({ nom: p.nom, images: p.images }))
+    productStore.toucheFinale = products.value.toucheFinale.map(p => ({ nom: p.nom, images: p.images }))
 
     // Recharger les vignettes pour refléter les changements
     onMounted(() => {

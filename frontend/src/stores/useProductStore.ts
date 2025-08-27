@@ -5,6 +5,7 @@ import { productConfigService } from '@/services/productConfigService'
 // COPIE EXACTE des interfaces d'AdminView.vue
 interface BaseProduct {
   nom: string
+  saved?: boolean
 }
 
 interface FondProduct extends BaseProduct {
@@ -440,12 +441,12 @@ export const useProductStore = defineStore('products', () => {
       configs.forEach(loadProduct)
       
       for (let i = 0; i < 3; i++) {
-        if (!products.value.fonds[i]) products.value.fonds[i] = { nom: '', image: null }
+        if (!products.value.fonds[i]) products.value.fonds[i] = { nom: '', image: null, saved: false }
       }
       for (let i = 0; i < 4; i++) {
-        if (!products.value.premiereCoucheDouceur[i]) products.value.premiereCoucheDouceur[i] = { nom: '', images: [null, null, null] }
-        if (!products.value.secondeCoucheDouceur[i]) products.value.secondeCoucheDouceur[i] = { nom: '', images: [null, null, null] }
-        if (!products.value.toucheFinale[i]) products.value.toucheFinale[i] = { nom: '', images: [null, null, null] }
+        if (!products.value.premiereCoucheDouceur[i]) products.value.premiereCoucheDouceur[i] = { nom: '', images: [null, null, null], saved: false }
+        if (!products.value.secondeCoucheDouceur[i]) products.value.secondeCoucheDouceur[i] = { nom: '', images: [null, null, null], saved: false }
+        if (!products.value.toucheFinale[i]) products.value.toucheFinale[i] = { nom: '', images: [null, null, null], saved: false }
       }
       
       console.log('✅ Configuration chargée avec succès')

@@ -16,7 +16,7 @@
                     </div>
             </div>
             <div class="accordion-icon" :class="{ 'rotated': isUsersSectionOpen }">
-                <span class="accordion-arrow">▼</span>
+                <i class="fas fa-chevron-down accordion-arrow"></i>
             </div>
         </div>
         <div class="accordion-content" :class="{ 'open': isUsersSectionOpen }">
@@ -345,6 +345,9 @@ $admin-danger: #dc3545;
     .accordion-arrow {
       font-size: 1.2rem;
       color: $admin-primary;
+      display: inline-block !important;
+      font-family: "Font Awesome 5 Free" !important;
+      font-weight: 900 !important;
     }
   }
 }

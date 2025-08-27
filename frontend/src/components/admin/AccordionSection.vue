@@ -1,6 +1,6 @@
 <template>
   <section class="dashboard-section accordion-section">
-  <div class="section-header accordion-header">
+  <div class="section-header accordion-header" @click="$emit('toggle')">
       <div class="header-left">
         <h2 class="section-title">
           <span class="title-icon"><i class="fas fa-cogs"></i></span>
@@ -26,7 +26,7 @@
         </button>
       </div>
       <div class="accordion-icon" :class="{ 'rotated': isProductsSectionOpen }">
-        <span class="accordion-arrow">▼</span>
+        <i class="fas fa-chevron-down accordion-arrow"></i>
       </div>
     </div>
     
@@ -43,9 +43,9 @@
               </div>
               <span class="progress-text">{{ fondsConfigured }}/3</span>
             </span>
-            <span class="step-chevron" @click.stop="toggleSection('fonds')" style="margin-left:auto;cursor:pointer;">
-              <i class="fas fa-chevron-down" :style="{ transform: openSections.fonds ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
-            </span>
+                         <span class="step-chevron" style="margin-left:auto;cursor:pointer;" @click.stop="toggleStep('fonds')">
+               <i class="fas fa-chevron-down" :style="{ transform: openSections.fonds ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
+             </span>
           </div>
           <Transition name="slide-fade">
             <div v-if="openSections.fonds">
@@ -78,9 +78,9 @@
               </div>
               <span class="progress-text">{{ premiereCoucheConfigured }}/4</span>
             </span>
-            <span class="step-chevron" @click.stop="toggleSection('premiereCoucheDouceur')" style="margin-left:auto;cursor:pointer;">
-              <i class="fas fa-chevron-down" :style="{ transform: openSections.premiereCoucheDouceur ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
-            </span>
+                         <span class="step-chevron" style="margin-left:auto;cursor:pointer;" @click.stop="toggleStep('premiereCoucheDouceur')">
+               <i class="fas fa-chevron-down" :style="{ transform: openSections.premiereCoucheDouceur ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
+             </span>
           </div>
           <Transition name="slide-fade">
             <div v-if="openSections.premiereCoucheDouceur">
@@ -113,9 +113,9 @@
               </div>
               <span class="progress-text">{{ secondeCoucheConfigured }}/4</span>
             </span>
-            <span class="step-chevron" @click.stop="toggleSection('secondeCoucheDouceur')" style="margin-left:auto;cursor:pointer;">
-              <i class="fas fa-chevron-down" :style="{ transform: openSections.secondeCoucheDouceur ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
-            </span>
+                         <span class="step-chevron" style="margin-left:auto;cursor:pointer;" @click.stop="toggleStep('secondeCoucheDouceur')">
+               <i class="fas fa-chevron-down" :style="{ transform: openSections.secondeCoucheDouceur ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
+             </span>
           </div>
           <Transition name="slide-fade">
             <div v-if="openSections.secondeCoucheDouceur">
@@ -148,9 +148,9 @@
               </div>
               <span class="progress-text">{{ toucheFinaleConfigured }}/4</span>
             </span>
-            <span class="step-chevron" @click.stop="toggleSection('toucheFinale')" style="margin-left:auto;cursor:pointer;">
-              <i class="fas fa-chevron-down" :style="{ transform: openSections.toucheFinale ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
-            </span>
+                         <span class="step-chevron" style="margin-left:auto;cursor:pointer;" @click.stop="toggleStep('toucheFinale')">
+               <i class="fas fa-chevron-down" :style="{ transform: openSections.toucheFinale ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 0.3s' }" />
+             </span>
           </div>
           <Transition name="slide-fade">
             <div v-if="openSections.toucheFinale">
@@ -177,26 +177,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import ProductStep from './ProductStep.vue'
 
+// ✅ APPROCHE VIGNETTE INDIVIDUELLE : Contrôle manuel des étapes
+// Chaque étape peut être ouverte/fermée avec son chevron
 const openSections = ref({
-  fonds: true,
-  premiereCoucheDouceur: false,
-  secondeCoucheDouceur: false,
-  toucheFinale: false
+  fonds: true,           // Étape 1 ouverte par défaut
+  premiereCoucheDouceur: true,  // Étape 2 ouverte par défaut
+  secondeCoucheDouceur: true,   // Étape 3 ouverte par défaut
+  toucheFinale: true,           // Étape 4 ouverte par défaut
 })
-const toggleSection = (key: keyof typeof openSections.value) => {
-  if (!props.isProductsSectionOpen) {
-    emit('toggle')
-    // On attend le prochain tick pour ouvrir l'étape
-    setTimeout(() => {
-      openSections.value[key] = true
-    }, 0)
-  } else {
-    openSections.value[key] = !openSections.value[key]
-  }
+
+// Fonction pour basculer l'état d'une étape
+const toggleStep = (stepName: keyof typeof openSections.value) => {
+  console.log('🔄 Toggle étape:', stepName, 'État actuel:', openSections.value[stepName])
+  openSections.value[stepName] = !openSections.value[stepName]
+  console.log('✅ Nouvel état:', openSections.value[stepName])
 }
+
+// Plus besoin de toggleSection - l'état est automatique
 
 const props = defineProps<{
   fonds: any[]
@@ -267,11 +267,13 @@ $admin-danger: #dc3545;
   border-bottom: 1px solid #e9ecef;
   background: rgba($admin-primary, 0.02);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
   position: relative;
   
   &:hover {
-    background: rgba($admin-primary, 0.05);
+    background: rgba($admin-primary, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba($admin-primary, 0.1);
   }
   
   .header-left {
@@ -374,6 +376,9 @@ $admin-danger: #dc3545;
     .accordion-arrow {
       font-size: 1.2rem;
       color: $admin-primary;
+      display: inline-block !important;
+      font-family: "Font Awesome 5 Free" !important;
+      font-weight: 900 !important;
     }
   }
 }
@@ -410,17 +415,24 @@ $admin-danger: #dc3545;
     &:hover {
       background: rgba($admin-primary, 0.05);
     }
-    .step-chevron {
-      font-size: 1.3rem;
-      color: $admin-primary;
-      transition: color 0.2s;
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-    }
-    .step-chevron:hover {
-      color: $admin-secondary;
-    }
+         .step-chevron {
+       font-size: 1.3rem;
+       color: $admin-primary;
+       transition: color 0.2s;
+       margin-left: auto;
+       display: flex;
+       align-items: center;
+       cursor: pointer;
+       
+       &:hover {
+         color: $admin-secondary;
+         transform: scale(1.1);
+       }
+       
+       i {
+         transition: transform 0.3s ease;
+       }
+     }
     
     .step-number {
       font-family: var(--font-family-title);

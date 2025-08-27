@@ -1342,79 +1342,79 @@ import { useAuthStore } from '@/stores/auth'
 import { usePanierStore } from '@/stores/panier'
 import { compositionsService, type Composition } from '@/services/supabaseService'
 import { productConfigService, type Product } from '@/services/productConfigService'
+import { useProductStore } from '@/stores/useProductStore'
 
-// Configuration des produits depuis Supabase
+// Store des produits pour synchronisation avec AdminHome
+const productStore = useProductStore()
+
+// Configuration des produits depuis Supabase (fallback)
 const productConfig = ref<Product[]>([])
 
-// Computed properties pour organiser les données
+// Computed properties pour organiser les données - FILTRER LES PRODUITS VIDES
 const fonds = computed(() => {
-  return productConfig.value
-    .filter((p: Product) => p.step === 'fonds')
+  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
+  const result = productStore.fonds
+    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
     .slice(0, 3) // Limiter à 3 fonds maximum
-    .map((p: Product, index: number) => ({
+    .map((p: any, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3
-      nom: p.nom || `Fond ${index + 1}`,
+      nom: p.nom,
+      image: p.image || p.images?.[0] || undefined,
+    }))
+  
+  console.log('🖼️ Fonds computed:', result.map(f => ({ nom: f.nom, image: f.image })))
+  return result
+})
+
+const garnitures1 = computed(() => {
+  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
+  return productStore.premiereCoucheDouceur
+    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
+    .slice(0, 4) // Limiter à 4 garnitures maximum
+    .map((p: any, index: number) => ({
+      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
+      nom: p.nom,
+      // ✅ PRÉVISUALISATION : Afficher l'image de la garniture pour le fond sélectionné
       image: p.images && p.images.length > 0 ? p.images[0] : undefined,
     }))
 })
 
-const garnitures1 = computed(() => {
-  return productConfig.value
-    .filter((p: Product) => p.step === 'premiereCoucheDouceur')
-    .slice(0, 4) // Limiter à 4 garnitures maximum
-    .map((p: Product, index: number) => ({
-      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
-      nom: p.nom || `Garniture ${index + 1}`,
-      // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
-      image:
-        p.images && p.images.length > 0
-          ? p.images[selectedFond.value ? (selectedFond.value.id - 1) % p.images.length : 0]
-          : undefined,
-    }))
-})
-
 const garnitures2 = computed(() => {
-  return productConfig.value
-    .filter((p: Product) => p.step === 'secondeCoucheDouceur')
+  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
+  return productStore.secondeCoucheDouceur
+    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
     .slice(0, 4) // Limiter à 4 garnitures maximum
-    .map((p: Product, index: number) => ({
+    .map((p: any, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
-      nom: p.nom || `Garniture ${index + 1}`,
-      // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
-      image:
-        p.images && p.images.length > 0
-          ? p.images[selectedFond.value ? (selectedFond.value.id - 1) % p.images.length : 0]
-          : undefined,
+      nom: p.nom,
+      // ✅ PRÉVISUALISATION : Afficher l'image de la garniture pour le fond sélectionné
+      image: p.images && p.images.length > 0 ? p.images[0] : undefined,
     }))
 })
 
 const garnitures3 = computed(() => {
-  return productConfig.value
-    .filter((p: Product) => p.step === 'toucheFinale')
+  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
+  return productStore.toucheFinale
+    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
     .slice(0, 4) // Limiter à 4 garnitures maximum
-    .map((p: Product, index: number) => ({
+    .map((p: any, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
-      nom: p.nom || `Garniture ${index + 1}`,
-      // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
-      image:
-        p.images && p.images.length > 0
-          ? p.images[selectedFond.value ? (selectedFond.value.id - 1) % p.images.length : 0]
-          : undefined,
+      nom: p.nom,
+      // ✅ PRÉVISUALISATION : Afficher l'image de la garniture pour le fond sélectionné
+      image: p.images && p.images.length > 0 ? p.images[0] : undefined,
     }))
 })
 
 const finitions = computed(() => {
-  return productConfig.value
-    .filter((p: Product) => p.step === 'toucheFinale')
+  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
+  return productStore.toucheFinale
+    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
     .slice(0, 4) // Limiter à 4 finitions maximum
-    .map((p: Product, index: number) => ({
+    .map((p: any, index: number) => ({
       id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
-      nom: p.nom || `Finition ${index + 1}`,
-      // ✅ CORRECTION : Indexation dynamique selon le fond sélectionné
-      image:
-        p.images && p.images.length > 0
-          ? p.images[selectedFond.value ? (selectedFond.value.id - 1) % p.images.length : 0]
-          : undefined,
+      nom: p.nom,
+      // ✅ PRÉVISUALISATION : Afficher l'image de la garniture pour le fond sélectionné
+      image: p.images && p.images.length > 0 ? p.images[0] : undefined,
     }))
 })
 
@@ -1502,16 +1502,60 @@ const handleImageError = (event: Event) => {
   }
 }
 
-// Charger la configuration des produits
+// Charger la configuration des produits depuis Supabase ET synchroniser avec le store
 const loadProductConfiguration = async () => {
   try {
-    console.log('🔄 Chargement de la configuration des produits...')
+    console.log('🔄 Chargement de la configuration des produits depuis Supabase...')
     const config = await productConfigService.getAllProducts()
     productConfig.value = config
-    console.log('✅ Configuration chargée:', config.length, 'produits')
+    console.log('✅ Configuration chargée depuis Supabase:', config.length, 'produits')
+    
+    // Synchroniser le store avec les données chargées
+    config.forEach(product => {
+      const { step, nom, images } = product
+      console.log(`📦 Produit ${step}: ${nom} avec ${images?.length || 0} images`)
+      
+      switch (step) {
+        case 'fonds':
+          const fondsIndex = productStore.fonds.findIndex(p => !p.nom || p.nom.trim() === '')
+          if (fondsIndex !== -1) {
+            productStore.fonds[fondsIndex] = { nom, image: images?.[0] || null }
+            console.log(`✅ Fond ajouté au store: ${nom} avec image: ${images?.[0] || 'aucune'}`)
+          }
+          break
+        case 'premiereCoucheDouceur':
+          const premiereIndex = productStore.premiereCoucheDouceur.findIndex(p => !p.nom || p.nom.trim() === '')
+          if (premiereIndex !== -1) {
+            productStore.premiereCoucheDouceur[premiereIndex] = { nom, images: images || [] }
+            console.log(`✅ Garniture 1 ajoutée au store: ${nom} avec ${images?.length || 0} images`)
+          }
+          break
+        case 'secondeCoucheDouceur':
+          const secondeIndex = productStore.secondeCoucheDouceur.findIndex(p => !p.nom || p.nom.trim() === '')
+          if (secondeIndex !== -1) {
+            productStore.secondeCoucheDouceur[secondeIndex] = { nom, images: images || [] }
+            console.log(`✅ Garniture 2 ajoutée au store: ${nom} avec ${images?.length || 0} images`)
+          }
+          break
+        case 'toucheFinale':
+          const toucheIndex = productStore.toucheFinale.findIndex(p => !p.nom || p.nom.trim() === '')
+          if (toucheIndex !== -1) {
+            productStore.toucheFinale[toucheIndex] = { nom, images: images || [] }
+            console.log(`✅ Touche finale ajoutée au store: ${nom} avec ${images?.length || 0} images`)
+          }
+          break
+      }
+    })
+    
+    console.log('✅ Store synchronisé avec les données Supabase')
+    console.log('📊 État final du store:', {
+      fonds: productStore.fonds.map(p => ({ nom: p.nom, image: p.image })),
+      premiereCouche: productStore.premiereCoucheDouceur.map(p => ({ nom: p.nom, images: p.images })),
+      secondeCouche: productStore.secondeCoucheDouceur.map(p => ({ nom: p.nom, images: p.images })),
+      toucheFinale: productStore.toucheFinale.map(p => ({ nom: p.nom, images: p.images }))
+    })
   } catch (error) {
     console.error('❌ Erreur lors du chargement de la configuration:', error)
-    productConfig.value = []
   }
 }
 
@@ -1521,12 +1565,18 @@ function selectFond(fond: { id: number; nom: string }) {
 }
 function selectGarniture1(garniture: { id: number; nom: string }) {
   selectedGarniture1.value = garniture
+  // ✅ PRÉVISUALISATION : Le client peut voir l'image avant de valider
+  // Pas de changement automatique d'étape - il doit cliquer sur "Suivant"
 }
 function selectGarniture2(garniture: { id: number; nom: string }) {
   selectedGarniture2.value = garniture
+  // ✅ PRÉVISUALISATION : Le client peut voir l'image avant de valider
+  // Pas de changement automatique d'étape - il doit cliquer sur "Suivant"
 }
 function selectGarniture3(garniture: { id: number; nom: string }) {
   selectedGarniture3.value = garniture
+  // ✅ PRÉVISUALISATION : Le client peut voir l'image avant de valider
+  // Pas de changement automatique d'étape - il doit cliquer sur "Suivant"
 }
 function selectFinition(finition: { id: number; nom: string }) {
   selectedFinition.value = finition
@@ -1721,6 +1771,8 @@ function deselectFond() {
   selectedGarniture2.value = null
   selectedGarniture3.value = null
   selectedFinition.value = null
+  // ✅ PRÉVISUALISATION : Pas de changement automatique d'étape
+  // Le client peut rester sur l'étape actuelle pour faire d'autres sélections
 }
 
 function deselectGarniture1() {
@@ -1732,14 +1784,13 @@ function getGarnitureImage(
   garniture: { id: number; nom: string; image?: string } | null,
 ) {
   if (!fond) return ''
-  if (!garniture) return fond.image || ''
-
-  // ✅ CORRECTION : Retourner l'image de la garniture si elle existe
-  if (garniture.image) {
+  
+  // ✅ LOGIQUE SIMPLE : Si on a une garniture, on l'affiche
+  if (garniture && garniture.image) {
     return garniture.image
   }
-
-  // Fallback : retourner l'image du fond
+  
+  // Sinon on affiche le fond
   return fond.image || ''
 }
 
@@ -1751,9 +1802,8 @@ function handleClickOutsideFond(event: MouseEvent) {
 }
 onMounted(async () => {
   document.addEventListener('mousedown', handleClickOutsideFond)
-  if (!selectedGarniture2.value && selectedGarniture1.value) {
-    selectedGarniture2.value = selectedGarniture1.value
-  }
+  // ✅ PRÉVISUALISATION : Pas de synchronisation automatique des garnitures
+  // Le client doit faire ses choix étape par étape
   // Charger la configuration des produits depuis Supabase
   await loadProductConfiguration()
 })
