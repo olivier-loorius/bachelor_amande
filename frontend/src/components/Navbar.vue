@@ -19,17 +19,16 @@
     <ul 
       id="navigation-menu"
       :class="{ open: isMenuOpen }" 
-      @click="closeMenu"
       role="menu"
     >
       <li class="composer" role="none">
-        <router-link to="/composer" role="menuitem">COMPOSER</router-link>
+        <router-link to="/composer" role="menuitem" @click="closeMenu">COMPOSER</router-link>
       </li>
       <li class="actualite" role="none">
-        <router-link to="/actualite" role="menuitem">ACTUALITE</router-link>
+        <router-link to="/actualite" role="menuitem" @click="closeMenu">ACTUALITE</router-link>
       </li>
       <li class="catalogue" role="none">
-        <router-link to="/catalogue" role="menuitem">CATALOGUE</router-link>
+        <router-link to="/catalogue" role="menuitem" @click="closeMenu">CATALOGUE</router-link>
       </li>
     </ul>
     

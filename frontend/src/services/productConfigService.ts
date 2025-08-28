@@ -273,6 +273,75 @@ export const productConfigService = {
     }
   },
 
+  // Mettre à jour le verrouillage d'un produit
+  async updateProductLock(step: string, productIndex: number, locked: boolean): Promise<boolean> {
+    try {
+      const products = await this.getProductsByStep(step as Product['step'])
+      if (products[productIndex]) {
+        return await this.updateProduct(products[productIndex].id, { locked })
+      }
+      return false
+    } catch (error) {
+      console.error('❌ Erreur mise à jour verrouillage:', error)
+      return false
+    }
+  },
+
+  // Créer ou mettre à jour une configuration de produit
+  async upsertProductConfig(config: any): Promise<boolean> {
+    try {
+      const { config_type, product_index, nom, images } = config
+      
+      // Vérifier si le produit existe déjà
+      const existingProducts = await this.getProductsByStep(config_type)
+      const existingProduct = existingProducts[product_index]
+      
+      if (existingProduct) {
+        // Mettre à jour le produit existant
+        return await this.updateProduct(existingProduct.id, { nom, images })
+      } else {
+        // Créer un nouveau produit
+        const productId = await this.upsertProduct({
+          nom,
+          locked: false,
+          step: config_type,
+          images
+        })
+        return productId !== null
+      }
+    } catch (error) {
+      console.error('❌ Erreur upsert config:', error)
+      return false
+    }
+  },
+
+  // Supprimer une image
+  async deleteImage(imageUrl: string): Promise<boolean> {
+    try {
+      // Extraire le chemin du fichier de l'URL
+      const urlParts = imageUrl.split('/')
+      const fileName = urlParts[urlParts.length - 1]
+      const filePath = `products/${fileName}`
+      
+      console.log('🗑️ Suppression du fichier:', filePath)
+      
+      const { error: storageError } = await supabase.storage
+        .from('product-images')
+        .remove([filePath])
+      
+      if (storageError) {
+        console.warn('⚠️ Erreur suppression fichier storage:', storageError)
+        return false
+      } else {
+        console.log('✅ Fichier supprimé du storage:', filePath)
+        return true
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la suppression du fichier:', error)
+      return false
+    }
+  },
+
   // Nettoyer les produits dupliqués (garder seulement le plus récent de chaque nom)
   async cleanDuplicateProducts(): Promise<boolean> {
     try {

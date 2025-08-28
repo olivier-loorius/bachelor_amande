@@ -282,21 +282,23 @@ const handleSave = async (productIndex: number) => {
     
     // ✅ APPROCHE VIGNETTE INDIVIDUELLE : Marquer comme sauvegardé
     // La vignette reste accessible mais est marquée comme "complète"
-    const product = products.value[productType][actualIndex]
-    product.saved = true
-    
-    // Synchroniser avec le store des produits pour ComposerView
-    if (productType === 'fonds') {
-      productStore.fonds[actualIndex] = { nom: product.nom, image: product.images[0] || null }
-    } else if (productType === 'premiereCoucheDouceur') {
-      productStore.premiereCoucheDouceur[actualIndex] = { nom: product.nom, images: product.images }
-    } else if (productType === 'secondeCoucheDouceur') {
-      productStore.secondeCoucheDouceur[actualIndex] = { nom: product.nom, images: product.images }
-    } else if (productType === 'toucheFinale') {
-      productStore.toucheFinale[actualIndex] = { nom: product.nom, images: product.images }
-    }
+    const product = getProductByType(productType, actualIndex)
+    if (product) {
+      product.saved = true
+      
+      // Synchroniser avec le store des produits pour ComposerView
+      if (productType === 'fonds') {
+        productStore.fonds[actualIndex] = { nom: product.nom, image: product.images[0] || null }
+      } else if (productType === 'premiereCoucheDouceur') {
+        productStore.premiereCoucheDouceur[actualIndex] = { nom: product.nom, images: product.images }
+      } else if (productType === 'secondeCoucheDouceur') {
+        productStore.secondeCoucheDouceur[actualIndex] = { nom: product.nom, images: product.images }
+      } else if (productType === 'toucheFinale') {
+        productStore.toucheFinale[actualIndex] = { nom: product.nom, images: product.images }
+      }
 
-    console.log('✅ Produit sauvegardé → vignette marquée comme complète + store synchronisé')
+      console.log('✅ Produit sauvegardé → vignette marquée comme complète + store synchronisé')
+    }
   } catch (error) {
     console.error('❌ Erreur sauvegarde:', error)
   }
@@ -307,10 +309,10 @@ const handleReset = async (productIndex: number) => {
     const { productType, actualIndex } = getProductInfo(productIndex)
     
     // Récupérer le produit actuel pour avoir son ID
-    const currentProduct = products.value[productType as keyof ProductsByStep][actualIndex]
+    const currentProduct = getProductByType(productType, actualIndex)
     
     // Si le produit a un ID (existe en base), le supprimer
-    if (currentProduct.id && typeof currentProduct.id === 'string') {
+    if (currentProduct && currentProduct.id && typeof currentProduct.id === 'string') {
       console.log('🗑️ Suppression du produit de Supabase:', currentProduct.id)
       const success = await productConfigService.deleteProduct(currentProduct.id)
       
@@ -350,15 +352,17 @@ const handleReset = async (productIndex: number) => {
 const handleToggleLock = async (productIndex: number) => {
   try {
     const { productType, actualIndex } = getProductInfo(productIndex)
-    const product = products.value[productType][actualIndex]
+    const product = getProductByType(productType, actualIndex)
     
-    // Basculer l'état : sauvegardé ↔ modifiable
-    product.saved = !product.saved
-    
-    if (product.saved) {
-      console.log('🔒 Vignette verrouillée (sauvegardée)')
-    } else {
-      console.log('🔓 Vignette déverrouillée (modifiable)')
+    if (product) {
+      // Basculer l'état : sauvegardé ↔ modifiable
+      product.saved = !product.saved
+      
+      if (product.saved) {
+        console.log('🔒 Vignette verrouillée (sauvegardée)')
+      } else {
+        console.log('🔓 Vignette déverrouillée (modifiable)')
+      }
     }
   } catch (error) {
     console.error('❌ Erreur toggle lock:', error)
@@ -373,6 +377,20 @@ const toggleProductsSection = () => {
 
 // ✅ APPROCHE SIMPLE : Plus besoin de gérer le nom séparément
 // Le nom est géré directement dans les composants ProductStep
+
+// Helper pour récupérer un produit par type et index de manière sûre
+const getProductByType = (productType: string, index: number) => {
+  if (productType === 'fonds') {
+    return products.value.fonds[index]
+  } else if (productType === 'premiereCoucheDouceur') {
+    return products.value.premiereCoucheDouceur[index]
+  } else if (productType === 'secondeCoucheDouceur') {
+    return products.value.secondeCoucheDouceur[index]
+  } else if (productType === 'toucheFinale') {
+    return products.value.toucheFinale[index]
+  }
+  return null
+}
 
 // Helper pour déterminer le type de produit et l'index local
 const getProductInfo = (productIndex: number) => {
@@ -429,7 +447,7 @@ const saveProduct = async (productType: string, actualIndex: number) => {
     const result = await productConfigService.upsertProduct({
       nom: productData.nom,
       images: productData.images,
-      locked: productData.locked,
+      locked: false, // Default to unlocked for new products
       step: productType as Product['step']
     })
     
@@ -464,7 +482,6 @@ onMounted(async () => {
               id: product.id, 
               nom, 
               images: images || [], 
-              locked,
               saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
               step: 'fonds'
             }
@@ -480,7 +497,6 @@ onMounted(async () => {
               id: product.id, 
               nom, 
               images: images || [], 
-              locked,
               saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
               step: 'premiereCoucheDouceur'
             }
@@ -496,7 +512,6 @@ onMounted(async () => {
               id: product.id, 
               nom, 
               images: images || [], 
-              locked,
               saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
               step: 'secondeCoucheDouceur'
             }
@@ -512,7 +527,6 @@ onMounted(async () => {
               id: product.id, 
               nom, 
               images: images || [], 
-              locked,
               saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
               step: 'toucheFinale'
             }

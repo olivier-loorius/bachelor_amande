@@ -338,7 +338,7 @@ export const useProductStore = defineStore('products', () => {
       if (type === 'fond') {
         if (fileArray.length > 0) {
           const file = fileArray[0]
-          const imageUrl = await productConfigService.uploadImage(file, 'fonds', index)
+          const imageUrl = await productConfigService.uploadImage(file, 'fonds', index, 0)
           if (imageUrl) {
             const productArray = getProductArray('fond') as FondProduct[]
             productArray[index].image = imageUrl
@@ -378,7 +378,7 @@ export const useProductStore = defineStore('products', () => {
     try {
       console.log('🔄 Chargement de la configuration depuis Supabase...')
       
-      const configs = await productConfigService.getAllProductConfig()
+      const configs = await productConfigService.getAllProducts()
       console.log('📦 Configuration chargée:', configs)
       
       products.value.fonds = []

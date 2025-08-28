@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
 import { requireAdmin } from '@/utils/authGuard'
 
 // COPIE EXACTE de la structure des routes admin

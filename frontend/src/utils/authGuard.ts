@@ -1,4 +1,4 @@
-import { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
+import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 // COPIE EXACTE de la logique d'authentification d'AdminView.vue
