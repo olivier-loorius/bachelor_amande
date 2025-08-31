@@ -24,37 +24,19 @@ export const productConfigService = {
   // Récupérer tous les produits avec leurs images
   async getAllProducts(): Promise<Product[]> {
     try {
-      console.log('🔍 Tentative de récupération depuis products_with_images...')
+      console.log('🔍 Récupération depuis la table products...')
       const { data, error } = await supabase
-        .from('products_with_images')
+        .from('products')
         .select('*')
         .order('created_at', { ascending: true })
 
-      if (error) {
-        console.log('❌ Erreur products_with_images, tentative products...')
-        // Fallback vers la table products
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: true })
+      if (error) throw error
 
-        if (fallbackError) throw fallbackError
-
-        console.log('✅ Données récupérées depuis products:', fallbackData)
-        return (fallbackData || []).map(item => ({
-          id: item.id,
-          nom: item.nom,
-          locked: item.locked || false,
-          step: item.step as Product['step'],
-          images: item.images || []
-        }))
-      }
-
-      console.log('✅ Données récupérées depuis products_with_images:', data)
+      console.log('✅ Données récupérées depuis products:', data)
       return (data || []).map(item => ({
         id: item.id,
         nom: item.nom,
-        locked: item.locked,
+        locked: item.locked || false,
         step: item.step as Product['step'],
         images: item.images || []
       }))
@@ -68,10 +50,10 @@ export const productConfigService = {
   async getProductsByStep(step: Product['step']): Promise<Product[]> {
     try {
       const { data, error } = await supabase
-        .from('products_with_images')
+        .from('products')
         .select('*')
         .eq('step', step)
-        .order('created_at', { ascending: true }) // Correction ici
+        .order('created_at', { ascending: true })
 
       if (error) throw error
 
@@ -92,43 +74,28 @@ export const productConfigService = {
   async upsertProduct(product: Omit<Product, 'id' | 'created_at'>): Promise<string | null> {
     try {
       const { nom, locked, step, images } = product
-
-      // ✅ CORRECTION : Vérifier si le produit existe déjà
-      const existingProducts = await this.getProductsByStep(step as Product['step'])
-      const existingProduct = existingProducts.find(p => p.nom === nom)
-
-      if (existingProduct) {
-        // ✅ Mettre à jour le produit existant
-        console.log('🔄 Produit existant trouvé, mise à jour...')
-        const success = await this.updateProduct(existingProduct.id, {
+      
+      console.log('💾 Sauvegarde produit:', { nom, step, locked, images })
+      
+      // ✅ CRÉER DIRECTEMENT dans la table products
+      const { data, error } = await supabase
+        .from('products')
+        .insert({
           nom,
+          step,
           locked,
-          step: step as Product['step'],
-          images
+          images: images || []
         })
-        
-        if (success) {
-          console.log('✅ Produit mis à jour avec succès')
-          return existingProduct.id
-        } else {
-          throw new Error('Échec de la mise à jour')
-        }
-      } else {
-        // ✅ Créer un nouveau produit
-        console.log('🆕 Nouveau produit, création...')
-        const { data, error } = await supabase
-          .rpc('insert_product_with_images', {
-            p_nom: nom,
-            p_step: step,
-            p_images: images,
-            p_locked: locked
-          })
-
-        if (error) throw error
-
-        console.log('✅ Nouveau produit créé avec succès')
-        return data
+        .select()
+        .single()
+      
+      if (error) {
+        console.error('❌ Erreur création produit:', error)
+        throw error
       }
+      
+      console.log('✅ Produit créé avec succès:', data)
+      return data.id
     } catch (error) {
       console.error('❌ Erreur sauvegarde produit:', error)
       return null
@@ -140,49 +107,18 @@ export const productConfigService = {
     try {
       const { nom, locked, step, images } = updates
 
-      if (nom !== undefined || locked !== undefined || step !== undefined) {
-        // Mettre à jour les propriétés du produit
-        const { error: productError } = await supabase
-          .from('products')
-          .update({ 
-            nom: nom || undefined, 
-            locked: locked !== undefined ? locked : undefined,
-            step: step || undefined 
-          })
-          .eq('id', productId)
+      // ✅ Mettre à jour directement dans la table products
+      const { error } = await supabase
+        .from('products')
+        .update({ 
+          nom: nom || undefined, 
+          locked: locked !== undefined ? locked : undefined,
+          step: step || undefined,
+          images: images || undefined
+        })
+        .eq('id', productId)
 
-        if (productError) throw productError
-      }
-
-      // Mettre à jour les images si fournies
-      if (images !== undefined) {
-        // Supprimer les anciennes images
-        const { error: deleteError } = await supabase
-          .from('product_images')
-          .delete()
-          .eq('product_id', productId)
-
-        if (deleteError) throw deleteError
-
-        // Insérer les nouvelles images
-        if (images.length > 0) {
-          const imageRecords = images
-            .filter(url => url && url !== '')
-            .map((url, index) => ({
-              product_id: productId,
-              url,
-              image_index: index
-            }))
-
-          if (imageRecords.length > 0) {
-            const { error: insertError } = await supabase
-              .from('product_images')
-              .insert(imageRecords)
-
-            if (insertError) throw insertError
-          }
-        }
-      }
+      if (error) throw error
 
       console.log('✅ Produit mis à jour avec succès')
       return true
@@ -272,7 +208,7 @@ export const productConfigService = {
   async getProductById(productId: string): Promise<Product | null> {
     try {
       const { data, error } = await supabase
-        .from('products_with_images')
+        .from('products')
         .select('*')
         .eq('id', productId)
         .single()
@@ -311,23 +247,28 @@ export const productConfigService = {
     try {
       const { config_type, product_index, nom, images } = config
       
-      // Vérifier si le produit existe déjà
-      const existingProducts = await this.getProductsByStep(config_type)
-      const existingProduct = existingProducts[product_index]
+      console.log('💾 Sauvegarde config:', { config_type, product_index, nom, images })
       
-      if (existingProduct) {
-        // Mettre à jour le produit existant
-        return await this.updateProduct(existingProduct.id, { nom, images })
-      } else {
-        // Créer un nouveau produit
-        const productId = await this.upsertProduct({
+      // ✅ CRÉER DIRECTEMENT avec product_index
+      const { data, error } = await supabase
+        .from('products')
+        .insert({
           nom,
-          locked: false,
           step: config_type,
-          images
+          locked: false,
+          product_index: product_index,
+          images: images || []
         })
-        return productId !== null
+        .select()
+        .single()
+      
+      if (error) {
+        console.error('❌ Erreur création produit:', error)
+        throw error
       }
+      
+      console.log('✅ Nouveau produit créé avec product_index:', data)
+      return !!data
     } catch (error) {
       console.error('❌ Erreur upsert config:', error)
       return false

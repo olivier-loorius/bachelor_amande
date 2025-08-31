@@ -213,17 +213,10 @@ const premiereCoucheConfigured = computed(() => products.value.premiereCoucheDou
 const secondeCoucheConfigured = computed(() => products.value.secondeCoucheDouceur.filter(p => p.nom && p.images.length > 0).length)
 const toucheFinaleConfigured = computed(() => products.value.toucheFinale.filter(p => p.nom && p.images.length > 0).length)
 
-// Computed properties pour afficher uniquement les produits renseignés et sans doublons
-const premiereCoucheVisibles = computed(() =>
-  uniqByNom(products.value.premiereCoucheDouceur).slice(0, 4)
-)
-const secondeCoucheVisibles = computed(() =>
-  uniqByNom(products.value.secondeCoucheDouceur).slice(0, 4)
-)
-const toucheFinaleVisibles = computed(() => {
-  // ✅ APPROCHE SIMPLE : Comme les autres étapes, pas de déduplication
-  return products.value.toucheFinale.slice(0, 4)
-})
+// Computed properties pour afficher TOUS les produits (pas de filtrage)
+const premiereCoucheVisibles = computed(() => products.value.premiereCoucheDouceur)
+const secondeCoucheVisibles = computed(() => products.value.secondeCoucheDouceur)
+const toucheFinaleVisibles = computed(() => products.value.toucheFinale)
 
 // ✅ APPROCHE SIMPLE : Plus besoin de logique complexe de verrouillage
 // Chaque vignette gère son propre état avec la propriété 'saved'
@@ -506,30 +499,28 @@ const saveProduct = async (productType: string, actualIndex: number) => {
   }
 }
 
-// Charger la configuration au montage
+// Charger la configuration au montage - MODE LECTURE SEULE
 onMounted(async () => {
   try {
-    // Charger tous les produits depuis la nouvelle structure
+    console.log('🔄 Chargement en mode lecture seule...')
     const allProducts = await productConfigService.getAllProducts()
     console.log('🔍 Dashboard - Produits chargés:', allProducts.length, allProducts)
     
-    // Organiser les produits par étape
+    // Organiser les produits par étape - LECTURE SEULE
     allProducts.forEach(product => {
       const { step, nom, images, locked } = product
       
       switch (step) {
         case 'fonds':
-          // Trouver le premier slot disponible
           const fondsIndex = products.value.fonds.findIndex(p => !p.nom && p.images.length === 0)
           if (fondsIndex !== -1) {
             products.value.fonds[fondsIndex] = { 
               id: product.id, 
               nom, 
               images: images || [], 
-              saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
+              saved: true,
               step: 'fonds'
             }
-            // Synchroniser avec le store des produits pour ComposerView
             productStore.fonds[fondsIndex] = { nom, image: images?.[0] || null }
           }
           break
@@ -540,10 +531,9 @@ onMounted(async () => {
               id: product.id, 
               nom, 
               images: images || [], 
-              saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
+              saved: true,
               step: 'premiereCoucheDouceur'
             }
-            // Synchroniser avec le store des produits pour ComposerView
             productStore.premiereCoucheDouceur[premiereIndex] = { nom, images: images || [] }
           }
           break
@@ -554,33 +544,28 @@ onMounted(async () => {
               id: product.id, 
               nom, 
               images: images || [], 
-              saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
+              saved: true,
               step: 'secondeCoucheDouceur'
             }
-            // Synchroniser avec le store des produits pour ComposerView
             productStore.secondeCoucheDouceur[secondeIndex] = { nom, images: images || [] }
           }
           break
         case 'toucheFinale':
-          console.log('🔍 Chargement toucheFinale:', { nom, images, id: product.id })
-          // ✅ APPROCHE SIMPLE : Placer dans l'ordre au lieu de chercher des slots vides
-          const toucheIndex = products.value.toucheFinale.findIndex(p => !p.nom || p.nom === nom)
-          console.log('🔍 Index trouvé pour toucheFinale:', toucheIndex)
+          const toucheIndex = products.value.toucheFinale.findIndex(p => !p.nom && p.images.length === 0)
           if (toucheIndex !== -1) {
             products.value.toucheFinale[toucheIndex] = { 
               id: product.id, 
               nom, 
               images: images || [], 
-              saved: true, // Produit chargé depuis Supabase = déjà sauvegardé
+              saved: true,
               step: 'toucheFinale'
             }
-            // Synchroniser avec le store des produits pour ComposerView
             productStore.toucheFinale[toucheIndex] = { nom, images: images || [] }
-            console.log('✅ toucheFinale placé à l\'index:', toucheIndex)
           }
           break
       }
     })
+    console.log('✅ Chargement terminé - Mode lecture seule')
   } catch (error) {
     console.error('❌ Erreur chargement produits:', error)
   }

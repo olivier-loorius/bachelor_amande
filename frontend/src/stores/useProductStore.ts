@@ -406,7 +406,7 @@ export const useProductStore = defineStore('products', () => {
         finition: finition.length 
       })
       
-      // Charger les fonds
+      // ✅ CHARGER LES FONDS
       fonds.forEach((config, index) => {
         if (index < 3) {
           products.value.fonds[index] = {
@@ -417,7 +417,7 @@ export const useProductStore = defineStore('products', () => {
         }
       })
       
-      // Charger les garnitures
+      // ✅ CHARGER LES GARNITURES (ÉTAPES 2 ET 3)
       premiere.forEach((config, index) => {
         if (index < 4) {
           products.value.premiereCoucheDouceur[index] = {
