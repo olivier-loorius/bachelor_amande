@@ -27,51 +27,51 @@
 </script>
 
 <style scoped>
-.composer-header {
-  margin-bottom: 2rem;
+.composer-header { 
+  margin-bottom: 2rem; 
+  padding: 0 0.5rem;
 }
 
-.section-title {
-  font-family: var(--font-family-title);
-  font-size: 2.3rem;
-  color: #90aeb0;
-  text-align: center;
-  margin-bottom: 2rem;
-  letter-spacing: 1px;
+.section-title { 
+  font-family: var(--font-family-title, 'Poppins', sans-serif); 
+  font-size: 2.3rem; 
+  color: var(--teal-color, #90aeb0); 
+  text-align: left; 
+  margin: 0 0 1.8rem 0; 
+  font-weight: 600;
+  line-height: 1.2;
 }
 
-.composer-price-ux {
-  margin: 0 0 1.2rem 0;
+.composer-price-ux { 
+  margin: 0 0 1.5rem 0; 
+  font-size: 1.08rem; 
+  color: var(--text-color, #333); 
+  font-family: var(--font-family-text, 'Inter', sans-serif); 
+  line-height: 1.5; 
   text-align: left;
-  font-size: 1.08rem;
-  color: var(--text-color);
-  font-family: var(--font-family-text);
-  font-weight: normal;
-  line-height: 1.5;
 }
 
-.composer-price-ux-value {
-  color: #ff6f61;
-  font-weight: bold;
-  font-size: 1.08em;
-  margin-left: 0.5em;
-  margin-right: 0.5em;
+.composer-price-ux-value { 
+  color: var(--accent-color, #e05a4e); 
+  font-weight: bold; 
+  font-size: 1.08em; 
+  margin: 0 .5em; 
 }
 
-.composer-intro {
-  font-family: var(--font-family-text);
-  font-size: 1.1rem;
-  color: var(--text-color);
-  margin-bottom: 2rem;
+.composer-intro { 
+  font-family: var(--font-family-text, 'Inter', sans-serif); 
+  font-size: 1.05rem; 
+  color: var(--text-color, #333); 
+  line-height: 1.6;
+  text-align: left;
 }
 
-.composer-intro-sub {
-  display: block;
-  color: var(--text-color);
-  font-weight: normal;
-  margin-top: 0.7rem;
-  font-size: 1.08rem;
-  letter-spacing: 0.5px;
+.composer-intro-sub { 
+  display: block; 
+  color: var(--text-color, #333); 
+  margin-top: .8rem; 
+  font-size: 1.02rem; 
+  font-weight: 500;
 }
 </style>
 

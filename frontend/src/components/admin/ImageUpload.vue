@@ -4,7 +4,19 @@
       <img :src="src" :alt="alt" />
       <button @click="$emit('remove')" class="remove-btn">×</button>
     </div>
-    <div v-else class="upload-area" @click="!locked && triggerFileInput()">
+    <div v-else-if="uploading" class="uploading-area">
+      <div class="spinner"></div>
+      <small>Upload en cours...</small>
+    </div>
+    <div 
+      v-else 
+      class="upload-area" 
+      @click="!locked && triggerFileInput()"
+      @dragover.prevent="handleDragOver"
+      @dragleave.prevent="handleDragLeave"
+      @drop.prevent="handleDrop"
+      :class="{ 'drag-over': isDragOver }"
+    >
       <input
         ref="fileInput"
         type="file"
@@ -14,7 +26,7 @@
         :disabled="locked"
       />
       <span>📁</span>
-      <small>Cliquez pour uploader</small>
+      <small>Cliquez ou glissez-déposez</small>
     </div>
   </div>
 </template>
@@ -25,12 +37,14 @@ import { ref } from 'vue'
 const props = defineProps({
   src: String,
   alt: String,
-  locked: Boolean
+  locked: Boolean,
+  uploading: Boolean
 })
 
 const emit = defineEmits(['upload', 'remove'])
 
 const fileInput = ref(null)
+const isDragOver = ref(false)
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -40,6 +54,30 @@ function handleFileSelect(event) {
   const file = event.target.files[0]
   if (file) {
     emit('upload', file)
+  }
+}
+
+function handleDragOver(event) {
+  if (!props.locked) {
+    isDragOver.value = true
+  }
+}
+
+function handleDragLeave(event) {
+  isDragOver.value = false
+}
+
+function handleDrop(event) {
+  if (props.locked) return
+  
+  isDragOver.value = false
+  const files = event.dataTransfer.files
+  
+  if (files.length > 0) {
+    const file = files[0]
+    if (file.type.startsWith('image/')) {
+      emit('upload', file)
+    }
   }
 }
 </script>
@@ -60,6 +98,34 @@ function handleFileSelect(event) {
 .image-upload:hover:not(.locked) {
   border-color: #007bff;
   background-color: #f8f9fa;
+}
+
+.image-upload .upload-area.drag-over {
+  border-color: #28a745;
+  background-color: #d4edda;
+  transform: scale(1.02);
+}
+
+.uploading-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .image-upload.locked {

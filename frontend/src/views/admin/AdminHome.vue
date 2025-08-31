@@ -25,9 +25,9 @@
     <!-- Section Produits -->
     <AccordionSection 
       :fonds="products.fonds"
-      :premiereCoucheDouceur="products.premiereCoucheDouceur"
-      :secondeCoucheDouceur="products.secondeCoucheDouceur"
-      :toucheFinale="products.toucheFinale"
+      :premiereCoucheDouceur="premiereCoucheVisibles"
+      :secondeCoucheDouceur="secondeCoucheVisibles"
+      :toucheFinale="toucheFinaleVisibles"
              :lockedProducts="{
          fonds: products.fonds.map(p => p.saved), // ← saved = true = verrouillée
          premiereCoucheDouceur: products.premiereCoucheDouceur.map(p => p.saved),
@@ -105,6 +105,18 @@ const router = useRouter()
 
 // Store des produits pour synchronisation avec ComposerView
 const productStore = useProductStore()
+
+// Fonction de déduplication par nom
+const uniqByNom = (arr: any[]) => {
+  const seen = new Set<string>()
+  return arr.filter((p: any) => {
+    const key = (p?.nom || '').trim().toLowerCase()
+    if (!key) return false
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
 
 const handleLogout = () => {
   authStore.logout(router)
@@ -201,13 +213,27 @@ const premiereCoucheConfigured = computed(() => products.value.premiereCoucheDou
 const secondeCoucheConfigured = computed(() => products.value.secondeCoucheDouceur.filter(p => p.nom && p.images.length > 0).length)
 const toucheFinaleConfigured = computed(() => products.value.toucheFinale.filter(p => p.nom && p.images.length > 0).length)
 
+// Computed properties pour afficher uniquement les produits renseignés et sans doublons
+const premiereCoucheVisibles = computed(() =>
+  uniqByNom(products.value.premiereCoucheDouceur).slice(0, 4)
+)
+const secondeCoucheVisibles = computed(() =>
+  uniqByNom(products.value.secondeCoucheDouceur).slice(0, 4)
+)
+const toucheFinaleVisibles = computed(() => {
+  // ✅ APPROCHE SIMPLE : Comme les autres étapes, pas de déduplication
+  return products.value.toucheFinale.slice(0, 4)
+})
+
 // ✅ APPROCHE SIMPLE : Plus besoin de logique complexe de verrouillage
 // Chaque vignette gère son propre état avec la propriété 'saved'
 
 // Fonctions de gestion
 const handleUpload = async ({ productIndex, imageIndex, file }: any) => {
   try {
+    console.log('🔄 Upload en cours:', { productIndex, imageIndex, file: file.name })
     const { productType, actualIndex } = getProductInfo(productIndex)
+    console.log('🔍 Info produit:', { productType, actualIndex })
     const imageUrl = await productConfigService.uploadImage(file, productType, actualIndex, imageIndex)
     
     if (productType === 'fonds') {
@@ -239,9 +265,27 @@ const handleUpload = async ({ productIndex, imageIndex, file }: any) => {
       products.value.toucheFinale[actualIndex].images[imageIndex] = imageUrl || ''
       // Synchroniser avec le store des produits pour ComposerView
       productStore.toucheFinale[actualIndex].images[imageIndex] = imageUrl || null
+      
+      // 🔍 Debug immédiat pour voir si l'image est mise à jour
+      console.log('🔍 Image mise à jour immédiatement:', {
+        actualIndex,
+        imageIndex,
+        imageUrl,
+        productImages: products.value.toucheFinale[actualIndex].images,
+        storeImages: productStore.toucheFinale[actualIndex].images
+      })
     }
     
     console.log('✅ Image uploadée et store synchronisé:', imageUrl)
+    console.log('🔍 État après upload:', {
+      productType,
+      actualIndex,
+      imageIndex,
+      imageUrl
+    })
+    
+    // ✅ APPROCHE SIMPLE : Pas de rechargement automatique qui écrase les nouvelles images
+    // L'image est déjà mise à jour dans le store local, pas besoin de recharger depuis Supabase
   } catch (error) {
     console.error('❌ Erreur upload:', error)
   }
@@ -467,7 +511,7 @@ onMounted(async () => {
   try {
     // Charger tous les produits depuis la nouvelle structure
     const allProducts = await productConfigService.getAllProducts()
-    console.log('🔍 Produits chargés:', allProducts)
+    console.log('🔍 Dashboard - Produits chargés:', allProducts.length, allProducts)
     
     // Organiser les produits par étape
     allProducts.forEach(product => {
@@ -487,7 +531,6 @@ onMounted(async () => {
             }
             // Synchroniser avec le store des produits pour ComposerView
             productStore.fonds[fondsIndex] = { nom, image: images?.[0] || null }
-            // Les vignettes chargées depuis Supabase gardent leur statut locked
           }
           break
         case 'premiereCoucheDouceur':
@@ -502,7 +545,6 @@ onMounted(async () => {
             }
             // Synchroniser avec le store des produits pour ComposerView
             productStore.premiereCoucheDouceur[premiereIndex] = { nom, images: images || [] }
-            // Les vignettes chargées depuis Supabase gardent leur statut locked
           }
           break
         case 'secondeCoucheDouceur':
@@ -517,11 +559,13 @@ onMounted(async () => {
             }
             // Synchroniser avec le store des produits pour ComposerView
             productStore.secondeCoucheDouceur[secondeIndex] = { nom, images: images || [] }
-            // Les vignettes chargées depuis Supabase gardent leur statut locked
           }
           break
         case 'toucheFinale':
-          const toucheIndex = products.value.toucheFinale.findIndex(p => !p.nom && p.images.length === 0)
+          console.log('🔍 Chargement toucheFinale:', { nom, images, id: product.id })
+          // ✅ APPROCHE SIMPLE : Placer dans l'ordre au lieu de chercher des slots vides
+          const toucheIndex = products.value.toucheFinale.findIndex(p => !p.nom || p.nom === nom)
+          console.log('🔍 Index trouvé pour toucheFinale:', toucheIndex)
           if (toucheIndex !== -1) {
             products.value.toucheFinale[toucheIndex] = { 
               id: product.id, 
@@ -532,7 +576,7 @@ onMounted(async () => {
             }
             // Synchroniser avec le store des produits pour ComposerView
             productStore.toucheFinale[toucheIndex] = { nom, images: images || [] }
-            // Les vignettes chargées depuis Supabase gardent leur statut locked
+            console.log('✅ toucheFinale placé à l\'index:', toucheIndex)
           }
           break
       }

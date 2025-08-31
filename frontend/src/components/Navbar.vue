@@ -178,12 +178,22 @@ onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
   document.addEventListener('click', handleClickOutside)
   router.afterEach(handleNavigation)
+  
+  // Écouter l'événement pour ouvrir la modal de connexion depuis le composer
+  window.addEventListener('open-login-modal', () => {
+    openLogin()
+  })
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
   document.removeEventListener('click', handleClickOutside)
   router.afterEach(() => {})
+  
+  // Nettoyer l'event listener pour la modal de connexion
+  window.removeEventListener('open-login-modal', () => {
+    openLogin()
+  })
 })
 </script>
 

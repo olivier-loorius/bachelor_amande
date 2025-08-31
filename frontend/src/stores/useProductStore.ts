@@ -381,75 +381,79 @@ export const useProductStore = defineStore('products', () => {
       const configs = await productConfigService.getAllProducts()
       console.log('📦 Configuration chargée:', configs)
       
-      products.value.fonds = []
-      products.value.premiereCoucheDouceur = []
-      products.value.secondeCoucheDouceur = []
-      products.value.toucheFinale = []
+      // Réinitialiser les tableaux avec la bonne structure
+      products.value.fonds = Array(3).fill(null).map(() => ({ nom: '', image: null }))
+      products.value.premiereCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+      products.value.secondeCoucheDouceur = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
+      products.value.toucheFinale = Array(4).fill(null).map(() => ({ nom: '', images: [null, null, null] }))
       
+      // Réinitialiser les états
       productStates.value.locked.fonds = [true, true, true]
       productStates.value.locked.premiereCoucheDouceur = [true, true, true, true]
       productStates.value.locked.secondeCoucheDouceur = [true, true, true, true]
       productStates.value.locked.toucheFinale = [true, true, true, true]
       
-      const loadProduct = (config: any) => {
-        const productType = Object.values(PRODUCT_TYPES).find(pt => pt.configType === config.config_type)
-        if (!productType) return
-        
-        let product: any
-        if (config.config_type === 'fonds') {
-          product = {
+      // Grouper les produits par étape
+      const fonds = configs.filter(c => c.step === 'fonds')
+      const premiere = configs.filter(c => c.step === 'premiereCoucheDouceur')
+      const seconde = configs.filter(c => c.step === 'secondeCoucheDouceur')
+      const finition = configs.filter(c => c.step === 'toucheFinale')
+      
+      console.log('📊 Produits groupés:', { 
+        fonds: fonds.length, 
+        premiere: premiere.length, 
+        seconde: seconde.length, 
+        finition: finition.length 
+      })
+      
+      // Charger les fonds
+      fonds.forEach((config, index) => {
+        if (index < 3) {
+          products.value.fonds[index] = {
             nom: config.nom || '',
             image: config.images && config.images.length > 0 ? config.images[0] : null
           }
-          products.value.fonds[config.product_index] = product
-          if (config.locked !== undefined) {
-            productStates.value.locked.fonds[config.product_index] = config.locked
-          } else {
-            productStates.value.locked.fonds[config.product_index] = true
-          }
-        } else {
-          product = {
+          productStates.value.locked.fonds[index] = config.locked
+        }
+      })
+      
+      // Charger les garnitures
+      premiere.forEach((config, index) => {
+        if (index < 4) {
+          products.value.premiereCoucheDouceur[index] = {
             nom: config.nom || '',
             images: config.images && config.images.length > 0 ? config.images : [null, null, null]
           }
-          
-          if (productType.array === 'premiereCoucheDouceur') {
-            products.value.premiereCoucheDouceur[config.product_index] = product
-            if (config.locked !== undefined) {
-              productStates.value.locked.premiereCoucheDouceur[config.product_index] = config.locked
-            } else {
-              productStates.value.locked.premiereCoucheDouceur[config.product_index] = true
-            }
-          } else if (productType.array === 'secondeCoucheDouceur') {
-            products.value.secondeCoucheDouceur[config.product_index] = product
-            if (config.locked !== undefined) {
-              productStates.value.locked.secondeCoucheDouceur[config.product_index] = config.locked
-            } else {
-              productStates.value.locked.secondeCoucheDouceur[config.product_index] = true
-            }
-          } else if (productType.array === 'toucheFinale') {
-            products.value.toucheFinale[config.product_index] = product
-            if (config.locked !== undefined) {
-              productStates.value.locked.toucheFinale[config.product_index] = config.locked
-            } else {
-              productStates.value.locked.toucheFinale[config.product_index] = true
-            }
-          }
+          productStates.value.locked.premiereCoucheDouceur[index] = config.locked
         }
-      }
+      })
       
-      configs.forEach(loadProduct)
+      seconde.forEach((config, index) => {
+        if (index < 4) {
+          products.value.secondeCoucheDouceur[index] = {
+            nom: config.nom || '',
+            images: config.images && config.images.length > 0 ? config.images : [null, null, null]
+          }
+          productStates.value.locked.secondeCoucheDouceur[index] = config.locked
+        }
+      })
       
-      for (let i = 0; i < 3; i++) {
-        if (!products.value.fonds[i]) products.value.fonds[i] = { nom: '', image: null, saved: false }
-      }
-      for (let i = 0; i < 4; i++) {
-        if (!products.value.premiereCoucheDouceur[i]) products.value.premiereCoucheDouceur[i] = { nom: '', images: [null, null, null], saved: false }
-        if (!products.value.secondeCoucheDouceur[i]) products.value.secondeCoucheDouceur[i] = { nom: '', images: [null, null, null], saved: false }
-        if (!products.value.toucheFinale[i]) products.value.toucheFinale[i] = { nom: '', images: [null, null, null], saved: false }
-      }
+      finition.forEach((config, index) => {
+        if (index < 4) {
+          products.value.toucheFinale[index] = {
+            nom: config.nom || '',
+            images: config.images && config.images.length > 0 ? config.images : [null, null, null]
+          }
+          productStates.value.locked.toucheFinale[index] = config.locked
+        }
+      })
       
-      console.log('✅ Configuration chargée avec succès')
+      console.log('✅ Configuration chargée avec succès:', {
+        fonds: products.value.fonds.map(f => ({ nom: f.nom, image: f.image })),
+        premiere: products.value.premiereCoucheDouceur.map(p => ({ nom: p.nom, images: p.images })),
+        seconde: products.value.secondeCoucheDouceur.map(s => ({ nom: s.nom, images: s.images })),
+        finition: products.value.toucheFinale.map(t => ({ nom: t.nom, images: t.images }))
+      })
     } catch (error) {
       console.error('❌ Erreur lors du chargement de la configuration:', error)
     }

@@ -1,2001 +1,301 @@
-<!-- prettier-ignore -->
+<!-- src/views/composer/ComposerView.vue -->
 <template>
   <div class="page-container">
     <main class="content-container composer-content">
       <div class="composer-card card">
-        <!-- Utilisation du composant ComposerSteps pour les étapes 1-4 -->
-        <ComposerSteps
-          v-if="currentStep >= 1 && currentStep <= 4"
-          :current-step="currentStep"
-          :selected-fond="selectedFond"
-          :selected-garniture1="selectedGarniture1"
-          :selected-garniture2="selectedGarniture2"
-          :selected-garniture3="selectedGarniture3"
-          :fonds="fonds"
-          :garnitures1="garnitures1"
-          :garnitures2="garnitures2"
-          :garnitures3="garnitures3"
-          :fond-index="fondIndex"
-          :is-mobile="isMobile"
-          @select-fond="selectFond"
-          @select-garniture1="selectGarniture1"
-          @select-garniture2="selectGarniture2"
-          @select-garniture3="selectGarniture3"
-          @deselect-fond="deselectFond"
-          @go-to-next-step="goToNextStep"
-          @prev-fond="prevFond"
-          @next-fond="nextFond"
-          @handle-fond-swipe="handleFondSwipe"
-          @handle-image-error="handleImageError"
-        />
+        <div class="page">
+                      <div class="content" :class="{ 'with-right': step > 1 && step < 5 }">
+                                          <div class="left">
+                <ComposerHeader />
 
-        <!-- Étape 5 : Résumé et finalisation -->
-        <section v-if="currentStep === 5">
-          <h2 class="composer-step-title">Et voilà, votre création finale !</h2>
-          <p class="composer-step-desc">
-            Il ne vous reste plus qu'à définir votre gourmandise… Choisissez le nombre de
-            tartelettes à commander, pour vous faire plaisir ou pour partager !
-          </p>
-          <div class="composer-step5-wrapper">
-            <div class="composer-step5-summary">
-              <h3
-                class="composer-step-title"
-                style="font-size: 1.15rem; margin-top: 0; margin-bottom: 1.7rem"
-              >
-                Votre création
-              </h3>
-              <div
-                style="
-                  display: flex;
-                  flex-direction: column;
-                  gap: 0.7rem;
-                  margin-bottom: 1.7rem;
-                  width: 100%;
-                "
-              >
-                <div
-                  v-if="selectedFond"
-                  class="composer-step-desc"
-                  style="
-                    margin-bottom: 0;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5em;
-                  "
-                >
-                  <span
-                    style="
-                      display: inline-block;
-                      width: 8px;
-                      height: 8px;
-                      border-radius: 50%;
-                      background: #ff6f61;
-                    "
-                  ></span>
-                  {{ selectedFond.nom }}
-                </div>
-                <div
-                  v-if="selectedGarniture1"
-                  class="composer-step-desc"
-                  style="
-                    margin-bottom: 0;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5em;
-                  "
-                >
-                  <span
-                    style="
-                      display: inline-block;
-                      width: 8px;
-                      height: 8px;
-                      border-radius: 50%;
-                      background: #ff6f61;
-                    "
-                  ></span>
-                  {{ selectedGarniture1.nom }}
-                </div>
-                <div
-                  v-if="selectedGarniture2"
-                  class="composer-step-desc"
-                  style="
-                    margin-bottom: 0;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5em;
-                  "
-                >
-                  <span
-                    style="
-                      display: inline-block;
-                      width: 8px;
-                      height: 8px;
-                      border-radius: 50%;
-                      background: #ff6f61;
-                    "
-                  ></span>
-                  {{ selectedGarniture2.nom }}
-                </div>
-                <div
-                  v-if="selectedGarniture3"
-                  class="composer-step-desc"
-                  style="
-                    margin-bottom: 0;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5em;
-                  "
-                >
-                  <span
-                    style="
-                      display: inline-block;
-                      width: 8px;
-                      height: 8px;
-                      border-radius: 50%;
-                      background: #ff6f61;
-                    "
-                  ></span>
-                  {{ selectedGarniture3.nom }}
-                </div>
-                <div
-                  v-if="selectedFinition"
-                  class="composer-step-desc"
-                  style="
-                    margin-bottom: 0;
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5em;
-                  "
-                >
-                  <span
-                    style="
-                      display: inline-block;
-                      width: 8px;
-                      height: 8px;
-                      border-radius: 50%;
-                      background: #ff6f61;
-                    "
-                  ></span>
-                  {{ selectedFinition.nom }}
-                </div>
-              </div>
-              <div style="width: 100%; margin-bottom: 0.7rem">
-                <div
-                  class="composer-step-title"
-                  style="
-                    font-size: 1.15rem;
-                    margin-top: 0;
-                    margin-bottom: 1.1rem;
-                    font-weight: bold;
-                  "
-                >
-                  Quantité
-                </div>
-                <div class="composer-qty-row">
-                  <button
-                    @click="quantite = Math.max(1, quantite - 1)"
-                    aria-label="Diminuer la quantité"
-                    class="composer-qty-btn-bare"
-                    :disabled="quantite <= 1"
-                    :class="{ 'composer-qty-btn-disabled': quantite <= 1 }"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 18 18"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M11 15L5 9L11 3"
-                        stroke="var(--accent-color)"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </button>
-                  <input
-                    type="number"
-                    v-model="quantite"
-                    min="1"
-                    max="10"
-                    class="composer-qty-input-bare"
-                    :class="{ 'composer-qty-input-animate': animateQty }"
-                    @animationend="animateQty = false"
-                    @input="triggerQtyAnim"
-                  />
-                  <button
-                    @click="quantite = Math.min(10, quantite + 1)"
-                    aria-label="Augmenter la quantité"
-                    class="composer-qty-btn-bare"
-                    :disabled="quantite >= 10"
-                    :class="{ 'composer-qty-btn-disabled': quantite >= 10 }"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 18 18"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M7 15L13 9L7 3"
-                        stroke="var(--accent-color)"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </button>
-                  <span
-                    style="
-                      color: #888;
-                      font-size: 0.98rem;
-                      margin-left: 0.5rem;
-                      min-width: 70px;
-                      text-align: left;
-                      font-weight: bold;
-                      font-family: var(--font-family-text);
-                    "
-                  >
-                    {{ quantite > 1 ? 'tartelettes' : 'tartelette' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div class="composer-step5-img">
-              <img
-                v-if="selectedFond"
-                :src="getGarnitureImage(selectedFond, getGarnitureToDisplay())"
-                :alt="getGarnitureToDisplay()?.nom || selectedFond.nom"
-                class="composer-step5-img-el"
-                @error="handleImageError"
-              />
-              <div v-else class="garniture-img-placeholder composer-step5-img-el">
-                Aucun fond sélectionné
-              </div>
-            </div>
-          </div>
-          <div class="composer-footer composer-footer-step5">
-            <div class="composer-progress-bar">
-              <template v-for="step in 5" :key="step">
-                <span
-                  class="progress-dot"
-                  :class="{
-                    done: currentStep > step,
-                    active: currentStep === step,
-                  }"
-                ></span>
-                <span
-                  v-if="step < 5"
-                  class="progress-bar"
-                  :class="{ done: currentStep > step }"
-                ></span>
-              </template>
-            </div>
-            <div class="composer-nav-btns composer-nav-btns-step5">
-              <button
-                class="composer-btn-secondary composer-btn-icon"
-                @click="currentStep = 4"
-                aria-label="Précédent"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M11 5l-4 4 4 4"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                <span class="btn-text">Précédent</span>
-              </button>
-              <button
-                class="composer-btn-secondary composer-btn-icon"
-                @click="recommencer(); currentStep = 1"
-                aria-label="Recommencer"
-              >
-                <i class="fas fa-undo"></i>
-                <span class="btn-text">Recommencer</span>
-              </button>
-              <button
-                class="composer-btn panier-cta composer-btn-icon"
-                :disabled="!quantite"
-                @click="ajouterAuPanier"
-                aria-label="Ajouter au panier"
-              >
-                <i class="fas fa-shopping-cart"></i>
-                <span class="btn-text">Panier</span>
-              </button>
-            </div>
-
-            <!-- CRUD Section -->
-            <div class="crud-section" v-if="authStore.isLoggedIn">
-              <div class="save-composition-section">
-                <input
-                  v-model="compositionName"
-                  placeholder="Nom de votre création"
-                  class="composition-name-input"
-                  :disabled="!peutValider"
+                <StepFond
+                  v-if="step===1"
+                  :fonds="fonds"
+                  :selected-id="selections.fond?.id"
+                  @select="({item,index}) => selectFond(item, index)"
                 />
-                <button
-                  @click="saveComposition"
-                  class="save-composition-btn"
-                  :disabled="!peutValider || isLoading"
-                >
-                  <i class="fas fa-save"></i>
-                  <span v-if="!isLoading">Sauvegarder</span>
-                  <span v-else>Sauvegarde...</span>
-                </button>
+
+                <StepGarniture
+                  v-else-if="step===2"
+                  title="2) Première couche de douceur"
+                  :items="g1"
+                  :selected-id="selections.g1?.id"
+                  :preview-url="previewUrl"
+                  @select="selectG1"
+                />
+
+                <StepGarniture
+                  v-else-if="step===3"
+                  title="3) Seconde couche de douceur"
+                  :items="g2"
+                  :selected-id="selections.g2?.id"
+                  :preview-url="previewUrl"
+                  @select="selectG2"
+                />
+
+                <StepGarniture
+                  v-else-if="step===4"
+                  title="4) La touche finale"
+                  :items="g3"
+                  :selected-id="selections.g3?.id"
+                  :preview-url="previewUrl"
+                  @select="selectG3"
+                />
+
+                <StepSummary
+                  v-else-if="step===5"
+                  :fond="selections.fond"
+                  :g1="selections.g1"
+                  :g2="selections.g2"
+                  :g3="selections.g3"
+                  :quantity="quantity"
+                  :unitPrice="unitPrice"
+                  :preview-src="previewUrl"
+                  @setQty="q => quantity = q"
+                  @prev="prev"
+                  @add="onAddToCart"
+                  @restart="restart"
+                />
+
+                <WizardNav
+                  v-if="step<=4"
+                  :can-prev="canPrev"
+                  :can-next="canNext"
+                  @prev="prev"
+                  @next="next"
+                />
               </div>
 
-              <div class="compositions-list-section">
-                <button @click="toggleCompositionsList" class="toggle-compositions-btn">
-                  <i class="fas fa-list"></i>
-                  <span>Mes créations ({{ userCompositions.length }})</span>
-                </button>
-
-                <div v-if="showCompositionsList" class="compositions-list">
-                  <div v-for="comp in userCompositions" :key="comp.id" class="composition-item">
-                    <div class="composition-info">
-                      <h4>{{ comp.name }}</h4>
-                      <p class="composition-date">
-                        {{ new Date(comp.created_at!).toLocaleDateString() }}
-                      </p>
-                    </div>
-                    <div class="composition-actions">
-                      <button @click="loadComposition(comp)" class="load-btn">
-                        <i class="fas fa-upload"></i>
-                        Charger
-                      </button>
-                      <button @click="deleteComposition(comp.id!)" class="delete-btn">
-                        <i class="fas fa-trash"></i>
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
+              <!-- Colonne de droite avec prévisualisation desktop (étapes 2-4) -->
+              <div class="right" v-if="step > 1 && step < 5">
+                <div class="right-bottom">
+                  <PreviewPane
+                    :src="previewUrl"
+                  />
                 </div>
               </div>
-
-              <!-- Save Message -->
-              <div v-if="saveMessage" class="save-message" :class="saveMessageType">
-                {{ saveMessage }}
-              </div>
-            </div>
-          </div>
-        </section>
+                    </div>
+                    </div>
       </div>
     </main>
   </div>
-  <AddToCartModal
-    :show="showAddModal"
-    message="Votre tartelette a bien été ajoutée au panier !"
-    @close="closeAddModal"
-  />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import AddToCartModal from '@/components/AddToCartModal.vue'
+import { computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { usePanierStore } from '@/stores/panier'
-import { compositionsService, type Composition } from '@/services/supabaseService'
-import { productConfigService, type Product } from '@/services/productConfigService'
 import { useProductStore } from '@/stores/useProductStore'
-import ComposerSteps from './components/ComposerSteps.vue'
 
-// Store des produits pour synchronisation avec AdminHome
+import ComposerHeader from './components/ComposerHeader.vue'
+import StepFond from './components/StepFond.vue'
+import StepGarniture from './components/StepGarniture.vue'
+import StepSummary from './components/StepSummary.vue'
+import WizardNav from './components/WizardNav.vue'
+import PreviewPane from './components/PreviewPane.vue'
+import { useComposer } from './composables/useComposer'
+import type { Item } from './types'
+
+// Stores
 const productStore = useProductStore()
+const auth = useAuthStore()
+const panier = usePanierStore()
 
-// Configuration des produits depuis Supabase (fallback)
-const productConfig = ref<Product[]>([])
-
-// Computed properties pour organiser les données - FILTRER LES PRODUITS VIDES
-const fonds = computed(() => {
-  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
-  const result = productStore.fonds
-    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
-    .slice(0, 3) // Limiter à 3 fonds maximum
-    .map((p: any, index: number) => ({
-      id: index + 1, // ID séquentiel simple : 1, 2, 3
-      nom: p.nom,
-      image: p.image || p.images?.[0] || undefined,
-    }))
-  
-  console.log('🖼️ Fonds computed:', result.map(f => ({ nom: f.nom, image: f.image })))
-  return result
-})
-
-const garnitures1 = computed(() => {
-  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
-  return productStore.premiereCoucheDouceur
-    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
-    .slice(0, 4) // Limiter à 4 garnitures maximum
-    .map((p: any, index: number) => ({
-      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
-      nom: p.nom,
-      // ✅ PRÉVISUALISATION : Afficher l'image de la garniture pour le fond sélectionné
-      image: p.images && p.images.length > 0 ? p.images[0] : undefined,
-    }))
-})
-
-const garnitures2 = computed(() => {
-  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
-  return productStore.secondeCoucheDouceur
-    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
-    .slice(0, 4) // Limiter à 4 garnitures maximum
-    .map((p: any, index: number) => ({
-      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
-      nom: p.nom,
-      // ✅ PRÉVISUALISATION : Afficher l'image de la garniture pour le fond sélectionné
-      image: p.images && p.images.length > 0 ? p.images[0] : undefined,
-    }))
-})
-
-const garnitures3 = computed(() => {
-  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
-  return productStore.toucheFinale
-    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
-    .slice(0, 4) // Limiter à 4 garnitures maximum
-    .map((p: any, index: number) => ({
-      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
-      nom: p.nom,
-      // ✅ PRÉVISUALISATION : Afficher l'image de la garniture pour le fond sélectionné
-      image: p.images && p.images.length > 0 ? p.images[0] : undefined,
-    }))
-})
-
-const finitions = computed(() => {
-  // Utiliser uniquement le store, pas de fallback pour éviter les doublons
-  return productStore.toucheFinale
-    .filter((p: any) => p.nom && p.nom.trim() !== '') // Filtrer les produits vides
-    .slice(0, 4) // Limiter à 4 finitions maximum
-    .map((p: any, index: number) => ({
-      id: index + 1, // ID séquentiel simple : 1, 2, 3, 4
-      nom: p.nom,
-      // ✅ PRÉVISUALISATION : Afficher l'image de la garniture pour le fond sélectionné
-      image: p.images && p.images.length > 0 ? p.images[0] : undefined,
-    }))
-})
-
-const selectedFond = ref(null as null | { id: number; nom: string })
-const selectedGarniture1 = ref(null as null | { id: number; nom: string })
-const selectedGarniture2 = ref(null as null | { id: number; nom: string })
-const selectedGarniture3 = ref(null as null | { id: number; nom: string })
-const selectedFinition = ref(null as null | { id: number; nom: string })
-const quantite = ref(1)
-const animateQty = ref(false)
-function triggerQtyAnim() {
-  animateQty.value = false
-  void quantite.value
-  animateQty.value = true
-}
-const showAddModal = ref(false)
-const showLoginPrompt = ref(false)
-const authStore = useAuthStore()
-const panierStore = usePanierStore()
-
-// CRUD Variables
-const compositionName = ref('')
-const userCompositions = ref<Composition[]>([])
-const showSaveModal = ref(false)
-const showCompositionsList = ref(false)
-const isLoading = ref(false)
-const saveMessage = ref('')
-const saveMessageType = ref<'success' | 'error'>('success')
-
-const peutValider = computed(() => {
-  return (
-    !!selectedFond.value &&
-    !!selectedGarniture1.value &&
-    !!selectedGarniture2.value &&
-    !!selectedGarniture3.value &&
-    !!selectedFinition.value &&
-    quantite.value > 0
-  )
-})
-
-// Fonction helper simple pour gérer les erreurs d'images
-// Utilise un placeholder CSS simple au lieu de fichiers SVG
-const handleImageError = (event: Event) => {
-  const target = event.target as HTMLImageElement
-  if (target) {
-    // Créer un placeholder CSS simple
-    target.style.background = '#f8f9fa'
-    target.style.border = '1px solid #e0e0e0'
-    target.style.borderRadius = '8px'
-    target.style.display = 'flex'
-    target.style.alignItems = 'center'
-    target.style.justifyContent = 'center'
-    target.style.color = '#999'
-    target.style.fontSize = '14px'
-    target.style.fontFamily = 'Arial, sans-serif'
-    target.style.textAlign = 'center'
-    target.style.padding = '20px'
-    target.style.boxSizing = 'border-box'
-
-    // Masquer l'image et afficher un texte
-    target.style.backgroundImage = 'none'
-    target.style.backgroundSize = 'cover'
-    target.style.backgroundPosition = 'center'
-    target.style.backgroundRepeat = 'no-repeat'
-
-    // Ajouter un pseudo-élément pour le texte
-    const placeholderText = document.createElement('div')
-    placeholderText.textContent = 'Image non disponible'
-    placeholderText.style.position = 'absolute'
-    placeholderText.style.top = '50%'
-    placeholderText.style.left = '50%'
-    placeholderText.style.transform = 'translate(-50%, -50%)'
-    placeholderText.style.color = '#999'
-    placeholderText.style.fontSize = '12px'
-    placeholderText.style.fontFamily = 'Arial, sans-serif'
-    placeholderText.style.textAlign = 'center'
-    placeholderText.style.pointerEvents = 'none'
-
-    // Ajouter le texte au conteneur parent
-    const parent = target.parentElement
-    if (parent) {
-      parent.style.position = 'relative'
-      parent.appendChild(placeholderText)
-    }
-  }
-}
-
-// Charger la configuration des produits depuis Supabase ET synchroniser avec le store
-const loadProductConfiguration = async () => {
-  try {
-    console.log('🔄 Chargement de la configuration des produits depuis Supabase...')
-    const config = await productConfigService.getAllProducts()
-    productConfig.value = config
-    console.log('✅ Configuration chargée depuis Supabase:', config.length, 'produits')
-    
-    // Synchroniser le store avec les données chargées
-    config.forEach(product => {
-      const { step, nom, images } = product
-      console.log(`📦 Produit ${step}: ${nom} avec ${images?.length || 0} images`)
-      
-      switch (step) {
-        case 'fonds':
-          const fondsIndex = productStore.fonds.findIndex(p => !p.nom || p.nom.trim() === '')
-          if (fondsIndex !== -1) {
-            productStore.fonds[fondsIndex] = { nom, image: images?.[0] || null }
-            console.log(`✅ Fond ajouté au store: ${nom} avec image: ${images?.[0] || 'aucune'}`)
-          }
-          break
-        case 'premiereCoucheDouceur':
-          const premiereIndex = productStore.premiereCoucheDouceur.findIndex(p => !p.nom || p.nom.trim() === '')
-          if (premiereIndex !== -1) {
-            productStore.premiereCoucheDouceur[premiereIndex] = { nom, images: images || [] }
-            console.log(`✅ Garniture 1 ajoutée au store: ${nom} avec ${images?.length || 0} images`)
-          }
-          break
-        case 'secondeCoucheDouceur':
-          const secondeIndex = productStore.secondeCoucheDouceur.findIndex(p => !p.nom || p.nom.trim() === '')
-          if (secondeIndex !== -1) {
-            productStore.secondeCoucheDouceur[secondeIndex] = { nom, images: images || [] }
-            console.log(`✅ Garniture 2 ajoutée au store: ${nom} avec ${images?.length || 0} images`)
-          }
-          break
-        case 'toucheFinale':
-          const toucheIndex = productStore.toucheFinale.findIndex(p => !p.nom || p.nom.trim() === '')
-          if (toucheIndex !== -1) {
-            productStore.toucheFinale[toucheIndex] = { nom, images: images || [] }
-            console.log(`✅ Touche finale ajoutée au store: ${nom} avec ${images?.length || 0} images`)
-          }
-          break
-      }
-    })
-    
-    console.log('✅ Store synchronisé avec les données Supabase')
-    console.log('📊 État final du store:', {
-      fonds: productStore.fonds.map(p => ({ nom: p.nom, image: p.image })),
-      premiereCouche: productStore.premiereCoucheDouceur.map(p => ({ nom: p.nom, images: p.images })),
-      secondeCouche: productStore.secondeCoucheDouceur.map(p => ({ nom: p.nom, images: p.images })),
-      toucheFinale: productStore.toucheFinale.map(p => ({ nom: p.nom, images: p.images }))
-    })
-  } catch (error) {
-    console.error('❌ Erreur lors du chargement de la configuration:', error)
-  }
-}
-
-function selectFond(fond: { id: number; nom: string }) {
-  selectedFond.value = fond
-  if (currentStep.value < 2) currentStep.value = 2
-}
-function selectGarniture1(garniture: { id: number; nom: string }) {
-  selectedGarniture1.value = garniture
-  // ✅ PRÉVISUALISATION : Le client peut voir l'image avant de valider
-  // Pas de changement automatique d'étape - il doit cliquer sur "Suivant"
-}
-function selectGarniture2(garniture: { id: number; nom: string }) {
-  selectedGarniture2.value = garniture
-  // ✅ PRÉVISUALISATION : Le client peut voir l'image avant de valider
-  // Pas de changement automatique d'étape - il doit cliquer sur "Suivant"
-}
-function selectGarniture3(garniture: { id: number; nom: string }) {
-  selectedGarniture3.value = garniture
-  // ✅ PRÉVISUALISATION : Le client peut voir l'image avant de valider
-  // Pas de changement automatique d'étape - il doit cliquer sur "Suivant"
-}
-function selectFinition(finition: { id: number; nom: string }) {
-  selectedFinition.value = finition
-}
-
-function recommencer() {
-  selectedFond.value = null
-  selectedGarniture1.value = null
-  selectedGarniture2.value = null
-  selectedGarniture3.value = null
-  selectedFinition.value = null
-  quantite.value = 1
-}
-async function ajouterAuPanier() {
-  if (!authStore.isLoggedIn) {
-    showLoginPrompt.value = true
-    return
-  }
-
-  // Créer le produit à partir des sélections
-  const produit = {
-    id: Date.now(), // ID unique basé sur le timestamp
-    nom: `Tartelette personnalisée`,
-    image: getGarnitureImage(selectedFond.value, getGarnitureToDisplay()),
-    prix: 6, // Prix fixe pour les tartelettes personnalisées
-    quantite: quantite.value,
-    base: selectedFond.value?.nom || '',
-    premiereDouceur: selectedGarniture1.value?.nom || '',
-    secondeDouceur: selectedGarniture2.value?.nom || '',
-    finition: selectedFinition.value?.nom || '',
-  }
-
-  // Ajouter au panier
-  const success = await panierStore.ajouterAuPanier(produit)
-
-  if (success) {
-    showAddModal.value = true
-  }
-}
-function closeAddModal() {
-  showAddModal.value = false
-  recommencer()
-  currentStep.value = 1
-}
-
-// Fonctions pour la modal d'incitation à la connexion
-function closeLoginPrompt() {
-  showLoginPrompt.value = false
-}
-
-function handleLoginSuccess() {
-  // L'utilisateur s'est connecté avec succès
-  // On peut maintenant ajouter le produit au panier
-  ajouterAuPanier()
-}
-
-function handleRegisterSuccess() {
-  // L'utilisateur s'est inscrit avec succès
-  // On peut maintenant ajouter le produit au panier
-  ajouterAuPanier()
-}
-
-function openCartAfterLogin() {
-  // Ouvrir le panier après connexion
-  // Cette fonction sera appelée si l'utilisateur choisit d'ouvrir le panier
-}
-
-// CRUD Functions
-async function saveComposition() {
-  if (!authStore.isLoggedIn) {
-    showLoginPrompt.value = true
-    return
-  }
-
-  if (!compositionName.value.trim()) {
-    saveMessage.value = 'Veuillez donner un nom à votre création'
-    saveMessageType.value = 'error'
-    return
-  }
-
-  if (!peutValider.value) {
-    saveMessage.value = 'Veuillez compléter votre composition'
-    saveMessageType.value = 'error'
-    return
-  }
-
-  isLoading.value = true
-
-  try {
-    if (!authStore.user?.id) {
-      saveMessage.value = 'Erreur: utilisateur non connecté'
-      saveMessageType.value = 'error'
-      return
-    }
-
-    const composition: Omit<Composition, 'id' | 'created_at' | 'updated_at'> = {
-      user_id: authStore.user.id,
-      name: compositionName.value.trim(),
-      fond: selectedFond.value?.nom || '',
-      garniture1: selectedGarniture1.value?.nom || '',
-      garniture2: selectedGarniture2.value?.nom || '',
-      garniture3: selectedFinition.value?.nom || '',
-      finition: selectedFinition.value?.nom || '',
-    }
-
-    const result = await compositionsService.createComposition(composition)
-
-    if (result) {
-      saveMessage.value = 'Composition sauvegardée avec succès !'
-      saveMessageType.value = 'success'
-      compositionName.value = ''
-      await loadUserCompositions()
-    } else {
-      saveMessage.value = 'Erreur lors de la sauvegarde'
-      saveMessageType.value = 'error'
-    }
-  } catch (error) {
-    saveMessage.value = 'Erreur lors de la sauvegarde'
-    saveMessageType.value = 'error'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function loadUserCompositions() {
-  if (!authStore.isLoggedIn) return
-
-  try {
-    const data = await compositionsService.getUserCompositions(authStore.user!.id)
-    userCompositions.value = data
-  } catch (error) {
-    console.error('Erreur lors du chargement des compositions:', error)
-  }
-}
-
-async function loadComposition(composition: Composition) {
-  // Trouver les objets correspondants aux noms stockés
-  const fond = fonds.value.find((f: { id: number; nom: string }) => f.nom === composition.fond)
-  const garniture1 = garnitures1.value.find(
-    (g: { id: number; nom: string }) => g.nom === composition.garniture1,
-  )
-  const garniture2 = garnitures2.value.find(
-    (g: { id: number; nom: string }) => g.nom === composition.garniture2,
-  )
-  const garniture3 = garnitures3.value.find(
-    (g: { id: number; nom: string }) => g.nom === composition.garniture3,
-  ) // CORRECTION : utiliser garnitures3
-  const finition = finitions.value.find(
-    (f: { id: number; nom: string }) => f.nom === composition.finition,
-  )
-
-  selectedFond.value = fond || null
-  selectedGarniture1.value = garniture1 || null
-  selectedGarniture2.value = garniture2 || null
-  selectedGarniture3.value = garniture3 || null
-  selectedFinition.value = finition || null
-  compositionName.value = composition.name
-}
-
-async function deleteComposition(id: string) {
-  if (!authStore.isLoggedIn) return
-
-  try {
-    const success = await compositionsService.deleteComposition(id)
-    if (success) {
-      await loadUserCompositions()
-    }
-  } catch (error) {
-    console.error('Erreur lors de la suppression:', error)
-  }
-}
-
-function showSaveCompositionModal() {
-  showSaveModal.value = true
-}
-
-function closeSaveModal() {
-  showSaveModal.value = false
-  saveMessage.value = ''
-}
-
-function toggleCompositionsList() {
-  showCompositionsList.value = !showCompositionsList.value
-  if (showCompositionsList.value) {
-    loadUserCompositions()
-  }
-}
-
-function deselectFond() {
-  selectedFond.value = null
-  selectedGarniture1.value = null
-  selectedGarniture2.value = null
-  selectedGarniture3.value = null
-  selectedFinition.value = null
-  // ✅ PRÉVISUALISATION : Pas de changement automatique d'étape
-  // Le client peut rester sur l'étape actuelle pour faire d'autres sélections
-}
-
-function deselectGarniture1() {
-  selectedGarniture1.value = null
-}
-
-function getGarnitureImage(
-  fond: { id: number; nom: string; image?: string } | null,
-  garniture: { id: number; nom: string; image?: string } | null,
-) {
-  // Si on a une garniture, on l'affiche SEULEMENT
-  if (garniture && garniture.image) {
-    return garniture.image
-  }
-  
-  // Sinon on affiche RIEN (pas le fond !)
-  return ''
-}
-
-function handleClickOutsideFond(event: MouseEvent) {
-  const fondOptions = document.querySelector('.fond-options')
-  if (fondOptions && !fondOptions.contains(event.target as Node)) {
-    deselectFond()
-  }
-}
+// Charger les données au montage
 onMounted(async () => {
-  document.addEventListener('mousedown', handleClickOutsideFond)
-  // ✅ PRÉVISUALISATION : Pas de synchronisation automatique des garnitures
-  // Le client doit faire ses choix étape par étape
-  // Charger la configuration des produits depuis Supabase
-  await loadProductConfiguration()
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', handleClickOutsideFond)
-})
-
-function handleClickOutsideGarniture1(event: MouseEvent) {
-  const ctaCol = document.querySelector('.garniture-cta-col')
-  if (ctaCol && !ctaCol.contains(event.target as Node)) {
-    selectedGarniture1.value = null
+  try {
+    await productStore.loadProductConfig()
+  } catch (error) {
+    console.error('❌ Erreur lors du chargement:', error)
   }
-}
-onMounted(() => {
-  document.addEventListener('mousedown', handleClickOutsideGarniture1)
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', handleClickOutsideGarniture1)
 })
 
-const currentStep = ref(1)
+/** 1) Normalisation stable : 3/4/4/4 items, labels sûrs, IDs uniques, image fallback = 1ère non vide */
+const firstNonEmpty = (arr?: any[]) => (Array.isArray(arr) ? arr.find(Boolean) : null) || null
 
-// Suppression de stepDone inutilisé
-
-function goToNextStep() {
-  if (currentStep.value < 6) {
-    currentStep.value++
-    setTimeout(() => {
-      const card = document.querySelector('.composer-card')
-      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 50)
+const normalizeSlice = (arr: any[], limit: number, prefix: string): Item[] => {
+  const src = Array.isArray(arr) ? arr : []
+  const out: Item[] = []
+  
+  for (let i = 0; i < src.length && out.length < limit; i++) {
+    const p = src[i] ?? {}
+    const safeName = (p.nom && String(p.nom).trim()) || `${prefix} ${out.length + 1}`
+    const safeImage = p.image || firstNonEmpty(p.images)
+    
+    out.push({
+      // clé/ID 100% unique : on suffixe par index (évite collisions de l'admin)
+      id: `${prefix}-${p.id ?? 'nil'}-${i}`,
+      nom: safeName,
+      image: safeImage,
+      images: Array.isArray(p.images) ? p.images : [],
+    })
   }
+  
+  return out
 }
-// Suppression de goToPrevStep inutilisé
 
-const fondIndex = ref(0)
+// ⚠️ PAS de dédup par nom ici → on garde bien 4 items même si 2 noms identiques dans le dashboard
+const fonds = computed<Item[]>(() => normalizeSlice(productStore.fonds, 3, 'Fond'))
+const g1 = computed<Item[]>(() => normalizeSlice(productStore.premiereCoucheDouceur, 4, 'Garniture1'))
+const g2 = computed<Item[]>(() => normalizeSlice(productStore.secondeCoucheDouceur, 4, 'Garniture2'))
+const g3 = computed<Item[]>(() => normalizeSlice(productStore.toucheFinale, 4, 'Garniture3'))
 
-function prevFond() {
-  if (fondIndex.value > 0) fondIndex.value--
+/** 2) Cerveau (navigation + sélections) */
+const {
+  step, quantity, selections,
+  canNext, canPrev, next, prev,
+  selectFond, selectG1, selectG2, selectG3,
+  unitPrice, totalPrice, description,
+  restart,
+} = useComposer()
+
+/** 3) Preview local robuste par variante de fond */
+const fondIndex = computed(() => {
+  const id = selections.value.fond?.id
+  return id ? fonds.value.findIndex(f => f.id === id) : -1
+})
+
+const imageFor = (item: Item | null) => {
+  const fallbackFond = selections.value.fond?.image || ''
+  if (!item) return fallbackFond
+  const imgs = Array.isArray(item.images) ? item.images : []
+  if (fondIndex.value >= 0 && imgs[fondIndex.value]) return imgs[fondIndex.value] as string
+  return item.image || firstNonEmpty(imgs) || fallbackFond
 }
-function nextFond() {
-  if (fondIndex.value < fonds.value.length - 1) fondIndex.value++
-}
-function handleFondSwipe(e: TouchEvent) {
-  let startX = 0
-  let endX = 0
-  if (e.type === 'touchstart') {
-    startX = e.touches[0].clientX
-    fondSwipeStartX = startX
-  } else if (e.type === 'touchend') {
-    endX = e.changedTouches[0].clientX
-    if (fondSwipeStartX - endX > 40) nextFond()
-    if (endX - fondSwipeStartX > 40) prevFond()
+
+const previewUrl = computed(() => {
+  if (step.value === 1) return selections.value.fond?.image || ''
+  if (step.value === 2) return imageFor(selections.value.g1)
+  if (step.value === 3) return imageFor(selections.value.g2)
+  if (step.value === 4) return imageFor(selections.value.g3)
+  // recap
+  return imageFor(selections.value.g3 || selections.value.g2 || selections.value.g1)
+})
+
+// Panier / ajout
+async function onAddToCart(){
+  if (!auth.isLoggedIn) {
+    // branche ta modale de connexion ici si tu en as une
+    alert('Connectez-vous pour ajouter au panier.')
+    return
   }
-}
-let fondSwipeStartX = 0
-
-const windowWidth = ref(window.innerWidth)
-function handleResize() {
-  windowWidth.value = window.innerWidth
-}
-onMounted(() => window.addEventListener('resize', handleResize))
-onBeforeUnmount(() => window.removeEventListener('resize', handleResize))
-const isMobile = computed(() => windowWidth.value <= 600)
-
-function getGarnitureToDisplay() {
-  if (currentStep.value === 1) return selectedFond.value
-  if (currentStep.value === 2) return selectedFond.value
-  if (currentStep.value === 3) return selectedGarniture1.value
-  if (currentStep.value === 4) return selectedGarniture2.value
-  if (currentStep.value === 5) return selectedGarniture3.value
-  return null
+  const produit = {
+    id: Date.now(),
+    nom: 'Tartelette personnalisée',
+    image: previewUrl || selections.value.fond?.image || '',
+    prix: unitPrice,
+    quantite: quantity,
+    base: selections.value.fond?.nom || '',
+    premiereDouceur: selections.value.g1?.nom || '',
+    secondeDouceur: selections.value.g2?.nom || '',
+    finition: selections.value.g3?.nom || '',
+    user_id: auth.user?.id,
+    description: description,
+    total: totalPrice,
+  }
+  const ok = await panier.ajouterAuPanier(produit)
+  if (ok) {
+    // affiche ta modale AddToCartModal si besoin
+    alert('Ajouté au panier 🎉')
+  }
 }
 </script>
 
 <style scoped>
+.page-container {
+  min-height: 100vh;
+  background: var(--background-color, #f5f5f5);
+  padding: 2rem 0;
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.composer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .composer-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 1.2rem;
   box-shadow: 0 2px 12px rgba(180, 138, 120, 0.07);
   padding: 2.5rem 2rem;
-  max-width: 800px;
+  max-width: 1000px;
   width: 100%;
   margin: 2rem 0;
-  padding-bottom: 8rem;
-  scroll-margin-top: 120px;
-}
-.composer-title {
-  font-family: var(--font-family-title);
-  font-size: 2.3rem;
-  color: #90aeb0;
-  text-align: center;
-  margin-bottom: 2rem;
-  letter-spacing: 1px;
-}
-.composer-intro {
-  font-family: var(--font-family-text);
-  font-size: 1.1rem;
-  color: var(--text-color);
-  margin-bottom: 2rem;
-}
-.composer-intro-left {
-  text-align: left;
-}
-.composer-intro-sub {
-  display: block;
-  color: var(--text-color);
-  font-weight: normal;
-  margin-top: 0.7rem;
-  font-size: 1.08rem;
-  letter-spacing: 0.5px;
-}
-.composer-price {
-  color: #90aeb0;
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-right: 0.5rem;
-}
-.composer-price-desc {
-  color: #b0c7c8;
-  font-size: 1.1rem;
-  font-weight: 400;
-}
-.composer-price-banner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #fff;
-  background: #90aeb0;
-  border-radius: 1.2rem;
-  padding: 0.5rem 1.5rem;
-  margin-bottom: 1.2rem;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 2px 8px rgba(144, 174, 176, 0.08);
-}
-.composer-price-simple {
-  margin: 0 0 1.2rem 0;
-  text-align: left;
-}
-.composer-price-ux {
-  margin: 0 0 1.2rem 0;
-  text-align: left;
-  font-size: 1.08rem;
-  color: var(--text-color);
-  font-family: var(--font-family-text);
-  font-weight: normal;
-  line-height: 1.5;
-}
-.composer-price-ux-value {
-  color: #ff6f61;
-  font-weight: bold;
-  font-size: 1.08em;
-  margin-left: 0.5em;
-  margin-right: 0.5em;
-}
-.composer-section {
-  margin-bottom: 2.2rem;
-}
-.composer-step-title {
-  font-family: var(--font-family-title);
-  font-size: 1.6rem;
-  color: #90aeb0;
-  margin-bottom: 0.2rem;
-  margin-top: 4rem;
-}
-.composer-step-desc {
-  font-family: var(--font-family-text);
-  color: var(--text-color);
-  font-size: 1rem;
-  margin-bottom: 3.5rem;
-}
-.fond-options {
-  gap: 2.5rem;
-  justify-content: center;
-  display: flex;
-}
-.fond-option-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  min-width: 140px;
-  cursor: pointer;
-  transition:
-    transform 0.16s,
-    border 0.16s;
-  position: relative;
-}
-.fond-option-card .fond-image-wrapper {
-  position: relative;
-  width: 220px;
-  height: 150px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: transparent;
-  border: 1px solid #e0e0e0;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-.fond-option-card.selected .fond-image-wrapper {
-  border: 1.5px solid var(--accent-color);
-}
-.fond-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  border-radius: 8px;
-  margin: 0;
-  background: none;
-  border: none;
-  padding: 0;
-}
-.fond-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 8px;
-  background: rgba(60, 60, 60, 0.45);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-.fond-option-card:hover .fond-overlay.fond-hover-overlay {
-  opacity: 1;
-  pointer-events: auto;
-}
-.fond-overlay-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 1.15rem;
-  font-weight: bold;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-  letter-spacing: 0.5px;
-  text-align: center;
-  white-space: pre-line;
-  pointer-events: none;
-}
-.fond-label {
-  margin-top: 0.15rem;
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--text-color);
-  text-align: center;
-}
-.fond-deselect-btn {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #e0e0e0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  transition: background 0.15s;
-  position: absolute;
-  top: -12px;
-  right: -12px;
-  z-index: 3;
-  border: none;
-  padding: 0;
-}
-.fond-deselect-btn:hover {
-  background: #d0d0d0;
-}
-.garniture-flex {
-  display: flex;
-  width: 100%;
-  gap: 2.5rem;
-  align-items: stretch;
-}
-.garniture-cta-col {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: stretch;
-}
-.garniture-cta-btn {
-  border: 1.5px solid #e0e0e0;
-  position: relative;
-  font-weight: bold;
-  color: #222;
-  background: #fff;
-  transition:
-    background 0.18s,
-    color 0.18s,
-    border 0.18s,
-    outline 0.18s;
-}
-.garniture-cta-btn.selected {
-  outline: 3px solid var(--accent-color);
-  outline-offset: 2px;
-  background: rgba(60, 60, 60, 0.45);
-  color: #fff;
-  font-weight: bold;
-  z-index: 15;
-}
-.garniture-img-col {
-  display: flex;
-  justify-content: flex-start;
-}
-.garniture-img {
-  width: 100%;
-  height: 312px;
-  object-fit: contain;
-  border-radius: 8px;
-  display: block;
-}
-.garniture-img-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #b0b0b0;
-  font-size: 1rem;
-  border: 1px dashed #e0e0e0;
-  border-radius: 8px;
-  background: #fafafa;
-}
-.garniture-deselect-btn {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #e0e0e0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  transition: background 0.15s;
-  position: absolute;
-  top: -12px;
-  right: -12px;
-  z-index: 3;
-  border: none;
-  padding: 0;
-}
-.garniture-deselect-btn:hover {
-  background: #d0d0d0;
-}
-.composer-btn {
-  background: var(--accent-color);
-  color: #fff;
-  padding: 0.8rem 1.5rem;
-  border-radius: 0.8rem;
-  border: none;
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(144, 174, 176, 0.15);
-  display: flex;
-  align-items: center;
-}
-.composer-btn:hover:not(:disabled) {
-  background: var(--accent-hover-color);
-  border: 2px solid var(--accent-color);
-  box-sizing: border-box;
-}
-.composer-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  color: #888;
-}
-.composer-btn-secondary {
-  background: #fff;
-  color: var(--accent-color);
-  border: 2px solid var(--accent-color);
-  padding: 0.8rem 1.5rem;
-  border-radius: 0.8rem;
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition:
-    background 0.2s,
-    color 0.2s;
-  box-shadow: 0 2px 8px rgba(144, 174, 176, 0.1);
-  display: flex;
-  align-items: center;
-}
-.composer-btn-secondary:hover:not(:disabled) {
-  background: #f0f0f0;
-  color: #ff6f61;
-}
-.composer-btn-secondary:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  color: #888;
-}
-.composer-stepper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 0.5rem;
-}
-.stepper-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 70px;
-  position: relative;
-}
-.stepper-index {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #e0e0e0;
-  color: #90aeb0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 0.2rem;
-  border: 2px solid #90aeb0;
-  transition:
-    background 0.2s,
-    color 0.2s;
-}
-.stepper-step.active .stepper-index {
-  background: #90aeb0;
-  color: #fff;
-}
-.stepper-step.done .stepper-index {
-  background: #ff6f61;
-  color: #fff;
-  border-color: #ff6f61;
-}
-.stepper-label {
-  font-size: 0.95rem;
-  color: #90aeb0;
-  font-weight: 500;
-}
-.stepper-step.active .stepper-label {
-  color: #ff6f61;
-  font-weight: bold;
-}
-.stepper-summary {
-  font-size: 0.85rem;
-  color: #222;
-  margin-top: 0.1rem;
-  text-align: center;
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.composer-nav-btns {
-  display: flex;
-  justify-content: center;
-  gap: 1.2rem;
-  margin-top: 2.5rem;
-  margin-bottom: 0;
-}
-.composer-btn,
-.composer-btn-secondary {
-  min-width: 160px;
-  max-width: 160px;
-  height: 40px;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.8rem;
-  box-shadow: 0 2px 8px rgba(144, 174, 176, 0.1);
-  margin: 0 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  color: inherit;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-}
-.composer-btn:disabled,
-.composer-btn-secondary:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-  color: #888;
-}
-.composer-footer {
-  width: 100%;
-  background: #fff;
-  padding-top: 2rem;
-  padding-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 2rem;
-}
-.composer-card {
-  padding-bottom: 2rem;
-}
-.composer-progress-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-  margin-top: 1rem;
-  gap: 0.5rem;
-  min-width: 340px;
-}
-.progress-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #e0e0e0;
-  border: 2px solid #e0e0e0;
-  box-sizing: border-box;
-  transition:
-    background 0.2s,
-    border 0.2s;
-  position: relative;
-  z-index: 1;
-  opacity: 0.7;
-}
-.progress-dot.active {
-  background: #fff;
-  border: 2px solid #ff6f61;
-  opacity: 1;
-}
-.progress-dot.done {
-  background: #ff6f61;
-  border: 2px solid #ff6f61;
-  opacity: 1;
-}
-.progress-bar {
-  width: 48px;
-  height: 2px;
-  background: #e0e0e0;
-  border-radius: 2px;
-  margin: 0 8px;
-  transition: background 0.2s;
-  z-index: 0;
-  opacity: 0.5;
-}
-.progress-bar.done {
-  background: #ff6f61;
-  opacity: 1;
-}
-.composer-qty-input {
-  width: 56px;
-  text-align: center;
-  font-size: 1.25rem;
-  border-radius: 1.2rem;
-  border: 2px solid var(--accent-color);
-  color: var(--accent-color);
-  padding: 0.4rem 0;
-  outline: none;
-  transition:
-    box-shadow 0.18s,
-    border 0.18s;
-}
-.composer-qty-input:focus {
-  box-shadow: 0 0 0 2px #ffe3de;
-  border-color: #ff6f61;
-}
-.composer-qty-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: #e0e0e0;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--accent-color);
-  cursor: pointer;
-  transition:
-    background 0.18s,
-    color 0.18s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.composer-qty-btn:hover {
-  background: #ffe3de;
-}
-.composer-qty-btn:focus {
-  outline: 2px solid #ff6f61;
-  background: #ffe3de;
-}
-.composer-qty-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.7rem;
-}
-.composer-qty-btn-minimal {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1.5px solid var(--accent-color);
-  background: #fff;
-  color: var(--accent-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  transition:
-    border 0.15s,
-    background 0.15s;
-  padding: 0;
-}
-.composer-qty-btn-minimal:hover {
-  background: #f8f8f8;
-  border-color: #ff6f61;
-}
-.composer-qty-input-minimal {
-  width: 38px;
-  text-align: center;
-  font-size: 1.1rem;
-  border: none;
-  background: transparent;
-  color: var(--accent-color);
-  font-weight: bold;
-  outline: none;
-}
-.composer-qty-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.composer-qty-btn-bare {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.15s;
-  opacity: 0.85;
-}
-.composer-qty-btn-bare:hover:not(:disabled) {
-  opacity: 1;
-}
-.composer-qty-btn-disabled {
-  opacity: 0.4 !important;
-  cursor: not-allowed !important;
-  pointer-events: none;
-}
-.composer-qty-input-bare {
-  width: 38px;
-  text-align: center;
-  font-size: 1.1rem;
-  border: none;
-  background: transparent;
-  color: #222;
-  font-weight: normal;
-  outline: none;
-  transition: background-color 0.2s;
-}
-.composer-qty-input-animate {
-  animation: qtyPulse 0.2s;
-}
-@keyframes qtyPulse {
-  0% {
-    background-color: #f8f8f8;
-  }
-  100% {
-    background-color: transparent;
-  }
-}
-/* Suppression de la règle vide .composer-btn-panier */
-.composer-btn-panier:disabled {
-  background: #ccc;
-  color: #888;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-.composer-btn-panier:hover:not(:disabled) {
-  background: #e05a4e;
-  transform: scale(1.08);
-  box-shadow: 0 4px 16px rgba(255, 111, 97, 0.18);
-}
-.composer-btn-panier i {
-  color: #fff;
-  font-size: 1.25em;
-}
-.composer-btn.panier-cta {
-  border: 2px solid var(--accent-color);
-  background: #fff;
-  color: var(--accent-color);
-  transition:
-    background 0.18s,
-    color 0.18s,
-    border 0.18s;
-}
-.composer-btn.panier-cta i {
-  color: var(--accent-color);
-  transition: color 0.18s;
-}
-.composer-btn.panier-cta:hover:not(:disabled) {
-  background: var(--accent-color);
-  color: #fff;
-  border: 2px solid var(--accent-color);
-}
-.composer-btn.panier-cta:hover:not(:disabled) i {
-  color: #fff;
-}
-.garniture-cta-btn-disabled {
-  opacity: 0.5;
-  pointer-events: none;
-  cursor: not-allowed !important;
-  background: #f5f5f5 !important;
-  color: #aaa !important;
-}
-.garniture-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(2px);
-  border-radius: 8px;
-  z-index: 2;
-  pointer-events: none;
-  transition: opacity 0.2s;
 }
 
-.fond-carousel-mobile {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+.page{ 
+  padding: 1.5rem 0; 
 }
-.fond-carousel-img-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.fond-card-mobile {
-  width: 100%;
-  max-width: 320px;
-}
-.fond-carousel-arrow {
-  background: none;
-  border: none;
-  color: var(--accent-color);
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  opacity: 0.7;
-  transition: opacity 0.15s;
-}
-.fond-carousel-arrow:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-.fond-carousel-dots {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 0.7rem;
-}
-.fond-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #e0e0e0;
-  display: inline-block;
-  transition: background 0.2s;
-}
-.fond-dot.active {
-  background: #ff6f61;
-}
-.garnitures-grid-mobile {
+
+.content{
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.7rem;
-  margin-bottom: 1.5rem;
-  padding: 0 0.7rem;
-  width: 100%;
-  box-sizing: border-box;
+  grid-template-columns: 1fr; /* 1 colonne par défaut (étape 1) */
+  gap: 2rem;
+  align-items: start;
 }
-.garnitures-grid-mobile .garniture-cta-btn {
-  min-height: 32px;
-  font-size: 0.8rem;
-  border-radius: 6px;
-  margin: 0;
-  padding: 0.2rem 0.1rem;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: 100%;
-  max-width: 100%;
-  overflow-wrap: break-word;
-  white-space: normal;
+
+/* Quand la colonne de droite existe (étapes 2–4) */
+.content.with-right{
+  grid-template-columns: 450px 1fr;
 }
-.garniture-img-mobile-wrapper {
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: 0;
-  margin-right: 0;
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: center;
-}
-.garniture-img-mobile {
-  width: 80vw;
-  max-width: 320px;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 8px;
-  display: block;
-}
-@media (min-width: 601px) {
-  .garnitures-grid-mobile,
-  .garniture-img-mobile-wrapper,
-  .garniture-img-mobile {
-    display: none !important;
+
+@media (max-width: 768px) {
+  .composer-card {
+    padding: 0.3rem;
+    margin: 0.3rem 0;
   }
-}
-@media (max-width: 600px) {
-  .composer-progress-bar {
-    width: 80vw !important;
-    max-width: 80vw !important;
-    margin: 0.8rem auto 0.8rem auto !important;
-    height: 4px !important;
-    min-height: 4px !important;
-  }
-  .composer-progress-bar .progress-bar-inner {
-    height: 4px !important;
-    min-height: 4px !important;
-  }
-  .composer-progress-bar-label {
-    font-size: 0.75rem !important;
-    margin-bottom: 0.1rem !important;
-  }
-}
-.composer-step5-wrapper {
-  display: flex;
-  gap: 2.5rem;
-  align-items: flex-start;
-}
-.composer-step5-summary {
-  height: 312px;
-  width: 220px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-}
-.composer-step5-img {
-  height: 312px;
-  flex: 1;
-  display: flex;
-  align-items: stretch;
-}
-.composer-step5-img-el {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 8px;
-  display: block;
-}
-.composer-footer-step5 {
-  padding-bottom: 2.5rem;
-}
-.composer-nav-btns-step5 {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 1.2rem;
-  margin-top: 2.5rem;
-  margin-bottom: 0;
-}
-.composer-btn-icon {
-  min-width: 48px;
-  max-width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  font-size: 1.2rem;
-  position: relative;
-  border: 2px solid var(--accent-color);
-  background: #fff;
-  transition:
-    border 0.18s,
-    background 0.18s,
-    color 0.18s;
-}
-.composer-btn-icon:hover:not(:disabled) {
-  border: 2.5px solid var(--accent-hover-color);
-  background: var(--accent-color);
-  color: #fff;
-}
-.composer-btn-icon:disabled {
-  border: 2px solid #ccc;
-  background: #f5f5f5;
-  color: #888;
-}
-@media (max-width: 600px) {
-  .composer-step5-wrapper {
-    flex-direction: column;
-    gap: 1.2rem;
-    align-items: stretch;
-  }
-  .composer-step5-summary {
-    width: 100%;
-    height: auto;
-    margin-bottom: 0.5rem;
-  }
-  .composer-step5-img {
-    width: 100%;
-    height: auto;
-    max-width: 90vw;
-    margin: 0 auto 1.2rem auto;
+
+  /* ⚠ On BASCULE en FLEX pour que `order` fonctionne */
+  .content,
+  .content.with-right {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.2rem;
   }
-  .composer-step5-img-el {
-    width: 90vw;
-    max-width: 350px;
-    height: auto;
-    min-height: 120px;
-    object-fit: cover;
-    border-radius: 8px;
+
+  .right {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 450px;
+  }
+  
+  .right-bottom {
+    display: none;         /* cache seulement la preview de droite en mobile */
+  }
+  
+  /* L'étape 5 reste en colonne normale */
+  .content:not(.with-right) {
     display: block;
   }
-  .composer-nav-btns-step5 {
-    margin-top: 2.5rem;
-    margin-bottom: 0;
+  
+  /* StepSummary en mobile ne doit pas être affecté par le Flexbox */
+  .left section {
+    display: block;
   }
 }
-.composer-btn-icon .btn-text {
-  display: none;
-}
 
-/* CRUD Styles */
-.crud-section {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border: 1px solid #e9ecef;
-}
-
-.save-composition-section {
+.right {
+  position: sticky;
+  top: 2rem;
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 450px;
 }
 
-.composition-name-input {
+.right-top {
   flex: 1;
-  padding: 12px 16px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
 }
 
-.composition-name-input:focus {
-  outline: none;
-  border-color: var(--accent-color);
-}
-
-.composition-name-input:disabled {
-  background: #f5f5f5;
-  color: #999;
-}
-
-.save-composition-btn {
-  padding: 12px 24px;
-  background: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.save-composition-btn:hover:not(:disabled) {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-}
-
-.save-composition-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.compositions-list-section {
-  margin-top: 1rem;
-}
-
-.toggle-compositions-btn {
-  width: 100%;
-  padding: 12px 16px;
-  background: white;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.toggle-compositions-btn:hover {
-  border-color: var(--accent-color);
-  background: #f8f9fa;
-}
-
-.compositions-list {
-  margin-top: 1rem;
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  background: white;
-}
-
-.composition-item {
-  padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.composition-item:last-child {
-  border-bottom: none;
-}
-
-.composition-info h4 {
-  margin: 0 0 0.5rem 0;
-  color: var(--text-color);
-  font-size: 1.1rem;
-}
-
-.composition-date {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.composition-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.load-btn,
-.delete-btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.load-btn {
-  background: var(--accent-color);
-  color: white;
-}
-
-.load-btn:hover {
-  background: var(--accent-hover);
-}
-
-.delete-btn {
-  background: #dc3545;
-  color: white;
-}
-
-.delete-btn:hover {
-  background: #c82333;
-}
-
-.save-message {
-  margin-top: 1rem;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-weight: 500;
-}
-
-.save-message.success {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.save-message.error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .save-composition-section {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .composition-item {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .composition-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
+.right-bottom {
+  margin-top: auto;
 }
 </style>

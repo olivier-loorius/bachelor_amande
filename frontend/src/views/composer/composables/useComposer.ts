@@ -1,146 +1,92 @@
-import { ref, computed, readonly } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { usePanierStore } from '@/stores/panier'
-import { useProductStore } from '@/stores/useProductStore'
-import { productConfigService } from '@/services/productConfigService'
-import { compositionsService } from '@/services/supabaseService'
-import type { ComposerProduct, ComposerSelection, ComposerState, ComposerCRUD } from '../types/composer.types'
+// src/views/composer/composables/useComposer.ts
+import { ref, computed } from 'vue'
+import type { Item, Selection, Step } from '../types'
 
 export function useComposer() {
-  // Stores
-  const authStore = useAuthStore()
-  const panierStore = usePanierStore()
-  const productStore = useProductStore()
+  // --- état principal (source de vérité) ---
+  const step = ref<Step>(1)
+  const quantity = ref(1)
+  const selections = ref<Selection>({ fond: null, g1: null, g2: null, g3: null })
 
-  // État des sélections
-  const selections = ref<ComposerSelection>({
-    fond: null,
-    garniture1: null,
-    garniture2: null,
-    garniture3: null,
-    finition: null
+  // --- navigation ---
+  const canNext = computed(() => {
+    if (step.value === 1) return !!selections.value.fond
+    if (step.value === 2) return !!selections.value.g1
+    if (step.value === 3) return !!selections.value.g2
+    if (step.value === 4) return !!selections.value.g3
+    return true
   })
+  const canPrev = computed(() => step.value > 1)
 
-  // État de navigation
-  const state = ref<ComposerState>({
-    currentStep: 1,
-    quantite: 1,
-    animateQty: false
-  })
+  function next() { if (step.value < 5 && canNext.value) step.value++ }
+  function prev() { if (step.value > 1) step.value-- }
+  function goTo(s: Step) { step.value = s }
 
-  // État CRUD
-  const crud = ref<ComposerCRUD>({
-    compositionName: '',
-    userCompositions: [],
-    showCompositionsList: false,
-    isLoading: false,
-    saveMessage: '',
-    saveMessageType: 'success'
-  })
-
-  // Computed properties
-  const peutValider = computed(() => {
-    return (
-      !!selections.value.fond &&
-      !!selections.value.garniture1 &&
-      !!selections.value.garniture2 &&
-      !!selections.value.garniture3 &&
-      !!selections.value.finition &&
-      state.value.quantite > 0
-    )
-  })
-
-  // Fonctions de sélection
-  function selectFond(fond: ComposerProduct) {
-    selections.value.fond = fond
-    if (state.value.currentStep < 2) state.value.currentStep = 2
+  // --- sélections ---
+  function selectFond(item: Item, variantIndex: number) {
+    selections.value.fond = { ...item, variantIndex }
+    if (step.value < 2) step.value = 2
   }
+  const selectG1 = (item: Item) => (selections.value.g1 = item)
+  const selectG2 = (item: Item) => (selections.value.g2 = item)
+  const selectG3 = (item: Item) => (selections.value.g3 = item)
 
-  function selectGarniture1(garniture: ComposerProduct) {
-    selections.value.garniture1 = garniture
-  }
-
-  function selectGarniture2(garniture: ComposerProduct) {
-    selections.value.garniture2 = garniture
-  }
-
-  function selectGarniture3(garniture: ComposerProduct) {
-    selections.value.garniture3 = garniture
-  }
-
-  function selectFinition(finition: ComposerProduct) {
-    selections.value.finition = finition
-  }
-
-  // Fonctions de navigation
-  function goToNextStep() {
-    if (state.value.currentStep < 6) {
-      state.value.currentStep++
+  // --- résolveur d'image robuste ---
+  function resolveImage(item: Item | null): string {
+    const fond = selections.value.fond
+    if (!fond) return item?.image || ''
+    // variantes dépendantes du fond
+    if (item?.images?.length) {
+      const i = fond.variantIndex
+      const byIndex = item.images[i]
+      if (byIndex) return String(byIndex)
+      const first = item.images.find(Boolean)
+      if (first) return String(first)
     }
+    // image générique de la garniture ou fallback fond
+    return (item?.image as string) || (fond.image as string) || ''
   }
 
-  function goToStep(step: number) {
-    state.value.currentStep = step
-  }
+  // --- URL de preview selon l'étape ---
+  const previewUrl = computed(() => {
+    const f = selections.value.fond
+    if (!f) return ''
+    if (step.value === 1) return f.image || ''
+    if (step.value === 2) return resolveImage(selections.value.g1)
+    if (step.value === 3) return resolveImage(selections.value.g2 || selections.value.g1)
+    if (step.value === 4) return resolveImage(selections.value.g3 || selections.value.g2 || selections.value.g1)
+    return resolveImage(selections.value.g3 || selections.value.g2 || selections.value.g1)
+  })
 
-  // Fonctions utilitaires
-  function triggerQtyAnim() {
-    state.value.animateQty = false
-    void state.value.quantite
-    state.value.animateQty = true
-  }
+  // --- résumé / pricing ---
+  const unitPrice = 6
+  const description = computed(() =>
+    [selections.value.fond?.nom, selections.value.g1?.nom, selections.value.g2?.nom, selections.value.g3?.nom]
+      .filter(Boolean)
+      .join(' • ')
+  )
+  const totalPrice = computed(() => unitPrice * quantity.value)
 
-  function recommencer() {
-    selections.value = {
-      fond: null,
-      garniture1: null,
-      garniture2: null,
-      garniture3: null,
-      finition: null
-    }
-    state.value.quantite = 1
-    state.value.currentStep = 1
-  }
-
-  // Fonction helper pour les images
-  function getGarnitureImage(
-    fond: ComposerProduct | null,
-    garniture: ComposerProduct | null,
-  ) {
-    if (!fond) return ''
-    
-    if (garniture && garniture.image) {
-      return garniture.image
-    }
-    
-    return fond.image || ''
+  function resetAll() {
+    selections.value = { fond: null, g1: null, g2: null, g3: null }
+    quantity.value = 1
+    step.value = 1
   }
 
   return {
-    // État
-    selections: readonly(selections),
-    state: readonly(state),
-    crud: readonly(crud),
-    
-    // Computed
-    peutValider,
-    
-    // Fonctions
-    selectFond,
-    selectGarniture1,
-    selectGarniture2,
-    selectGarniture3,
-    selectFinition,
-    goToNextStep,
-    goToStep,
-    triggerQtyAnim,
-    recommencer,
-    getGarnitureImage,
-    
-    // Stores
-    authStore,
-    panierStore,
-    productStore
+    // state
+    step, quantity, selections,
+    // nav
+    canNext, canPrev, next, prev, goTo,
+    // select
+    selectFond, selectG1, selectG2, selectG3,
+    // preview
+    previewUrl, resolveImage,
+    // pricing/summary
+    unitPrice, totalPrice, description,
+    // misc
+    resetAll,
+    restart: resetAll,
   }
 }
 

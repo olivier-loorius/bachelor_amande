@@ -24,14 +24,33 @@ export const productConfigService = {
   // Récupérer tous les produits avec leurs images
   async getAllProducts(): Promise<Product[]> {
     try {
+      console.log('🔍 Tentative de récupération depuis products_with_images...')
       const { data, error } = await supabase
         .from('products_with_images')
         .select('*')
-        .order('created_at', { ascending: true }) // Correction ici
+        .order('created_at', { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.log('❌ Erreur products_with_images, tentative products...')
+        // Fallback vers la table products
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: true })
 
-      // Transformer les données pour correspondre à l'interface Product
+        if (fallbackError) throw fallbackError
+
+        console.log('✅ Données récupérées depuis products:', fallbackData)
+        return (fallbackData || []).map(item => ({
+          id: item.id,
+          nom: item.nom,
+          locked: item.locked || false,
+          step: item.step as Product['step'],
+          images: item.images || []
+        }))
+      }
+
+      console.log('✅ Données récupérées depuis products_with_images:', data)
       return (data || []).map(item => ({
         id: item.id,
         nom: item.nom,

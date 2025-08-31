@@ -108,7 +108,9 @@ onMounted(() => {
 // Fonction helper pour gérer la structure uniforme d'images
 function getImageSrc(product: Product, imageIndex: number) {
   // Nouvelle structure uniforme : { nom: '', images: string[], locked: boolean }
-  return product.images && product.images[imageIndex] ? product.images[imageIndex] : null
+  const imageUrl = product.images && product.images[imageIndex] ? product.images[imageIndex] : null
+  console.log(`🔍 getImageSrc - Produit: ${product.nom}, Index: ${imageIndex}, URL: ${imageUrl}`)
+  return imageUrl
 }
 </script>
 
