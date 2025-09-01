@@ -2,7 +2,7 @@
   <div class="image-upload" :class="{ locked }">
     <div v-if="src" class="image-preview">
       <img :src="src" :alt="alt" />
-      <button @click="$emit('remove')" class="remove-btn">×</button>
+      <button @click="$emit('remove')" class="remove-btn" aria-label="Supprimer l'image">×</button>
     </div>
     <div v-else-if="uploading" class="uploading-area">
       <div class="spinner"></div>
@@ -16,6 +16,11 @@
       @dragleave.prevent="handleDragLeave"
       @drop.prevent="handleDrop"
       :class="{ 'drag-over': isDragOver }"
+      role="button"
+      :tabindex="locked ? -1 : 0"
+      :aria-label="locked ? 'Zone de téléchargement verrouillée' : 'Cliquer ou glisser-déposer une image'"
+      @keydown.enter="!locked && triggerFileInput()"
+      @keydown.space.prevent="!locked && triggerFileInput()"
     >
       <input
         ref="fileInput"
@@ -24,56 +29,61 @@
         @change="handleFileSelect"
         style="display: none"
         :disabled="locked"
+        aria-hidden="true"
       />
-      <span>📁</span>
+      <span aria-hidden="true">📁</span>
       <small>Cliquez ou glissez-déposez</small>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
-const props = defineProps({
-  src: String,
-  alt: String,
-  locked: Boolean,
-  uploading: Boolean
-})
+const props = defineProps<{
+  src?: string
+  alt?: string
+  locked?: boolean
+  uploading?: boolean
+}>()
 
-const emit = defineEmits(['upload', 'remove'])
+const emit = defineEmits<{
+  upload: [file: File]
+  remove: []
+}>()
 
-const fileInput = ref(null)
+const fileInput = ref<HTMLInputElement | null>(null)
 const isDragOver = ref(false)
 
 function triggerFileInput() {
   fileInput.value?.click()
 }
 
-function handleFileSelect(event) {
-  const file = event.target.files[0]
+function handleFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (file) {
     emit('upload', file)
   }
 }
 
-function handleDragOver(event) {
+function handleDragOver() {
   if (!props.locked) {
     isDragOver.value = true
   }
 }
 
-function handleDragLeave(event) {
+function handleDragLeave() {
   isDragOver.value = false
 }
 
-function handleDrop(event) {
+function handleDrop(event: DragEvent) {
   if (props.locked) return
   
   isDragOver.value = false
-  const files = event.dataTransfer.files
+  const files = event.dataTransfer?.files
   
-  if (files.length > 0) {
+  if (files && files.length > 0) {
     const file = files[0]
     if (file.type.startsWith('image/')) {
       emit('upload', file)
@@ -179,3 +189,5 @@ function handleDrop(event) {
   color: #666;
 }
 </style>
+
+<!-- Composant d'upload d'images avec drag & drop, preview et état de chargement. -->

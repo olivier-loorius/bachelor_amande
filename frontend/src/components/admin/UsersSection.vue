@@ -1,9 +1,9 @@
 <template>
     <section class="dashboard-section accordion-section">
-        <div class="section-header accordion-header" @click="toggleUsersSection">
+        <div class="section-header accordion-header" @click="toggleUsersSection" role="button" :aria-expanded="isUsersSectionOpen" aria-controls="users-section-content" tabindex="0" aria-label="Basculer la section Utilisateurs" @keydown.enter="toggleUsersSection" @keydown.space.prevent="toggleUsersSection">
             <div class="header-left">
                 <h2 class="section-title">
-                    <span class="title-icon"><i class="fas fa-users"></i></span>
+                    <span class="title-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
                     <span class="title-text">Gestion des Utilisateurs</span>
                 </h2>
                     <div class="section-stats">
@@ -16,13 +16,13 @@
                     </div>
             </div>
             <div class="accordion-icon" :class="{ 'rotated': isUsersSectionOpen }">
-                <i class="fas fa-chevron-down accordion-arrow"></i>
+                <i class="fas fa-chevron-down accordion-arrow" aria-hidden="true"></i>
             </div>
         </div>
-        <div class="accordion-content" :class="{ 'open': isUsersSectionOpen }">
+        <div id="users-section-content" class="accordion-content" :class="{ 'open': isUsersSectionOpen }">
             <div class="search-container">
                 <div class="search-input-wrapper">
-                    <i class="fas fa-search search-icon"></i>
+                    <i class="fas fa-search search-icon" aria-hidden="true"></i>
                     <input
                         :value="searchQuery"
                         type="text"
@@ -35,8 +35,9 @@
                         @click="updateSearchQuery('')"
                         class="clear-search-btn"
                         title="Effacer la recherche"
+                        aria-label="Effacer la recherche"
                     >
-                    <i class="fas fa-times clear-icon"></i>
+                    <i class="fas fa-times clear-icon" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div v-if="searchQuery" class="search-results">
@@ -57,7 +58,7 @@
                     <tbody>
                         <tr v-if="filteredUsers.length === 0 && !isLoading" class="empty-state">
                             <td colspan="5">
-                                <div class="empty-message"><i class="fas fa-search"></i><p>{{ searchQuery ? 'Aucun utilisateur trouvé pour "' + searchQuery + '"' : 'Aucun utilisateur trouvé' }}</p>
+                                <div class="empty-message"><i class="fas fa-search" aria-hidden="true"></i><p>{{ searchQuery ? 'Aucun utilisateur trouvé pour "' + searchQuery + '"' : 'Aucun utilisateur trouvé' }}</p>
                                 </div>
                             </td>
                         </tr>
@@ -90,9 +91,9 @@
                    class="role-icon admin-icon"
                    title="Administrateur"
                  >
-                   <i class="fas fa-crown"></i>
+                   <i class="fas fa-crown" aria-hidden="true"></i>
                  </span>
-                 <span v-else class="role-icon user-icon" title="Utilisateur"><i class="fas fa-user"></i></span>
+                 <span v-else class="role-icon user-icon" title="Utilisateur"><i class="fas fa-user" aria-hidden="true"></i></span>
                </td>
               
               <td class="user-date" data-label="Créé le">
@@ -126,7 +127,6 @@
                  </table>
        </div>
        
-       <!-- Vignettes utilisateurs pour mobile -->
        <div class="users-cards">
          <div 
            v-for="user in filteredUsers" 
@@ -171,8 +171,9 @@
                @click="deleteUser(user.id)"
                class="action-btn delete-btn"
                title="Désactiver cet utilisateur"
+               :aria-label="`Désactiver ${user.name}`"
              >
-               <span class="btn-icon"><i class="fas fa-trash"></i></span>
+               <span class="btn-icon"><i class="fas fa-trash" aria-hidden="true"></i></span>
                <span class="btn-text">Désactiver</span>
              </button>
              <span v-else-if="user.deleted" class="deleted-status">Désactivé</span>
@@ -183,7 +184,6 @@
            </div>
          </div>
          
-         <!-- État vide pour les vignettes -->
          <div v-if="filteredUsers.length === 0 && !isLoading" class="empty-cards">
            <div class="empty-message">
              <i class="fas fa-search"></i>
@@ -196,14 +196,14 @@
 </template>
 
 <script setup lang="ts">
-// Utilisation directe du store pour la gestion des utilisateurs
+// Utilisation store gestion utilisateurs
 import { useUserStore } from '@/stores/useUserStore'
 import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
 
 const userStore = useUserStore()
 
-// Accès direct aux données du store
+// Accès données store
 const {
   users,
   isLoading,
@@ -214,10 +214,8 @@ const {
   deletedUsers
 } = storeToRefs(userStore)
 
-// Actions directes du store
 const { toggleUsersSection, updateSearchQuery, deleteUser, loadUsers } = userStore
 
-// Charger les utilisateurs au montage du composant
 onMounted(() => {
   loadUsers()
 })
@@ -244,7 +242,6 @@ const maskEmail = (email: string) => {
 <style lang="scss" scoped>
 @use 'sass:color';
 
-/* Variables admin */
 $admin-primary: #383961;
 $admin-secondary: #FCD581;
 $admin-text-dark: #2c3e50;
@@ -252,7 +249,6 @@ $admin-text-light: #6c757d;
 $admin-success: #28a745;
 $admin-danger: #dc3545;
 
-/* Section admin - utilise vos styles existants */
 .dashboard-section {
   background: white;
   margin-bottom: 2rem;
@@ -352,18 +348,16 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Contenu accordéon - ouverture/fermeture */
 .accordion-content {
   max-height: 0 !important;
   overflow: hidden !important;
   transition: max-height 0.3s ease !important;
   
   &.open {
-    max-height: 2000px !important; /* Hauteur suffisante pour le contenu */
+    max-height: 2000px !important;
   }
 }
 
-/* Boutons d'action - utilise vos styles existants */
 .refresh-btn {
   background: $admin-secondary;
   color: $admin-primary;
@@ -378,7 +372,6 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Tableau des utilisateurs */
 .table-container {
   padding: 1.5rem;
   overflow-x: auto;
@@ -428,7 +421,6 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Texte barré pour utilisateurs supprimés */
 .deleted-text {
   text-decoration: line-through;
   text-decoration-color: #999;
@@ -436,7 +428,6 @@ $admin-danger: #dc3545;
   opacity: 0.6;
 }
 
-/* Badge supprimé */
 .deleted-badge {
   display: inline-block;
   background: rgba($admin-danger, 0.1);
@@ -448,7 +439,6 @@ $admin-danger: #dc3545;
   margin-left: 0.5rem;
 }
 
-/* Badge modifié */
 .modified-badge {
   display: inline-block;
   background: rgba($admin-secondary, 0.1);
@@ -460,7 +450,6 @@ $admin-danger: #dc3545;
   margin-left: 0.5rem;
 }
 
-/* Badges et boutons - utilise vos styles existants */
 .role-badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -557,7 +546,6 @@ $admin-danger: #dc3545;
   color: $admin-primary;
 }
 
-/* Statistiques de la section */
 .section-stats {
   display: flex;
   gap: 1rem;
@@ -574,8 +562,7 @@ $admin-danger: #dc3545;
     }
   }
 }
-
-/* Barre de recherche - style du projet */
+ 
 .search-container {
   padding: 1.5rem;
   border-bottom: 1px solid #e9ecef;
@@ -603,7 +590,6 @@ $admin-danger: #dc3545;
   background: transparent;
 }
 
-/* Icône de recherche */
 .search-icon {
   color: #6c757d;
   margin-right: 0.75rem;
@@ -617,7 +603,6 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Icône de suppression */
 .clear-icon {
   color: #6c757d;
   cursor: pointer;
@@ -635,7 +620,6 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Résultats de recherche */
 .search-results {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
@@ -676,9 +660,8 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Vignettes utilisateurs pour mobile */
 .users-cards {
-  display: none; /* Caché par défaut sur desktop */
+  display: none; 
 }
 
 .user-card {
@@ -790,9 +773,7 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Responsive - règles simples et réutilisables */
 @media (max-width: 768px) {
-  /* Titre plus petit sur mobile */
   .section-header h2 {
     font-size: 1.5rem;
     margin: 0 0 0.75rem 0;
@@ -802,7 +783,6 @@ $admin-danger: #dc3545;
     font-size: 1.8rem;
   }
   
-  /* Statistiques plus compactes */
   .section-stats {
     gap: 0.75rem;
     
@@ -811,7 +791,6 @@ $admin-danger: #dc3545;
     }
   }
   
-  /* Accordéon plus compact */
   .accordion-icon {
     padding: 0.4rem;
     
@@ -820,7 +799,6 @@ $admin-danger: #dc3545;
     }
   }
   
-  /* Barre de recherche adaptée mobile */
   .search-container {
     padding: 1rem;
   }
@@ -845,7 +823,6 @@ $admin-danger: #dc3545;
     height: 14px;
   }
   
-  /* Résultats de recherche plus compacts */
   .search-results {
     margin-top: 0.75rem;
     padding: 0.6rem 0.8rem;
@@ -855,7 +832,6 @@ $admin-danger: #dc3545;
     }
   }
   
-  /* Basculer vers les vignettes sur mobile */
   .users-table {
     display: none;
   }
@@ -864,7 +840,6 @@ $admin-danger: #dc3545;
     display: block;
   }
   
-  /* Optimisations des vignettes sur mobile */
   .user-card {
     padding: 0.8rem;
     margin-bottom: 0.8rem;
@@ -901,7 +876,6 @@ $admin-danger: #dc3545;
 }
 
 @media (max-width: 480px) {
-  /* Très petits écrans */
   .section-header h2 {
     font-size: 1.3rem;
     margin: 0 0 0.5rem 0;
@@ -928,7 +902,6 @@ $admin-danger: #dc3545;
   }
 }
 
-/* Icônes de rôle */
 .role-icon {
   display: inline-flex;
   align-items: center;
@@ -948,14 +921,12 @@ $admin-danger: #dc3545;
   }
 }
 
-/* ICÔNES FONTAWESOME - SEULEMENT ÇA ! */
 .fas {
   display: inline-block !important;
   font-family: "Font Awesome 5 Free" !important;
   font-weight: 900 !important;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .section-header {
     flex-direction: column;
@@ -972,7 +943,6 @@ $admin-danger: #dc3545;
     }
   }
   
-  /* Barre de recherche adaptée mobile */
   .search-container {
     padding: 1rem;
   }
@@ -997,7 +967,6 @@ $admin-danger: #dc3545;
     height: 14px;
   }
   
-  /* Résultats de recherche plus compacts */
   .search-results {
     margin-top: 0.75rem;
     padding: 0.6rem 0.8rem;
@@ -1007,7 +976,6 @@ $admin-danger: #dc3545;
     }
   }
   
-  /* Basculer vers les vignettes sur mobile */
   .users-table {
     display: none;
   }
@@ -1016,7 +984,6 @@ $admin-danger: #dc3545;
     display: block;
   }
   
-  /* Optimisations des vignettes sur mobile */
   .user-card {
     padding: 0.8rem;
     margin-bottom: 0.8rem;
@@ -1053,7 +1020,6 @@ $admin-danger: #dc3545;
 }
 
 @media (max-width: 480px) {
-  /* Très petits écrans */
   .section-header h2 {
     font-size: 1.3rem;
   }

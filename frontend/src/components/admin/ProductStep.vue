@@ -35,8 +35,9 @@
             :class="{ 'unlocked': !(locked && locked[i]) }"
             @click="$emit('toggleLock', startIndex + i); if(locked && locked[i]) $emit('openStep')"
             :title="(locked && locked[i]) ? 'Déverrouiller' : 'Verrouiller'"
+            :aria-label="(locked && locked[i]) ? 'Déverrouiller' : 'Verrouiller'"
           >
-            <i class="fas" :class="(locked && locked[i]) ? 'fa-lock' : 'fa-unlock'"></i>
+            <i class="fas" :class="(locked && locked[i]) ? 'fa-lock' : 'fa-unlock'" aria-hidden="true"></i>
           </button>
           
           <!-- Bouton save (visible seulement si déverrouillé) -->
@@ -45,8 +46,9 @@
             class="action-btn save-btn" 
             @click="$emit('save', startIndex + i)"
             title="Sauvegarder"
+            aria-label="Sauvegarder"
           >
-            <i class="fas fa-save"></i>
+            <i class="fas fa-save" aria-hidden="true"></i>
           </button>
           
           <!-- Bouton reset (visible seulement si déverrouillé) -->
@@ -55,8 +57,9 @@
             class="action-btn reset-btn" 
             @click="$emit('reset', startIndex + i)"
             title="Remettre à zéro"
+            aria-label="Remettre à zéro"
           >
-            <i class="fas fa-undo"></i>
+            <i class="fas fa-undo" aria-hidden="true"></i>
           </button>
         </div>
       </div>
@@ -66,7 +69,6 @@
 
 <script setup lang="ts">
 import ImageUpload from './ImageUpload.vue'
-import { onMounted } from 'vue'
 
 // Interface pour typer les produits
 interface Product {
@@ -99,17 +101,12 @@ const props = defineProps({
 
 defineEmits(['upload', 'remove', 'save', 'reset', 'toggleLock', 'nomChange', 'openStep'])
 
-// Debug: vérifier le nombre de produits
-onMounted(() => {
-  console.log(`🔍 ProductStep ${props.step} - Nombre de produits:`, props.products?.length)
-  console.log(`🔍 ProductStep ${props.step} - Produits:`, props.products)
-})
+//
 
 // Fonction helper pour gérer la structure uniforme d'images
 function getImageSrc(product: Product, imageIndex: number) {
   // Nouvelle structure uniforme : { nom: '', images: string[], locked: boolean }
   const imageUrl = product.images && product.images[imageIndex] ? product.images[imageIndex] : null
-  console.log(`🔍 getImageSrc - Produit: ${product.nom}, Index: ${imageIndex}, URL: ${imageUrl}`)
   return imageUrl
 }
 </script>
@@ -207,7 +204,6 @@ function getImageSrc(product: Product, imageIndex: number) {
 .action-btn i {
   font-size: 1rem;
   color: white;
-  /* Force l'affichage des icônes FontAwesome */
   display: inline-block !important;
   font-family: "Font Awesome 5 Free" !important;
   font-weight: 900 !important;
@@ -254,3 +250,5 @@ function getImageSrc(product: Product, imageIndex: number) {
   background: #c82333;
 }
 </style>
+
+<!-- Affiche une étape produit avec titre, description et grille de cartes. -->

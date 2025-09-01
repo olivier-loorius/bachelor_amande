@@ -514,3 +514,10 @@ $admin-danger: #dc3545;
   }
 }
 </style>
+
+<!-- Affiche une section d’administration pour gérer des produits par étapes.
+Entrées via props: listes de produits, états verrouillés, compteurs et progressions.
+Émet des événements: upload, remove, save, reset, toggle, toggleLock, showDeleteConfirm.
+Gère localement l’ouverture/fermeture de chaque étape via openSections et toggleStep.
+Utilise ProductStep pour chaque étape avec configuration d’images et index de départ.
+Styles SCSS scopés pour l’en-tête, les étapes et la responsivité. -->

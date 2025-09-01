@@ -2,12 +2,12 @@
   <header class="admin-header">
     <div class="header-content">
       <h1 class="header-title">
-        <i class="fas fa-cogs"></i>
+        <i class="fas fa-cogs" aria-hidden="true"></i>
         Administration Amande
       </h1>
       
       <button class="logout-btn" @click="handleLogout">
-        <i class="fas fa-sign-out-alt"></i>
+        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
         Déconnexion
       </button>
     </div>
@@ -21,6 +21,7 @@ import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const router = useRouter()
 
+// Déclenche la déconnexion via le store (navigation gérée par le store)
 const handleLogout = () => {
   authStore.logout(router)
 }
@@ -96,3 +97,7 @@ const handleLogout = () => {
   }
 }
 </style>
+
+<!-- En-tête d’administration affichant le titre et un bouton de déconnexion.
+Dépend de useAuthStore et vue-router.
+Action: au clic, appelle authStore.logout(router) pour gérer la déconnexion/navigation. -->
