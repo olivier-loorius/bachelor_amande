@@ -12,28 +12,24 @@
       <h3 class="composition-title">Votre composition</h3>
       <div class="ingredients-grid">
         <div v-if="fond" class="ingredient-card">
-          <div class="ingredient-icon">🍰</div>
           <div class="ingredient-content">
             <span class="ingredient-label">Fond</span>
             <span class="ingredient-name">{{ fond.nom }}</span>
           </div>
         </div>
         <div v-if="g1" class="ingredient-card">
-          <div class="ingredient-icon">🥜</div>
           <div class="ingredient-content">
             <span class="ingredient-label">1ère couche</span>
             <span class="ingredient-name">{{ g1.nom }}</span>
           </div>
         </div>
         <div v-if="g2" class="ingredient-card">
-          <div class="ingredient-icon">🍫</div>
           <div class="ingredient-content">
             <span class="ingredient-label">2ème couche</span>
             <span class="ingredient-name">{{ g2.nom }}</span>
           </div>
         </div>
         <div v-if="g3" class="ingredient-card">
-          <div class="ingredient-icon">✨</div>
           <div class="ingredient-content">
             <span class="ingredient-label">Finition</span>
             <span class="ingredient-name">{{ g3.nom }}</span>
@@ -175,9 +171,7 @@ function clamp(v: string) {
   return Number.isFinite(n) ? n : 1 
 }
 
-function onError(e: Event) { 
-  (e.target as HTMLImageElement).style.visibility = 'hidden' 
-}
+
 
 function handleAddToCart() {
   if (!isLoggedIn.value) {
@@ -196,14 +190,11 @@ function closeModal() {
 }
 
 function openLoginModal() {
-  // Fermer la modal actuelle
   closeModal()
-  // Émettre un événement pour ouvrir la modal de connexion de la nav
   window.dispatchEvent(new CustomEvent('open-login-modal'))
 }
 
 function confirmAddToCart() {
-  // Émettre l'événement pour que le parent gère l'ajout au panier
   emit('add')
   closeModal()
 }
@@ -241,74 +232,72 @@ function confirmAddToCart() {
 }
 
 .composition-card {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-  text-align: left !important;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  text-align: left;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .composition-title {
-  font-family: var(--font-family-title, 'Poppins', sans-serif) !important;
-  color: var(--teal-color, #90aeb0) !important;
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  margin: 0 0 0.8rem 0 !important;
-  text-align: left !important;
+  font-family: var(--font-family-title, 'Poppins', sans-serif);
+  color: var(--teal-color, #90aeb0);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.8rem 0;
+  text-align: left;
 }
 
 .ingredients-grid {
-  list-style: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0.3rem !important;
-  text-align: left !important;
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-align: left;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .ingredient-card {
-  display: flex !important;
-  justify-content: flex-start !important;
-  align-items: flex-start !important;
-  padding: 0.2rem 0 !important;
-  border: none !important;
-  text-align: left !important;
-  width: 100% !important;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 0.2rem 0;
+  border: none;
+  text-align: left;
+  width: 100%;
 }
 
-.ingredient-icon {
-  display: none !important;
-}
+
 
 .ingredient-content {
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .ingredient-label {
-  font-family: var(--font-family-text, 'Inter', sans-serif) !important;
-  color: #333 !important;
-  font-size: 0.85rem !important;
-  font-weight: 500 !important;
-  margin-right: 0.5rem !important;
-  min-width: 80px !important;
-  text-align: left !important;
-  flex-shrink: 0 !important;
+  font-family: var(--font-family-text, 'Inter', sans-serif);
+  color: #333;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  min-width: 80px;
+  text-align: left;
+  flex-shrink: 0;
 }
 
 .ingredient-name {
-  font-family: var(--font-family-text, 'Inter', sans-serif) !important;
-  color: var(--accent-color, #e05a4e) !important;
-  font-size: 0.85rem !important;
-  font-weight: 600 !important;
-  text-align: left !important;
-  flex: 1 !important;
+  font-family: var(--font-family-text, 'Inter', sans-serif);
+  color: var(--accent-color, #e05a4e);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  flex: 1;
 }
 
 .quantity-section {
@@ -434,19 +423,17 @@ function confirmAddToCart() {
     font-size: 1.3rem;
   }
 
-  /* ✅ Styles de prévisualisation supprimés */
-
   .composition-title {
-    font-size: 0.95rem !important;
+    font-size: 0.95rem;
   }
 
   .ingredient-label {
-    font-size: 0.8rem !important;
-    min-width: 70px !important;
+    font-size: 0.8rem;
+    min-width: 70px;
   }
 
   .ingredient-name {
-    font-size: 0.8rem !important;
+    font-size: 0.8rem;
   }
 
   .quantity-controls {
@@ -508,8 +495,6 @@ function confirmAddToCart() {
     font-size: 1.2rem;
   }
 
-  /* ✅ Styles de prévisualisation supprimés */
-
   .left-actions {
     flex-direction: column;
     gap: 0.5rem;
@@ -549,7 +534,6 @@ function confirmAddToCart() {
   }
 }
 
-/* Styles desktop par défaut */
 .btn-tertiary, .btn-secondary, .btn-primary {
   display: flex;
   align-items: center;
@@ -602,7 +586,6 @@ function confirmAddToCart() {
   border-color: #d04a3e;
 }
 
-/* Modal styles */
 .modal-overlay {
   position: fixed;
   top: 0;

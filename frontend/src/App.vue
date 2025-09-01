@@ -29,14 +29,13 @@ html, body, #app {
 }
 
 .main-content {
-  padding-top: 80px; /* Hauteur de la navbar */
+  padding-top: 80px; 
   min-height: calc(100vh - 80px);
 }
 
-/* Mobile : ajuster le padding */
 @media (max-width: 768px) {
   .main-content {
-    padding-top: 65px; /* Hauteur de la navbar mobile */
+    padding-top: 65px; 
     min-height: calc(100vh - 65px);
   }
 }

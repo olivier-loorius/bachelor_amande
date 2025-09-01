@@ -1,34 +1,34 @@
-# 🍰 Amande - L'art de la tartelette
+# Amande - L'art de la tartelette
 
 Projet full-stack pour l'application Amande - L'art de la tartelette.
 
-## 📁 Structure du projet
+## Structure du projet
 
 ```
 bachelor_amande-1/
-├── 📂 frontend/           # Application Vue.js
-│   ├── 📂 src/
-│   │   ├── 📂 components/ # Composants réutilisables
-│   │   ├── 📂 views/      # Pages de l'application
-│   │   ├── 📂 stores/     # Gestion d'état (Pinia)
-│   │   ├── 📂 services/   # Services API
-│   │   ├── 📂 assets/     # Ressources statiques
-│   │   └── 📂 router/     # Configuration des routes
-│   └── 📂 public/         # Fichiers publics
-├── 📂 backend/            # API Express + Supabase
-│   ├── 📂 src/
-│   │   ├── 📂 routes/     # Routes API
-│   │   ├── 📂 controllers/# Contrôleurs
-│   │   ├── 📂 middleware/ # Middlewares
-│   │   ├── 📂 config/     # Configuration
-│   │   └── 📂 utils/      # Utilitaires
-│   └── 📂 docs/           # Documentation API
-├── 📂 docs/               # Documentation générale
-├── 📂 scripts/            # Scripts utilitaires
-└── 📂 .github/            # Configuration GitHub (CI/CD)
+├── frontend/           # Application Vue.js
+│   ├── src/
+│   │   ├── components/ # Composants réutilisables
+│   │   ├── views/      # Pages de l'application
+│   │   ├── stores/     # Gestion d'état (Pinia)
+│   │   ├── services/   # Services API
+│   │   ├── assets/     # Ressources statiques
+│   │   └── router/     # Configuration des routes
+│   └── public/         # Fichiers publics
+├── backend/            # API Express + Supabase
+│   ├── src/
+│   │   ├── routes/     # Routes API
+│   │   ├── controllers/# Contrôleurs
+│   │   ├── middleware/ # Middlewares
+│   │   ├── config/     # Configuration
+│   │   └── utils/      # Utilitaires
+│   └── docs/           # Documentation API
+├── docs/               # Documentation générale
+├── scripts/            # Scripts utilitaires
+└── supabase/           # Migrations et fonctions Supabase
 ```
 
-## 🚀 Démarrage rapide
+## Démarrage rapide
 
 ### Frontend
 
@@ -46,22 +46,101 @@ npm install
 npm run dev
 ```
 
-## 🛠️ Technologies
+### Démarrage complet
 
-- **Frontend**: Vue.js 3 + Vite + TypeScript + Tailwind CSS
+```bash
+# Script pour démarrer frontend + backend
+npm run dev:all
+```
+
+## Technologies
+
+- **Frontend**: Vue.js 3 + Vite + TypeScript + Tailwind CSS + Pinia
 - **Backend**: Express.js + Supabase + Node.js
 - **Base de données**: PostgreSQL (via Supabase)
-- **Authentification**: Supabase Auth
+- **Authentification**: JWT + RLS (Row Level Security)
 
-## 📋 Fonctionnalités
+## Fonctionnalités principales
 
-- 🍰 Catalogue de tartelettes
-- 🎨 Composer sa tartelette
-- 🛒 Panier d'achat
-- 👤 Authentification utilisateur
-- 📱 Interface responsive
+### Client
+- Catalogue de tartelettes (Fonds, Garnitures, Recouvrements)
+- Composeur de tartelette en 5 étapes
+- Panier d'achat personnalisé
+- Authentification et gestion de profil
 
-## 📝 Conventions de nommage
+### Administration
+- Gestion du catalogue de produits
+- Upload et gestion des images
+- Gestion des utilisateurs
+- Statistiques et monitoring
+
+## Architecture technique
+
+### CRUD Produits
+- Structure : 4 types de produits avec quotas définis
+- Images multiples par produit
+- Système de verrouillage et déverrouillage
+- Gestion des étapes (Fond, G1, G2, G3)
+
+### CRUD Utilisateurs
+- Rôles Admin/User avec permissions
+- Authentification JWT sécurisée
+- Soft delete pour la désactivation
+- Protection RLS des données
+
+### Gestion du Panier
+- Stockage local pour la performance
+- Synchronisation avec Supabase
+- Panier unique par utilisateur
+- Persistance entre sessions
+
+## Sécurité
+
+- **JWT Tokens** : Authentification sans stockage de mots de passe
+- **RLS** : Isolation automatique des données par utilisateur
+- **Middleware** : Protection des routes sensibles
+- **Validation** : Côté client et serveur
+
+## Scripts utiles
+
+```bash
+# Développement
+npm run dev          # Frontend uniquement
+npm run dev:all      # Frontend + Backend
+
+# Production
+npm run build        # Build frontend
+npm run lint         # Vérification code
+npm run test         # Tests unitaires
+```
+
+## Configuration
+
+### Variables d'environnement
+
+Créer un fichier `.env` dans le dossier `backend/` :
+
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+JWT_SECRET=your_jwt_secret
+```
+
+### Base de données
+
+Les migrations Supabase se trouvent dans `supabase/migrations/` :
+- Schéma des produits et images
+- Politiques RLS
+- Fonctions de base
+
+## Documentation
+
+- `docs/DOCUMENTATION_TECHNIQUE.md` : Documentation technique complète
+- `docs/PRESENTATION_JURY.md` : Présentation pour le jury
+- `docs/GUIDE_DEMONSTRATION.md` : Guide de démonstration
+
+## Conventions de nommage
 
 - **Fichiers**: kebab-case (`mon-fichier.vue`)
 - **Composants**: PascalCase (`MonComposant.vue`)
@@ -69,63 +148,13 @@ npm run dev
 - **Constantes**: UPPER_SNAKE_CASE (`MA_CONSTANTE`)
 - **Dossiers**: kebab-case (`mon-dossier/`)
 
-## 🔧 Scripts utiles
+## Déploiement
 
-```bash
-# Démarrer tout le projet
-npm run dev:all
+1. Build du frontend : `npm run build`
+2. Configuration des variables d'environnement
+3. Déploiement du backend sur votre serveur
+4. Configuration de Supabase en production
 
-# Lancer les tests
-npm run test
+## Support
 
-# Build de production
-npm run build
-```
-
-## �️ Gestion du Backend (installation, SQL, Supabase, lancement)
-
-### 1. Installation du backend
-
-```bash
-cd backend
-npm install
-```
-
-### 2. Configuration Supabase
-
-- Crée un projet sur https://supabase.com
-- Récupère tes clés API (URL, ANON KEY, SERVICE ROLE KEY)
-- Crée un fichier `.env` dans `backend/` :
-  ```env
-  SUPABASE_URL=...
-  SUPABASE_ANON_KEY=...
-  SUPABASE_SERVICE_ROLE_KEY=...
-  PORT=3001
-  FRONTEND_URL=http://localhost:5174
-  NODE_ENV=development
-  ```
-
-### 3. Initialisation ou nettoyage de la base de données
-
-- Ouvre l’éditeur SQL Supabase
-- Copie le contenu du fichier `docs/sql/supabase-init.sql` (script unique)
-- Exécute le script pour créer toutes les tables et nettoyer l’ancienne base
-
-### 4. Lancement du backend
-
-```bash
-cd backend
-npm run dev   # pour le développement
-npm start     # pour la production
-```
-
-### 5. Vérification
-
-- Accède à `http://localhost:3001/health` pour vérifier que l’API fonctionne
-- Le backend est prêt à recevoir les requêtes du frontend
-
-### 6. Conseils
-
-- Un seul script SQL suffit pour tout réinitialiser
-- Les anciennes migrations SQL peuvent être supprimées
-- Documente bien tes variables d’environnement
+Pour toute question technique, consulter la documentation dans le dossier `docs/`.

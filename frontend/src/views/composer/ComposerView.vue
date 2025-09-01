@@ -1,81 +1,79 @@
-<!-- src/views/composer/ComposerView.vue -->
 <template>
   <div class="page-container">
     <main class="content-container composer-content">
       <div class="composer-card card">
         <div class="page">
-                      <div class="content" :class="{ 'with-right': step > 1 && step < 5 }">
-                                          <div class="left">
-                <ComposerHeader />
+          <div class="content" :class="{ 'with-right': step > 1 && step < 5 }">
+            <div class="left">
+              <ComposerHeader />
 
-                <StepFond
-                  v-if="step===1"
-                  :fonds="fonds"
-                  :selected-id="selections.fond?.id"
-                  @select="({item,index}) => selectFond(item, index)"
-                />
+              <StepFond
+                v-if="step===1"
+                :fonds="fonds"
+                :selected-id="selections.fond?.id"
+                @select="({item,index}) => selectFond(item, index)"
+              />
 
-                <StepGarniture
-                  v-else-if="step===2"
-                  title="2) Première couche de douceur"
-                  :items="g1"
-                  :selected-id="selections.g1?.id"
-                  :preview-url="previewUrl"
-                  @select="selectG1"
-                />
+              <StepGarniture
+                v-else-if="step===2"
+                title="2) Première couche de douceur"
+                :items="g1"
+                :selected-id="selections.g1?.id"
+                :preview-url="previewUrl"
+                @select="selectG1"
+              />
 
-                <StepGarniture
-                  v-else-if="step===3"
-                  title="3) Seconde couche de douceur"
-                  :items="g2"
-                  :selected-id="selections.g2?.id"
-                  :preview-url="previewUrl"
-                  @select="selectG2"
-                />
+              <StepGarniture
+                v-else-if="step===3"
+                title="3) Seconde couche de douceur"
+                :items="g2"
+                :selected-id="selections.g2?.id"
+                :preview-url="previewUrl"
+                @select="selectG2"
+              />
 
-                <StepGarniture
-                  v-else-if="step===4"
-                  title="4) La touche finale"
-                  :items="g3"
-                  :selected-id="selections.g3?.id"
-                  :preview-url="previewUrl"
-                  @select="selectG3"
-                />
+              <StepGarniture
+                v-else-if="step===4"
+                title="4) La touche finale"
+                :items="g3"
+                :selected-id="selections.g3?.id"
+                :preview-url="previewUrl"
+                @select="selectG3"
+              />
 
-                <StepSummary
-                  v-else-if="step===5"
-                  :fond="selections.fond"
-                  :g1="selections.g1"
-                  :g2="selections.g2"
-                  :g3="selections.g3"
-                  :quantity="quantity"
-                  :unitPrice="unitPrice"
-                  :preview-src="previewUrl"
-                  @setQty="q => quantity = q"
-                  @prev="prev"
-                  @add="onAddToCart"
-                  @restart="restart"
-                />
+              <StepSummary
+                v-else-if="step===5"
+                :fond="selections.fond"
+                :g1="selections.g1"
+                :g2="selections.g2"
+                :g3="selections.g3"
+                :quantity="quantity"
+                :unitPrice="unitPrice"
+                :preview-src="previewUrl"
+                @setQty="q => quantity = q"
+                @prev="prev"
+                @add="onAddToCart"
+                @restart="restart"
+              />
 
-                <WizardNav
-                  v-if="step<=4"
-                  :can-prev="canPrev"
-                  :can-next="canNext"
-                  @prev="prev"
-                  @next="next"
+              <WizardNav
+                v-if="step<=4"
+                :can-prev="canPrev"
+                :can-next="canNext"
+                @prev="prev"
+                @next="next"
+              />
+            </div>
+
+            <div class="right" v-if="step > 1 && step < 5">
+              <div class="right-bottom">
+                <PreviewPane
+                  :src="previewUrl"
                 />
               </div>
-
-              <!-- Colonne de droite avec prévisualisation desktop (étapes 2-4) -->
-              <div class="right" v-if="step > 1 && step < 5">
-                <div class="right-bottom">
-                  <PreviewPane
-                    :src="previewUrl"
-                  />
-                </div>
-              </div>
-                    </div>
-                    </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -96,21 +94,18 @@ import PreviewPane from './components/PreviewPane.vue'
 import { useComposer } from './composables/useComposer'
 import type { Item } from './types'
 
-// Stores
 const productStore = useProductStore()
 const auth = useAuthStore()
 const panier = usePanierStore()
 
-// Charger les données au montage
 onMounted(async () => {
   try {
     await productStore.loadProductConfig()
   } catch (error) {
-    console.error('❌ Erreur lors du chargement:', error)
+    // Gestion d'erreur silencieuse pour éviter les erreurs console
   }
 })
 
-/** 1) Normalisation stable : 3/4/4/4 items, labels sûrs, IDs uniques, image fallback = 1ère non vide */
 const firstNonEmpty = (arr?: any[]) => (Array.isArray(arr) ? arr.find(Boolean) : null) || null
 
 const normalizeSlice = (arr: any[], limit: number, prefix: string): Item[] => {
@@ -123,7 +118,6 @@ const normalizeSlice = (arr: any[], limit: number, prefix: string): Item[] => {
     const safeImage = p.image || firstNonEmpty(p.images)
     
     out.push({
-      // clé/ID 100% unique : on suffixe par index (évite collisions de l'admin)
       id: `${prefix}-${p.id ?? 'nil'}-${i}`,
       nom: safeName,
       image: safeImage,
@@ -134,13 +128,11 @@ const normalizeSlice = (arr: any[], limit: number, prefix: string): Item[] => {
   return out
 }
 
-// ⚠️ PAS de dédup par nom ici → on garde bien 4 items même si 2 noms identiques dans le dashboard
 const fonds = computed<Item[]>(() => normalizeSlice(productStore.fonds, 3, 'Fond'))
 const g1 = computed<Item[]>(() => normalizeSlice(productStore.premiereCoucheDouceur, 4, 'Garniture1'))
 const g2 = computed<Item[]>(() => normalizeSlice(productStore.secondeCoucheDouceur, 4, 'Garniture2'))
 const g3 = computed<Item[]>(() => normalizeSlice(productStore.toucheFinale, 4, 'Garniture3'))
 
-/** 2) Cerveau (navigation + sélections) */
 const {
   step, quantity, selections,
   canNext, canPrev, next, prev,
@@ -150,7 +142,6 @@ const {
   restart,
 } = useComposer()
 
-/** 3) Preview local robuste par variante de fond */
 const fondIndex = computed(() => {
   const id = selections.value.fond?.id
   return id ? fonds.value.findIndex(f => f.id === id) : -1
@@ -164,15 +155,12 @@ const imageFor = (item: Item | null) => {
   return item.image || firstNonEmpty(imgs) || fallbackFond
 }
 
-// Utilise previewUrl de useComposer qui gère la logique des étapes
-
-// Panier / ajout
-async function onAddToCart(){
+async function onAddToCart() {
   if (!auth.isLoggedIn) {
-    // branche ta modale de connexion ici si tu en as une
     alert('Connectez-vous pour ajouter au panier.')
     return
   }
+  
   const produit = {
     id: Date.now(),
     nom: 'Tartelette personnalisée',
@@ -187,9 +175,9 @@ async function onAddToCart(){
     description: description,
     total: totalPrice,
   }
+  
   const ok = await panier.ajouterAuPanier(produit)
   if (ok) {
-    // affiche ta modale AddToCartModal si besoin
     alert('Ajouté au panier 🎉')
   }
 }
@@ -224,19 +212,18 @@ async function onAddToCart(){
   margin: 2rem 0;
 }
 
-.page{ 
+.page { 
   padding: 1.5rem 0; 
 }
 
-.content{
+.content {
   display: grid;
-  grid-template-columns: 1fr; /* 1 colonne par défaut (étape 1) */
+  grid-template-columns: 1fr;
   gap: 2rem;
   align-items: start;
 }
 
-/* Quand la colonne de droite existe (étapes 2–4) */
-.content.with-right{
+.content.with-right {
   grid-template-columns: 450px 1fr;
 }
 
@@ -246,7 +233,6 @@ async function onAddToCart(){
     margin: 0.3rem 0;
   }
 
-  /* ⚠ On BASCULE en FLEX pour que `order` fonctionne */
   .content,
   .content.with-right {
     display: flex;
@@ -262,15 +248,13 @@ async function onAddToCart(){
   }
   
   .right-bottom {
-    display: none;         /* cache seulement la preview de droite en mobile */
+    display: none;
   }
   
-  /* L'étape 5 reste en colonne normale */
   .content:not(.with-right) {
     display: block;
   }
   
-  /* StepSummary en mobile ne doit pas être affecté par le Flexbox */
   .left section {
     display: block;
   }

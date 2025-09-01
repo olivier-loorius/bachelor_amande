@@ -1,7 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { requireAdmin } from '@/utils/authGuard'
 
-// COPIE EXACTE de la structure des routes admin
+// COPIE EXACTE structure routes admin
 export const adminRoutes: RouteRecordRaw[] = [
   {
     path: '/admin',

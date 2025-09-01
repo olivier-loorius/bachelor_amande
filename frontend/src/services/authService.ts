@@ -1,7 +1,7 @@
 import { supabase } from './supabaseService'
 
 export async function registerUser({ email, password, name }: { email: string; password: string; name: string }) {
-  // 🔒 Validation des champs
+  // Validation des champs
   if (!email || !password || !name) {
     throw new Error("Tous les champs sont requis.");
   }
@@ -33,7 +33,6 @@ export async function registerUser({ email, password, name }: { email: string; p
 
   if (error) throw error;
 
-  // 🛑 Retourner user et session pour accès immédiat aux tokens
   return {
     user: data.user,
     session: data.session
@@ -41,7 +40,7 @@ export async function registerUser({ email, password, name }: { email: string; p
 }
 
 export async function loginUser({ email, password }: { email: string; password: string }) {
-  // 🔒 Validation des champs
+  // Validation des champs
   if (!email || !password) {
     throw new Error("Email et mot de passe requis.");
   }
@@ -53,7 +52,6 @@ export async function loginUser({ email, password }: { email: string; password: 
 
   if (error) throw error;
 
-  // 🛑 Retourner user et session pour accès immédiat aux tokens
   return {
     user: data.user,
     session: data.session
@@ -76,10 +74,9 @@ export async function getUserInfos(userId: string) {
   
   console.log('✅ getUserInfos - data:', data);
   
-  // Vérifier si le compte est marqué comme supprimé
+  // Vérifier si compte supprimé
   if (data.deleted) {
     console.log('❌ Compte supprimé détecté:', data.email);
-    // Déconnecter l'utilisateur car son compte est supprimé
     await supabase.auth.signOut();
     throw new Error('Ce compte a été supprimé. Veuillez contacter l\'administrateur.');
   }

@@ -1,6 +1,5 @@
 import { supabase } from './supabaseService'
 
-// Types pour la nouvelle structure robuste
 export interface Product {
   id: string
   nom: string
@@ -19,7 +18,6 @@ export interface ProductWithImages {
   images: string[]
 }
 
-// Service refactorisé pour la nouvelle structure
 export const productConfigService = {
   // Récupérer tous les produits avec leurs images
   async getAllProducts(): Promise<Product[]> {
@@ -46,7 +44,7 @@ export const productConfigService = {
     }
   },
 
-  // Récupérer les produits par étape
+  // Récupérer produits par étape
   async getProductsByStep(step: Product['step']): Promise<Product[]> {
     try {
       const { data, error } = await supabase
@@ -70,14 +68,13 @@ export const productConfigService = {
     }
   },
 
-  // Créer ou mettre à jour un produit avec ses images
+  // Créer ou mettre à jour un produit avec images
   async upsertProduct(product: Omit<Product, 'id' | 'created_at'>): Promise<string | null> {
     try {
       const { nom, locked, step, images } = product
       
       console.log('💾 Sauvegarde produit:', { nom, step, locked, images })
       
-      // ✅ CRÉER DIRECTEMENT dans la table products
       const { data, error } = await supabase
         .from('products')
         .insert({
@@ -107,7 +104,6 @@ export const productConfigService = {
     try {
       const { nom, locked, step, images } = updates
 
-      // ✅ Mettre à jour directement dans la table products
       const { error } = await supabase
         .from('products')
         .update({ 
@@ -133,16 +129,13 @@ export const productConfigService = {
     try {
       console.log('🗑️ Suppression du produit:', productId)
       
-      // Récupérer d'abord le produit pour avoir ses images
       const product = await this.getProductById(productId)
       
       if (product && product.images.length > 0) {
         console.log('🗑️ Suppression des images du storage:', product.images)
         
-        // Supprimer les images du storage
         for (const imageUrl of product.images) {
           try {
-            // Extraire le chemin du fichier de l'URL
             const urlParts = imageUrl.split('/')
             const fileName = urlParts[urlParts.length - 1]
             const filePath = `products/${fileName}`
@@ -180,7 +173,7 @@ export const productConfigService = {
     }
   },
 
-  // Upload d'image (fonction existante conservée)
+  // Upload d'image
   async uploadImage(file: File, productType: string, productIndex: number, imageIndex: number): Promise<string | null> {
     try {
       const fileName = `${productType}_${productIndex}_${imageIndex}_${Date.now()}.jpg`
@@ -204,7 +197,7 @@ export const productConfigService = {
     }
   },
 
-  // Récupérer un produit par ID
+  // Récupérer 1 produit par ID
   async getProductById(productId: string): Promise<Product | null> {
     try {
       const { data, error } = await supabase
@@ -228,7 +221,6 @@ export const productConfigService = {
     }
   },
 
-  // Mettre à jour le verrouillage d'un produit
   async updateProductLock(step: string, productIndex: number, locked: boolean): Promise<boolean> {
     try {
       const products = await this.getProductsByStep(step as Product['step'])
@@ -242,14 +234,12 @@ export const productConfigService = {
     }
   },
 
-  // Créer ou mettre à jour une configuration de produit
   async upsertProductConfig(config: any): Promise<boolean> {
     try {
       const { config_type, product_index, nom, images } = config
       
       console.log('💾 Sauvegarde config:', { config_type, product_index, nom, images })
       
-      // ✅ CRÉER DIRECTEMENT avec product_index
       const { data, error } = await supabase
         .from('products')
         .insert({

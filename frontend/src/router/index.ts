@@ -5,7 +5,7 @@ import MentionsLegales from '@/views/info/MentionsLegales.vue'
 import ContactView from '@/views/info/ContactView.vue'
 import CGVView from '@/views/info/CGVView.vue'
 import PanierView from '@/views/panier/Panier.vue'
-import LoginView from '@/views/auth/LoginView.vue' // Importation du composant ConnexionView
+import LoginView from '@/views/auth/LoginView.vue'
 import ErrorView from '@/views/utils/ErrorView.vue'
 import ComposerView from '@/views/composer/ComposerView.vue'
 import CatalogueView from '@/views/catalogue/CatalogueView.vue'

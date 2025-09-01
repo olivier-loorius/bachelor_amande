@@ -1,10 +1,7 @@
-<!-- src/views/composer/components/StepFond.vue -->
 <template>
   <section>
     <h2 class="title">1) Choisissez votre fond</h2>
-    
-
-    
+     
     <div class="grid">
       <button
         v-for="(f, i) in fonds"
@@ -49,8 +46,6 @@ function hideImg(e: Event){ (e.target as HTMLImageElement).style.display='none' 
     display: none;
   }
 }
-
-
 
 .grid{ 
   display:grid; 

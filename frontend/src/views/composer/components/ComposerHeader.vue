@@ -22,8 +22,6 @@
 </template>
 
 <script setup lang="ts">
-// Composant header pour le titre, prix et introduction
-// Responsabilité unique : présentation des informations générales
 </script>
 
 <style scoped>
