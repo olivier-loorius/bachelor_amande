@@ -145,6 +145,7 @@ const {
   step, quantity, selections,
   canNext, canPrev, next, prev,
   selectFond, selectG1, selectG2, selectG3,
+  previewUrl,
   unitPrice, totalPrice, description,
   restart,
 } = useComposer()
@@ -163,14 +164,7 @@ const imageFor = (item: Item | null) => {
   return item.image || firstNonEmpty(imgs) || fallbackFond
 }
 
-const previewUrl = computed(() => {
-  if (step.value === 1) return selections.value.fond?.image || ''
-  if (step.value === 2) return imageFor(selections.value.g1)
-  if (step.value === 3) return imageFor(selections.value.g2)
-  if (step.value === 4) return imageFor(selections.value.g3)
-  // recap
-  return imageFor(selections.value.g3 || selections.value.g2 || selections.value.g1)
-})
+// Utilise previewUrl de useComposer qui gère la logique des étapes
 
 // Panier / ajout
 async function onAddToCart(){
@@ -182,7 +176,7 @@ async function onAddToCart(){
   const produit = {
     id: Date.now(),
     nom: 'Tartelette personnalisée',
-    image: previewUrl || selections.value.fond?.image || '',
+    image: previewUrl.value || selections.value.fond?.image || '',
     prix: unitPrice,
     quantite: quantity,
     base: selections.value.fond?.nom || '',

@@ -33,7 +33,7 @@
     </ul>
     
     <div class="cta-container">
-      <!-- CTA Admin (visible seulement pour les admins) -->
+      <!-- CTA Admin -->
       <div v-if="authStore.isLoggedIn && authStore.user?.role === 'admin'" class="cta-item admin">
         <router-link to="/admin" class="cta-button admin-btn" title="Administration">
           <i class="fas fa-cog"></i>
@@ -179,7 +179,6 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   router.afterEach(handleNavigation)
   
-  // Écouter l'événement pour ouvrir la modal de connexion depuis le composer
   window.addEventListener('open-login-modal', () => {
     openLogin()
   })
@@ -190,7 +189,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   router.afterEach(() => {})
   
-  // Nettoyer l'event listener pour la modal de connexion
   window.removeEventListener('open-login-modal', () => {
     openLogin()
   })
@@ -413,10 +411,9 @@ a:hover {
   box-sizing: border-box;
   position: relative;
   background: none;
-  outline: none; /* Supprime la bordure de focus par défaut */
+  outline: none;
 }
 
-/* Styles de focus personnalisés pour chaque CTA */
 .cta-button:focus {
   outline: none;
 }
@@ -603,7 +600,7 @@ a:hover {
     display: flex;
     position: relative;
     text-align: center;
-    outline: none; /* Supprime la bordure de focus par défaut */
+    outline: none; 
   }
   
   .cta-button:focus {

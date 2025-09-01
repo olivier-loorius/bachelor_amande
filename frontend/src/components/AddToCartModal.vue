@@ -53,12 +53,10 @@ const closeModal = () => {
 
 watch(() => props.show, (newShow) => {
   if (newShow) {
-    // Auto-fermeture après le délai spécifié
     autoCloseTimeout = setTimeout(() => {
       closeModal()
     }, props.autoCloseDelay)
   } else {
-    // Nettoyer le timeout si la modal est fermée manuellement
     if (autoCloseTimeout) {
       clearTimeout(autoCloseTimeout)
       autoCloseTimeout = null

@@ -3,7 +3,6 @@
     <h2 class="composer-step-title">{{ title }}</h2>
     <p class="composer-step-desc">{{ subtitle }}</p>
 
-         <!-- Prévisualisation juste au-dessus des CTA -->
      <div v-if="previewUrl" class="garniture-preview">
        <img :src="previewUrl" alt="Prévisualisation" class="garniture-img" @error="handleImageError" />
      </div>

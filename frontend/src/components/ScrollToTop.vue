@@ -45,7 +45,7 @@ const scrollToTop = () => {
 }
 
 .scroll-to-top-btn.admin-mode {
-  background: #01192b; /* Couleur bleue du dashboard */
+  background: #01192b; 
 }
 
 .scroll-to-top-btn:focus {
@@ -58,7 +58,6 @@ const scrollToTop = () => {
   border: none;
 }
 
-/* Desktop : en bas à droite */
 @media (min-width: 769px) {
   .scroll-to-top-btn {
     bottom: 30px;

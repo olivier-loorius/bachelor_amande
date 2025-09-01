@@ -77,7 +77,6 @@
           <a href="#" class="text-accent hover:underline" @click.prevent="openLogin">Connectez-vous</a>
         </p>
 
-        <!-- Modale de succès intégrée -->
         <div v-if="showSuccessModal" class="success-modal-integrated" :class="{ show: showSuccessModal }">
           <div class="success-modal-content">
             <div class="success-modal-icon">

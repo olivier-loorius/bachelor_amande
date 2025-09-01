@@ -1,111 +1,103 @@
 <template>
   <div class="login-overlay" :class="{ 'active': isOpen }" @click.self="closeLogin">
     <div class="login-panel" :class="{ 'mobile-view': isMobile }">
-      <!-- En-tête -->
       <div class="login-header">
         <h2>{{ getHeaderTitle() }}</h2>
-        <button @click="closeLogin" class="close-btn">
-          <i class="fas fa-times"></i>
+        <button @click="closeLogin" class="close-btn" aria-label="Fermer le panneau">
+          <i class="fas fa-times" aria-hidden="true"></i>
         </button>
       </div>
 
-      <!-- Contenu -->
       <div class="login-content">
-                 <!-- Mode Compte (utilisateur connecté) -->
-         <div v-if="currentMode === 'account'">
-           <!-- Message d'erreur/succès -->
-           <div v-if="message" :class="['message', messageType]">
-             {{ message }}
-           </div>
-           
-           <div class="account-section">
+        <div v-if="currentMode === 'account'">
+          <div v-if="message" :class="['message', messageType]">
+            {{ message }}
+          </div>
+          
+          <div class="account-section">
             <div class="account-header">
               <div class="user-avatar">
-                <i class="fas fa-user-circle"></i>
+                <i class="fas fa-user-circle" aria-hidden="true"></i>
               </div>
               <div class="user-details">
-                        <h3>{{ authStore.user?.name || 'Utilisateur' }}</h3>
-        <p class="user-email">{{ maskEmail(authStore.user?.email) }}</p>
+                <h3>{{ authStore.user?.name || 'Utilisateur' }}</h3>
+                <p class="user-email">{{ maskEmail(authStore.user?.email) }}</p>
                 <span class="member-since">Membre depuis {{ getMemberSince() }}</span>
               </div>
             </div>
 
-                         <div class="account-actions">
-               <button 
-                 v-if="authStore.user?.role !== 'admin'"
-                 @click="openEditProfile" 
-                 class="account-btn"
-               >
-                 <i class="fas fa-user-edit"></i>
-                 Modifier mon profil
-               </button>
-               <button @click="redirectToConstruction('commandes')" class="account-btn">
-                 <i class="fas fa-shopping-bag"></i>
-                 Mes commandes
-               </button>
-               <button @click="redirectToConstruction('favoris')" class="account-btn">
-                 <i class="fas fa-heart"></i>
-                 Mes favoris
-               </button>
-               <button @click="redirectToConstruction('parametres')" class="account-btn">
-                 <i class="fas fa-cog"></i>
-                 Paramètres
-               </button>
-             </div>
+            <div class="account-actions">
+              <button 
+                v-if="authStore.user?.role !== 'admin'"
+                @click="openEditProfile" 
+                class="account-btn"
+              >
+                <i class="fas fa-user-edit" aria-hidden="true"></i>
+                Modifier mon profil
+              </button>
+              <button @click="redirectToConstruction('commandes')" class="account-btn">
+                <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+                Mes commandes
+              </button>
+              <button @click="redirectToConstruction('favoris')" class="account-btn">
+                <i class="fas fa-heart" aria-hidden="true"></i>
+                Mes favoris
+              </button>
+              <button @click="redirectToConstruction('parametres')" class="account-btn">
+                <i class="fas fa-cog" aria-hidden="true"></i>
+                Paramètres
+              </button>
+            </div>
 
-             <!-- Section discrète pour la déconnexion et suppression -->
-             <div class="account-footer">
-               <div class="footer-actions">
-                 <button @click="handleLogout" class="discrete-btn logout-discrete">
-                   <i class="fas fa-sign-out-alt"></i>
-                   Se déconnecter
-                 </button>
-                 <button 
-                   v-if="authStore.user?.role !== 'admin'"
-                   @click="startDeleteProcess" 
-                   class="discrete-btn delete-discrete"
-                 >
-                   <i class="fas fa-trash-alt"></i>
-                   Supprimer mon compte
-                 </button>
-               </div>
-             </div>
+            <div class="account-footer">
+              <div class="footer-actions">
+                <button @click="handleLogout" class="discrete-btn logout-discrete">
+                  <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                  Se déconnecter
+                </button>
+                <button 
+                  v-if="authStore.user?.role !== 'admin'"
+                  @click="startDeleteProcess" 
+                  class="discrete-btn delete-discrete"
+                >
+                  <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                  Supprimer mon compte
+                </button>
+              </div>
+            </div>
 
-             <!-- Processus de suppression intégré -->
-             <div v-if="deleteStep > 0" class="delete-process">
-               <div v-if="deleteStep === 1" class="delete-step">
-                 <h4>Confirmer la suppression</h4>
-                 <p>Cette action est irréversible. Toutes vos données seront définitivement supprimées.</p>
-                 <div class="delete-actions">
-                   <button @click="cancelDelete" class="cancel-discrete">
-                     Annuler
-                   </button>
-                   <button @click="confirmDelete" class="confirm-discrete">
-                     Confirmer la suppression
-                   </button>
-                 </div>
-               </div>
+            <div v-if="deleteStep > 0" class="delete-process">
+              <div v-if="deleteStep === 1" class="delete-step">
+                <h4>Confirmer la suppression</h4>
+                <p>Cette action est irréversible. Toutes vos données seront définitivement supprimées.</p>
+                <div class="delete-actions">
+                  <button @click="cancelDelete" class="cancel-discrete">
+                    Annuler
+                  </button>
+                  <button @click="confirmDelete" class="confirm-discrete">
+                    Confirmer la suppression
+                  </button>
+                </div>
+              </div>
 
-               <div v-if="deleteStep === 2" class="delete-step">
-                 <h4>Suppression en cours...</h4>
-                 <div class="loading-spinner"></div>
-                 <p>Votre compte est en cours de suppression...</p>
-               </div>
+              <div v-if="deleteStep === 2" class="delete-step">
+                <h4>Suppression en cours...</h4>
+                <div class="loading-spinner"></div>
+                <p>Votre compte est en cours de suppression...</p>
+              </div>
 
-               <div v-if="deleteStep === 3" class="delete-step">
-                 <h4>Compte supprimé</h4>
-                 <p>Votre compte a été supprimé avec succès.</p>
-                 <p>Vous allez être redirigé dans quelques secondes...</p>
-               </div>
-             </div>
+              <div v-if="deleteStep === 3" class="delete-step">
+                <h4>Compte supprimé</h4>
+                <p>Votre compte a été supprimé avec succès.</p>
+                <p>Vous allez être redirigé dans quelques secondes...</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Mode Connexion -->
         <div v-else-if="currentMode === 'login'">
           <p>Entrez votre email et mot de passe pour vous connecter à votre compte.</p>
           
-          <!-- Message d'erreur/succès -->
           <div v-if="message" :class="['message', messageType]">
             {{ message }}
           </div>
@@ -113,49 +105,45 @@
           <form @submit.prevent="handleLogin">
             <div>
               <label for="email">Email</label>
-                             <input
-                 v-model="loginForm.email"
-                 type="email"
-                 id="email"
-                 placeholder="Entrez votre email"
-                 autocomplete="off"
-                 required
-               />
+              <input
+                v-model="loginForm.email"
+                type="email"
+                id="email"
+                placeholder="Entrez votre email"
+                autocomplete="off"
+                required
+              />
             </div>
-                         <div>
-               <label for="password">Mot de passe</label>
-               <input
-                 v-model="loginForm.password"
-                 :type="showPassword ? 'text' : 'password'"
-                 id="password"
-                 placeholder="Entrez votre mot de passe"
-                 autocomplete="off"
-                 required
-                 style="padding-right: 2.5rem;"
-               />
-               <i 
-                 :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
-                 @click="showPassword = !showPassword"
-                 style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%) translateY(12px); cursor: pointer; color: var(--text-color); font-size: 14px;"
-                 :title="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
-               ></i>
-             </div>
+            <div>
+              <label for="password">Mot de passe</label>
+              <input
+                v-model="loginForm.password"
+                :type="showPassword ? 'text' : 'password'"
+                id="password"
+                placeholder="Entrez votre mot de passe"
+                autocomplete="off"
+                required
+                style="padding-right: 2.5rem;"
+              />
+              <i 
+                :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                @click="showPassword = !showPassword"
+                style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%) translateY(12px); cursor: pointer; color: var(--text-color); font-size: 14px;"
+                :title="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              ></i>
+            </div>
             <button type="submit" :disabled="isLoading">
               {{ isLoading ? 'Connexion...' : 'Connexion' }}
             </button>
           </form>
           
-          <!-- Lien d'inscription -->
           <p class="text-center">
             Vous n'avez pas de compte ?
             <a href="#" @click.prevent="switchToRegister">Créez-en un</a>
           </p>
         </div>
 
-        <!-- Mode Vérification du mot de passe -->
         <div v-else-if="currentMode === 'password-verification'">
-          
-          <!-- Message d'erreur/succès -->
           <div v-if="message" :class="['message', messageType]">
             {{ message }}
           </div>
@@ -185,19 +173,18 @@
             
             <div class="form-actions">
               <button type="submit" :disabled="isLoading" class="btn-primary">
-                <i class="fas fa-check"></i>
+                <i class="fas fa-check" aria-hidden="true"></i>
                 {{ isLoading ? 'Vérification...' : 'Confirmer' }}
               </button>
               
               <button type="button" @click="handleBackFromVerification" class="btn-secondary">
-                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
                 Retour
               </button>
             </div>
           </form>
         </div>
 
-        <!-- Mode Inscription -->
         <div v-else>
           <p>Remplissez les informations ci-dessous pour créer votre compte.</p>
           
@@ -229,73 +216,67 @@
               />
             </div>
             
-                         <div>
-               <label for="registerPassword">Mot de passe</label>
-               <input
-                 v-model="registerForm.password"
-                 :type="showPassword ? 'text' : 'password'"
-                 id="registerPassword"
-                 :placeholder="authStore.isLoggedIn ? 'Laissez vide pour ne pas changer' : 'Entrez votre mot de passe'"
-                 autocomplete="new-password"
-                 :required="!authStore.isLoggedIn"
-                 style="padding-right: 2.5rem;"
-               />
-               <i 
-                 :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
-                 @click="showPassword = !showPassword"
-                 style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%) translateY(12px); cursor: pointer; color: var(--text-color); font-size: 14px;"
-                 :title="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
-               ></i>
-             </div>
+            <div>
+              <label for="registerPassword">Mot de passe</label>
+              <input
+                v-model="registerForm.password"
+                :type="showPassword ? 'text' : 'password'"
+                id="registerPassword"
+                :placeholder="authStore.isLoggedIn ? 'Laissez vide pour ne pas changer' : 'Entrez votre mot de passe'"
+                autocomplete="new-password"
+                :required="!authStore.isLoggedIn"
+                style="padding-right: 2.5rem;"
+              />
+              <i 
+                :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                @click="showPassword = !showPassword"
+                style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%) translateY(12px); cursor: pointer; color: var(--text-color); font-size: 14px;"
+                :title="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              ></i>
+            </div>
             
-                         <div>
-               <label for="confirmPassword">Confirmer le mot de passe</label>
-               <input
-                 v-model="registerForm.confirmPassword"
-                 :type="showConfirmPassword ? 'text' : 'password'"
-                 id="confirmPassword"
-                 :placeholder="authStore.isLoggedIn ? 'Confirmez si vous changez le mot de passe' : 'Confirmez votre mot de passe'"
-                 autocomplete="new-password"
-                 :required="!authStore.isLoggedIn"
-                 style="padding-right: 2.5rem;"
-               />
-               <i 
-                 :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
-                 @click="showConfirmPassword = !showConfirmPassword"
-                 style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%) translateY(12px); cursor: pointer; color: var(--text-color); font-size: 14px;"
-                 :title="showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
-               ></i>
-             </div>
+            <div>
+              <label for="confirmPassword">Confirmer le mot de passe</label>
+              <input
+                v-model="registerForm.confirmPassword"
+                :type="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                :placeholder="authStore.isLoggedIn ? 'Confirmez si vous changez le mot de passe' : 'Confirmez votre mot de passe'"
+                autocomplete="new-password"
+                :required="!authStore.isLoggedIn"
+                style="padding-right: 2.5rem;"
+              />
+              <i 
+                :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                @click="showConfirmPassword = !showConfirmPassword"
+                style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%) translateY(12px); cursor: pointer; color: var(--text-color); font-size: 14px;"
+                :title="showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              ></i>
+            </div>
             
             <div class="form-actions">
               <button type="submit" :disabled="isLoading" class="btn-primary">
-                <i :class="authStore.isLoggedIn ? 'fas fa-edit' : 'fas fa-user-plus'"></i>
+                <i :class="authStore.isLoggedIn ? 'fas fa-edit' : 'fas fa-user-plus'" aria-hidden="true"></i>
                 <span v-if="!isLoading">{{ authStore.isLoggedIn ? 'Mettre à jour' : 'Créer un compte' }}</span>
                 <span v-else>{{ authStore.isLoggedIn ? 'Mise à jour...' : 'Création...' }}</span>
               </button>
               
               <button v-if="authStore.isLoggedIn" type="button" @click="currentMode = 'account'" class="btn-secondary">
-                <i class="fas fa-arrow-left"></i>
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
                 Annuler
               </button>
             </div>
           </form>
 
-          <!-- Lien de connexion -->
           <p class="text-center">
-            Vous avez déjà un compte ? 
+            Vous avez déjà un compte? 
             <a @click="switchToLogin">Se connecter</a>
           </p>
         </div>
-             </div>
-     </div>
-   </div>
-   
-
-   
-   
-   
- </template>
+      </div>
+    </div>
+  </div>
+</template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
@@ -327,7 +308,7 @@ const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const showPasswordVerification = ref(false)
 const showDeleteConfirmation = ref(false)
-const deleteStep = ref(0) // 0: normal, 1: confirmation, 2: loading, 3: success
+const deleteStep = ref(0) 
 const showEditProfile = ref(false)
 
 const loginForm = reactive({
@@ -335,13 +316,10 @@ const loginForm = reactive({
   password: ''
 })
 
-// Forcer l'initialisation à vide
 onMounted(() => {
   loginForm.email = ''
   loginForm.password = ''
 })
-
-
 
 const registerForm = reactive({
   name: '',
@@ -350,10 +328,7 @@ const registerForm = reactive({
   confirmPassword: ''
 })
 
-
-
 const clearForms = () => {
-  // Vider les données réactives
   loginForm.email = ''
   loginForm.password = ''
   registerForm.name = ''
@@ -363,22 +338,18 @@ const clearForms = () => {
   showPassword.value = false
   showConfirmPassword.value = false
   message.value = ''
-  
-  // Forcer le vidage des champs DOM immédiatement
+
   const inputs = document.querySelectorAll('input[type="email"], input[type="password"], input[type="text"]')
   inputs.forEach((input) => {
     if (input instanceof HTMLInputElement) {
       input.value = ''
       input.setAttribute('value', '')
       input.removeAttribute('value')
-      // Forcer la mise à jour du DOM
       input.dispatchEvent(new Event('input', { bubbles: true }))
-      // Forcer aussi un événement change
       input.dispatchEvent(new Event('change', { bubbles: true }))
     }
   })
-  
-  // Vider aussi après plusieurs délais pour s'assurer
+
   setTimeout(() => {
     const inputs = document.querySelectorAll('input[type="email"], input[type="password"], input[type="text"]')
     inputs.forEach((input) => {
@@ -418,7 +389,6 @@ const clearForms = () => {
     })
   }, 500)
   
-  // Vider encore après 1 seconde pour être sûr
   setTimeout(() => {
     const inputs = document.querySelectorAll('input[type="email"], input[type="password"], input[type="text"]')
     inputs.forEach((input) => {
@@ -460,20 +430,12 @@ const switchToAccount = () => {
 }
 
 const handleLogout = () => {
-  // Vider les champs immédiatement avant la déconnexion
   clearForms()
-  
-  // Déconnexion avec redirection
   authStore.logout(router)
-  
-  // Vider encore après la déconnexion
   setTimeout(() => {
     clearForms()
   }, 100)
-  
   closeLogin()
-  
-  // Forcer un refresh pour s'assurer que la vue se met à jour
   setTimeout(() => {
     window.location.reload()
   }, 500)
@@ -481,8 +443,6 @@ const handleLogout = () => {
 
 const startDeleteProcess = () => {
   deleteStep.value = 1
-  
-  // Scroll automatique vers la section de confirmation après un court délai
   setTimeout(() => {
     const deleteProcess = document.querySelector('.delete-process')
     if (deleteProcess) {
@@ -500,23 +460,15 @@ const cancelDelete = () => {
 
 const confirmDelete = async () => {
   deleteStep.value = 2
-  
   try {
-    // Appeler la fonction de suppression du store
     const result = await authStore.deleteAccount()
-    
     if (result.success) {
       deleteStep.value = 3
-      
-                    // Afficher le message de succès dans la vue compte
-              message.value = 'Compte désactivé avec succès !'
-              messageType.value = 'success'
-      
-      // Forcer la déconnexion et fermer après un délai
+      message.value = 'Compte désactivé avec succès !'
+      messageType.value = 'success'
       setTimeout(() => {
         authStore.logout()
         closeLogin()
-        // Recharger la page pour s'assurer que tout est bien nettoyé
         setTimeout(() => {
           window.location.reload()
         }, 1000)
@@ -527,31 +479,21 @@ const confirmDelete = async () => {
       messageType.value = 'error'
     }
   } catch (error) {
-    console.error('Erreur lors de la suppression du compte:', error)
     deleteStep.value = 0
     message.value = 'Erreur lors de la suppression du compte'
     messageType.value = 'error'
   }
 }
 
-
-
 const handleDeleteAccount = async () => {
   try {
     isLoading.value = true
     message.value = ''
-    
-    // Appeler la fonction de suppression du store
     const result = await authStore.deleteAccount()
-    
     if (result.success) {
       message.value = 'Compte supprimé avec succès'
       messageType.value = 'success'
-      
-      // Fermer la modale de confirmation
       showDeleteConfirmation.value = false
-      
-      // Fermer le panneau après un délai
       setTimeout(() => {
         closeLogin()
       }, 2000)
@@ -560,7 +502,6 @@ const handleDeleteAccount = async () => {
       messageType.value = 'error'
     }
   } catch (error) {
-    console.error('Erreur lors de la suppression du compte:', error)
     message.value = 'Erreur lors de la suppression du compte'
     messageType.value = 'error'
   } finally {
@@ -569,37 +510,27 @@ const handleDeleteAccount = async () => {
 }
 
 const openEditProfile = () => {
-  // Vérification de sécurité : s'assurer que l'utilisateur est connecté
   if (!authStore.isLoggedIn || !authStore.user) {
     message.value = 'Vous devez être connecté pour modifier votre profil'
     messageType.value = 'error'
     return
   }
-  
-  // Vérification de sécurité : empêcher les admins de modifier leur profil
   if (authStore.user.role === 'admin') {
     message.value = 'Les administrateurs ne peuvent pas modifier leur profil depuis l\'interface pour des raisons de sécurité. Contactez le support technique.'
     messageType.value = 'error'
     return
   }
-  
-  // Vider le formulaire de vérification
   passwordVerification.value = ''
   showPasswordVerification.value = false
-  
-  // Demander d'abord le mot de passe actuel
   currentMode.value = 'password-verification'
   message.value = 'Veuillez entrer votre mot de passe actuel pour modifier votre profil'
   messageType.value = 'info'
 }
 
 const handleBackFromVerification = () => {
-  // Vider le formulaire de vérification
   passwordVerification.value = ''
   showPasswordVerification.value = false
   message.value = ''
-  
-  // Retourner au mode compte
   currentMode.value = 'account'
 }
 
@@ -609,39 +540,28 @@ const verifyPassword = async () => {
     messageType.value = 'error'
     return
   }
-
   try {
     isLoading.value = true
     message.value = 'Vérification en cours...'
-    
-    // Vérification de sécurité supplémentaire
     if (!authStore.user?.email) {
       message.value = 'Erreur : Impossible de récupérer vos informations'
       messageType.value = 'error'
       return
     }
-    
-    // Vérifier le mot de passe avec Supabase
     const { error } = await supabase.auth.signInWithPassword({
       email: authStore.user.email,
       password: passwordVerification.value
     })
-    
     if (error) {
       message.value = 'Mot de passe incorrect'
       messageType.value = 'error'
       passwordVerification.value = ''
     } else {
-      // Mot de passe correct, ouvrir la modification
       currentMode.value = 'register'
-      
-      // Pré-remplir le formulaire avec les données actuelles
       registerForm.name = authStore.user?.name || ''
       registerForm.email = authStore.user?.email || ''
-      registerForm.password = '' // Laisser vide pour indiquer qu'il est optionnel
-      registerForm.confirmPassword = '' // Laisser vide pour indiquer qu'il est optionnel
-      
-      // Message informatif
+      registerForm.password = ''
+      registerForm.confirmPassword = ''
       message.value = 'Modifiez vos informations. Le mot de passe est optionnel - laissez vide pour ne pas le changer.'
       messageType.value = 'info'
     }
@@ -665,29 +585,21 @@ const getMemberSince = () => {
   return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
 }
 
-// Surveiller l'état de connexion pour vider les champs lors de la déconnexion
 watch(() => authStore.isLoggedIn, (isAuthenticated, wasAuthenticated) => {
   if (!isAuthenticated && props.isOpen) {
-    // Si le panneau est ouvert mais l'utilisateur n'est pas connecté
     switchToLogin()
-    
-    // Si l'utilisateur était connecté et maintenant déconnecté, vider les champs
     if (wasAuthenticated) {
       clearForms()
     }
   }
 })
 
-// Surveiller l'ouverture du panneau pour déterminer le mode d'affichage
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen) {
     if (authStore.isLoggedIn) {
-      // Si l'utilisateur est connecté, afficher la page compte
       switchToAccount()
     } else {
-      // Si l'utilisateur n'est pas connecté, afficher le formulaire de connexion
       switchToLogin()
-      // Vider les champs immédiatement et après plusieurs délais
       clearForms()
       setTimeout(() => clearForms(), 50)
       setTimeout(() => clearForms(), 200)
@@ -702,20 +614,16 @@ const handleLogin = async () => {
     messageType.value = 'error'
     return
   }
-
   isLoading.value = true
   message.value = ''
-  
   try {
     const result = await authStore.login({
       email: loginForm.email,
       password: loginForm.password
     })
-    
     if (result.success) {
       message.value = result.message
       messageType.value = 'success'
-      // Fermer automatiquement le panneau après connexion réussie
       setTimeout(() => {
         closeLogin()
       }, 1000)
@@ -724,7 +632,6 @@ const handleLogin = async () => {
       messageType.value = 'error'
     }
   } catch (error) {
-    console.error('Erreur de connexion:', error)
     message.value = 'Erreur lors de la connexion'
     messageType.value = 'error'
   } finally {
@@ -733,42 +640,33 @@ const handleLogin = async () => {
 }
 
 const handleRegister = async () => {
-  // Vérification de sécurité : s'assurer que l'utilisateur est connecté pour les modifications
   if (authStore.isLoggedIn && (!authStore.user || !authStore.user.id)) {
     message.value = 'Erreur de sécurité : Impossible de récupérer vos informations'
     messageType.value = 'error'
     return
   }
-  
-  // Si l'utilisateur est connecté, c'est une mise à jour
   if (authStore.isLoggedIn) {
-    // Validation pour la mise à jour (mot de passe optionnel)
     if (!registerForm.name || !registerForm.email) {
       message.value = 'Veuillez remplir le nom et l\'email'
       messageType.value = 'error'
       return
     }
-    
-    // Si un mot de passe est saisi, vérifier qu'il est confirmé
     if (registerForm.password && !registerForm.confirmPassword) {
       message.value = 'Veuillez confirmer votre nouveau mot de passe'
       messageType.value = 'error'
       return
     }
-    
     if (registerForm.password && registerForm.password !== registerForm.confirmPassword) {
       message.value = 'Les mots de passe ne correspondent pas'
       messageType.value = 'error'
       return
     }
   } else {
-    // Validation pour l'inscription (tous les champs requis)
     if (!registerForm.name || !registerForm.email || !registerForm.password || !registerForm.confirmPassword) {
       message.value = 'Veuillez remplir tous les champs'
       messageType.value = 'error'
       return
     }
-
     if (registerForm.password !== registerForm.confirmPassword) {
       message.value = 'Les mots de passe ne correspondent pas'
       messageType.value = 'error'
@@ -778,11 +676,8 @@ const handleRegister = async () => {
 
   isLoading.value = true
   message.value = ''
-  
   try {
-    // Si l'utilisateur est connecté, c'est une mise à jour
     if (authStore.isLoggedIn) {
-      // Mise à jour du nom
       if (registerForm.name !== authStore.user?.name) {
         const { error } = await supabase
           .from('users')
@@ -791,27 +686,20 @@ const handleRegister = async () => {
             updated_at: new Date().toISOString()
           })
           .eq('id', authStore.user?.id)
-        
         if (error) {
           message.value = 'Erreur lors de la modification du nom'
           messageType.value = 'error'
           return
         }
-        
-        // Mettre à jour le store local
         if (authStore.user) {
           authStore.user.name = registerForm.name.trim()
         }
-        
-        // Rafraîchir les données utilisateur depuis Supabase
         const { data: userData, error: userError } = await supabase
           .from('users')
           .select('*')
           .eq('id', authStore.user?.id)
           .single()
-        
         if (!userError && userData) {
-          // Mettre à jour le store avec les nouvelles données
           authStore.user = {
             id: userData.id,
             email: userData.email,
@@ -821,32 +709,23 @@ const handleRegister = async () => {
           }
         }
       }
-      
-      // Mise à jour du mot de passe si fourni
       if (registerForm.password) {
         const { error } = await supabase.auth.updateUser({ 
           password: registerForm.password 
         })
-        
         if (error) {
           message.value = 'Erreur lors du changement de mot de passe'
           messageType.value = 'error'
           return
         }
       }
-      
       message.value = 'Profil mis à jour avec succès !'
       messageType.value = 'success'
-      
-      // Émettre un événement pour rafraîchir le dashboard admin
       window.dispatchEvent(new CustomEvent('profile-updated'))
-      
-      // Fermer automatiquement le panneau après modification réussie
       setTimeout(() => {
         closeLogin()
       }, 1500)
     } else {
-      // Inscription normale
       await authStore.register({
         nom: registerForm.name,
         email: registerForm.email,
@@ -854,15 +733,11 @@ const handleRegister = async () => {
       })
       message.value = 'Compte créé avec succès !'
       messageType.value = 'success'
-      
-      // Fermer automatiquement le panneau après création réussie
       setTimeout(() => {
         closeLogin()
       }, 1500)
     }
-    
   } catch (error) {
-    console.error('Erreur:', error)
     message.value = authStore.isLoggedIn ? 'Erreur lors de la modification' : 'Erreur lors de la création du compte. Veuillez réessayer.'
     messageType.value = 'error'
   } finally {
@@ -874,15 +749,9 @@ const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768
 }
 
-// Fonction pour rediriger vers la page en construction avec fermeture automatique
 const redirectToConstruction = (section: string) => {
-  // Fermer le panneau de connexion
   closeLogin()
-  
-  // Rediriger vers la page en construction
   router.push('/en-construction')
-  
-  // Fermer automatiquement après 4 secondes et retourner à l'accueil
   setTimeout(() => {
     router.push('/')
   }, 4000)
@@ -891,10 +760,6 @@ const redirectToConstruction = (section: string) => {
 onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
-  
-  // Ne pas basculer automatiquement vers le mode compte au montage
-  // Le mode compte ne sera affiché que si l'utilisateur clique sur le CTA connexion
-  // et qu'il est déjà connecté
 })
 
 onBeforeUnmount(() => {
@@ -932,7 +797,6 @@ onBeforeUnmount(() => {
   max-height: none;
 }
 
-/* Forcer l'overlay à couvrir tout le contenu scrollable */
 .login-overlay.active {
   height: 100vh !important;
   min-height: 100vh !important;
@@ -1113,11 +977,11 @@ form button[type='button']:hover {
   margin-bottom: 1rem;
   font-size: 0.9rem;
   font-weight: 500;
-  min-height: 20px; /* Hauteur minimale pour éviter le décalage */
+  min-height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease; /* Transition fluide */
+  transition: all 0.3s ease;
   opacity: 1;
   transform: translateY(0);
 }
@@ -1146,8 +1010,6 @@ form button[type='button']:hover {
   color: #ff6f61;
   border: 1px solid rgba(255, 111, 97, 0.3);
 }
-
-
 
 .verification-form {
   margin-top: var(--spacing-lg);
@@ -1258,29 +1120,24 @@ form button[type='button']:hover {
   box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3);
 }
 
-/* Responsive pour la vérification */
 @media (max-width: 768px) {
   .form-actions {
     flex-direction: column;
     margin-top: 1rem;
   }
-  
   .login-panel.mobile-view {
     height: 100vh;
     max-height: 100vh;
     overflow-y: auto;
   }
-  
   .login-content {
     flex: 1;
     overflow-y: auto;
     padding: 1rem;
   }
-  
   form {
     gap: 0.8rem;
   }
-  
   .btn-primary, .btn-secondary {
     padding: 0.8rem 1.2rem;
     font-size: 0.9rem;
@@ -1407,7 +1264,6 @@ form button[type='button']:hover {
   outline: none;
 }
 
-/* Styles pour le footer discret */
 .account-footer {
   margin-top: 2rem;
   padding-top: 1.5rem;
@@ -1451,7 +1307,6 @@ form button[type='button']:hover {
   color: #dc3545;
 }
 
-/* Styles pour le processus de suppression intégré */
 .delete-process {
   margin-top: 2rem;
   padding: 1.5rem;
@@ -1517,7 +1372,6 @@ form button[type='button']:hover {
   color: #dc3545;
 }
 
-/* Spinner de chargement */
 .loading-spinner {
   width: 20px;
   height: 20px;
@@ -1532,7 +1386,6 @@ form button[type='button']:hover {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+</style>
 
-
-
-</style> 
+<!-- Panneau de connexion/inscription/compte avec overlay, responsive mobile/desktop  -->

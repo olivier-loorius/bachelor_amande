@@ -47,15 +47,15 @@ export function useComposer() {
     return (item?.image as string) || (fond.image as string) || ''
   }
 
-  // --- URL de preview selon l'étape ---
+  // --- URL de preview selon l'étape (cascade simple et sûre) ---
   const previewUrl = computed(() => {
-    const f = selections.value.fond
-    if (!f) return ''
-    if (step.value === 1) return f.image || ''
-    if (step.value === 2) return resolveImage(selections.value.g1)
-    if (step.value === 3) return resolveImage(selections.value.g2 || selections.value.g1)
-    if (step.value === 4) return resolveImage(selections.value.g3 || selections.value.g2 || selections.value.g1)
-    return resolveImage(selections.value.g3 || selections.value.g2 || selections.value.g1)
+    const fondImage = selections.value.fond?.image || ''
+    if (step.value === 1) return fondImage
+    if (step.value === 2) return selections.value.g1?.image || fondImage
+    if (step.value === 3) return selections.value.g2?.image || selections.value.g1?.image || fondImage
+    if (step.value === 4) return selections.value.g3?.image || selections.value.g2?.image || selections.value.g1?.image || fondImage
+    // recap (step 5)
+    return selections.value.g3?.image || selections.value.g2?.image || selections.value.g1?.image || fondImage
   })
 
   // --- résumé / pricing ---

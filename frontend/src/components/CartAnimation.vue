@@ -24,7 +24,6 @@ const animationStyle = ref({
 
 onMounted(() => {
   if (props.show) {
-    // Animation vers l'icône du panier
     setTimeout(() => {
       animationStyle.value = {
         left: `${props.endPosition.x}px`,
